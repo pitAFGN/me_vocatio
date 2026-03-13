@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:15
+    container_name: mevocatio_db
+    environment:
+      POSTGRES_USER: mevocatio
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: mevocatio
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
