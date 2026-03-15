@@ -1,10 +1,11 @@
 import Image from 'next/image';
+import Link from 'next/link'; // Importante para la navegación
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-[linear-gradient(180deg,_#b4b8c0_0%,_#e5e7eb_100%)] relative overflow-hidden">
 
-      {/* CAPA DE FONDO: Los Rombos (Se quedan donde estaban) */}
+      {/* CAPA DE FONDO: Los Rombos */}
       <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
         <div className="relative flex items-center justify-center w-full h-full -translate-y-20">
           <div className="absolute w-[32rem] h-[32rem] border-[45px] border-slate-400 rotate-45 -translate-x-32 shadow-inner"></div>
@@ -12,7 +13,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* CAPA DE CONTENIDO CENTRAL: Bajamos de mt-24 a mt-40 para centrarlo en los rombos */}
+      {/* CAPA DE CONTENIDO CENTRAL */}
       <div className="z-10 flex flex-col items-center justify-center text-center mt-40 relative">
 
         {/* EL LOGO COMPLETO */}
@@ -27,7 +28,7 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* Textos Secundarios: Limpios sin sombras blancas */}
+        {/* Textos Secundarios */}
         <div className="flex flex-col gap-0.5 -mt-6">
           <p className="text-slate-800 text-lg font-black tracking-tight">
             Pulimos tu potencial profesional
@@ -37,14 +38,19 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Botones Centrales */}
+        {/* Botones Centrales Conectados */}
         <div className="flex gap-6 mt-10">
-          <button className="bg-[#cbd5e1] text-slate-800 px-12 py-3 rounded-md font-bold border border-slate-400 shadow-md hover:bg-slate-300 transition-all text-xs uppercase tracking-wider active:scale-95">
-            Registro
-          </button>
-          <button className="bg-[#cbd5e1] text-slate-800 px-12 py-3 rounded-md font-bold border border-slate-400 shadow-md hover:bg-slate-300 transition-all text-xs uppercase tracking-wider active:scale-95">
-            Iniciar Sesión
-          </button>
+          <Link href="/login?mode=signup">
+            <button className="bg-[#cbd5e1] text-slate-800 px-12 py-3 rounded-md font-bold border border-slate-400 shadow-md hover:bg-slate-300 transition-all text-xs uppercase tracking-wider active:scale-95">
+              Registro
+            </button>
+          </Link>
+
+          <Link href="/login">
+            <button className="bg-[#cbd5e1] text-slate-800 px-12 py-3 rounded-md font-bold border border-slate-400 shadow-md hover:bg-slate-300 transition-all text-xs uppercase tracking-wider active:scale-95">
+              Iniciar Sesión
+            </button>
+          </Link>
         </div>
       </div>
 
