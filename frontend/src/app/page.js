@@ -50,7 +50,7 @@ export default function LandingPage() {
       {/* Frase inferior fija al fondo */}
       <div className="absolute bottom-10 w-full text-center">
         <p className="text-slate-500 uppercase tracking-[0.8em] text-[10px] font-black opacity-40">
-          Elevate Your Professional Path
+          Empieza hoy a pulir tu perfil profesional
         </p>
       </div>
 

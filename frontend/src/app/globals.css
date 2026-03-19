@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
+/* Tus variables de toda la vida */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
+@theme {
+  --color-mevo-dark: #1a2230;
+  --color-mevo-blue: #7dd3fc;
+  --color-mevo-gray: #d1d5db;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
