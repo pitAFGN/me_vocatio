@@ -46,9 +46,6 @@ export default function OpinionesCarrusel() {
 
     return (
         <div className="z-10 w-full max-w-5xl absolute bottom-24 px-6 drop-shadow-xl">
-            <p className="text-center text-slate-950 text-[10px] font-black uppercase tracking-[0.3em] mb-4 opacity-70">
-                Opiniones de nuestros usuarios
-            </p>
 
             <div className="bg-slate-800/90 backdrop-blur-md p-4 rounded-2xl flex items-center gap-4 shadow-2xl border border-white/10 overflow-hidden">
 
