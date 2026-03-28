@@ -103,7 +103,9 @@ function AuthContent() {
             {/* FORMULARIO */}
             <div className="flex-1 flex flex-col items-center justify-start pt-16 lg:pt-24 p-8 sm:p-12 bg-white relative overflow-y-auto">
 
-                <Link href="/" className="absolute top-10 right-10 text-slate-400 hover:text-slate-900 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] z-50">
+                {/* BOTÓN CERRAR: Azul profundo para que no se pierda */}
+
+                <Link href="/" className="absolute top-10 right-10 text-[#1e293b] hover:text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] z-50 bg-white shadow-lg px-6 py-2.5 rounded-full border border-slate-200 hover:bg-[#1e293b] active:scale-95">
                     Cerrar ✕
                 </Link>
 
@@ -118,8 +120,8 @@ function AuthContent() {
                     </div>
 
                     <div className="flex border-b border-slate-100 mb-8">
-                        <button type="button" onClick={() => setEsRegistro(false)} className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${!esRegistro ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-300'}`}>LOGIN</button>
-                        <button type="button" onClick={() => setEsRegistro(true)} className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${esRegistro ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-300'}`}>REGISTER</button>
+                        <button type="button" onClick={() => setEsRegistro(false)} className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${!esRegistro ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-300'}`}>INICIAR SESIÓN</button>
+                        <button type="button" onClick={() => setEsRegistro(true)} className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${esRegistro ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-300'}`}>REGISTRATE</button>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
