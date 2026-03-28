@@ -8,33 +8,35 @@ const SECRET = "mevocatio_secret";
 
 /* REGISTER */
 router.post("/register", async (req, res) => {
-
   const { name, email, password } = req.body;
 
   try {
+    console.log("BODY:", req.body);
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Faltan datos" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await pool.query(
-      "INSERT INTO users (name, email, password) VALUES ($1,$2,$3) RETURNING *",
+      "INSERT INTO users (name, email, password_hash) VALUES ($1,$2,$3) RETURNING id, name, email",
       [name, email, hashedPassword]
     );
 
     res.json(newUser.rows[0]);
 
   } catch (error) {
-    res.status(500).json({ error: "Error al registrar usuario" });
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
-
 });
 
 /* LOGIN */
 router.post("/login", async (req, res) => {
-
   const { email, password } = req.body;
 
   try {
-
     const user = await pool.query(
       "SELECT * FROM users WHERE email=$1",
       [email]
@@ -46,7 +48,7 @@ router.post("/login", async (req, res) => {
 
     const validPassword = await bcrypt.compare(
       password,
-      user.rows[0].password
+      user.rows[0].password_hash
     );
 
     if (!validPassword) {
@@ -62,9 +64,9 @@ router.post("/login", async (req, res) => {
     res.json({ token });
 
   } catch (error) {
-    res.status(500).json({ error: "Error en login" });
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
-
 });
 
 module.exports = router;
