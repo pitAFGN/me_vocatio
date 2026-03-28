@@ -6,19 +6,43 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 function AuthContent() {
+    const [mostrarOlvido, setMostrarOlvido] = useState(false);
+    const [emailRecuperacion, setEmailRecuperacion] = useState("");
     const searchParams = useSearchParams();
     const router = useRouter();
 
     const [esRegistro, setEsRegistro] = useState(false);
+    const [loading, setLoading] = useState(true); // <--- CONTROL DE ACCESO
 
     const [nombre, setNombre] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    // --- PROTECCIÓN: SI YA HAY TOKEN, NO ENTRA AL LOGIN ---
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            // Si ya está logueado, lo mandamos al dashboard y NO quitamos el loading
+            router.replace("/dashboard");
+        } else {
+            // Solo si NO hay token, permitimos ver el formulario
+            setLoading(false);
+        }
+    }, [router]);
+
     useEffect(() => {
         const mode = searchParams.get('mode');
         setEsRegistro(mode === 'signup');
     }, [searchParams]);
+
+    // --- BLOQUEO VISUAL ---
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#1e293b] text-white italic font-black uppercase tracking-[0.3em]">
+                Verificando...
+            </div>
+        );
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -46,7 +70,7 @@ function AuthContent() {
                 if (!esRegistro) {
                     // 1. Guardamos el token en el navegador
                     localStorage.setItem("token", data.token);
-                    // 2. Redirigimos al Dashboard para que empiece a elegir su perfil
+                    // 2. Redirigimos al Dashboard
                     router.push("/dashboard");
                 } else {
                     alert("Usuario registrado correctamente");
@@ -99,8 +123,6 @@ function AuthContent() {
 
             {/* FORMULARIO */}
             <div className="flex-1 flex flex-col items-center justify-start pt-16 lg:pt-24 p-8 sm:p-12 bg-white relative overflow-y-auto">
-
-                {/* BOTÓN CERRAR: Azul profundo para que no se pierda */}
 
                 <Link href="/" className="absolute top-10 right-10 text-[#1e293b] hover:text-white transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] z-50 bg-white shadow-lg px-6 py-2.5 rounded-full border border-slate-200 hover:bg-[#1e293b] active:scale-95">
                     Cerrar ✕
@@ -163,7 +185,17 @@ function AuthContent() {
                                 type="password"
                             />
                         </div>
-
+                        {!esRegistro && (
+                            <div className="flex justify-end pr-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setMostrarOlvido(true)}
+                                    className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-[#1e293b] transition-colors"
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </button>
+                            </div>
+                        )}
                         <button
                             type="submit"
                             className="w-full py-4 bg-[#1e293b] hover:bg-slate-800 text-white font-black rounded-xl shadow-xl transition-all transform active:scale-[0.97] mt-4 uppercase text-[11px] tracking-[0.3em]"
@@ -175,6 +207,57 @@ function AuthContent() {
 
                 </div>
             </div>
+            {/* MODAL TIPO EPIC: OLVIDÉ MI CONTRASEÑA */}
+            {mostrarOlvido && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    {/* Fondo oscuro con desenfoque */}
+                    <div
+                        className="absolute inset-0 bg-[#1e293b]/80 backdrop-blur-sm"
+                        onClick={() => setMostrarOlvido(false)}
+                    ></div>
+
+                    {/* La Tarjetica */}
+                    <div className="relative bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl border border-slate-200 animate-in zoom-in duration-300">
+                        <button
+                            onClick={() => setMostrarOlvido(false)}
+                            className="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition-colors"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="text-center mb-6">
+                            <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">¿Olvidaste tu contraseña?</h4>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2">
+                                Introduce tu email para recuperar el acceso
+                            </p>
+                        </div>
+
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            alert("Enlace enviado a: " + emailRecuperacion);
+                            setMostrarOlvido(false);
+                        }} className="space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email de recuperación</label>
+                                <input
+                                    required
+                                    type="email"
+                                    value={emailRecuperacion}
+                                    onChange={(e) => setEmailRecuperacion(e.target.value)}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-900 transition-all font-bold text-slate-800 text-sm"
+                                    placeholder="TU-EMAIL@EJEMPLO.COM"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full py-4 bg-[#1e293b] text-white font-black rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase text-[11px] tracking-[0.3em]"
+                            >
+                                Enviar Enlace
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

@@ -1,9 +1,34 @@
 'use client';
 
+import { useEffect, useState } from 'react'; // Añadimos useState y useEffect
+import { useRouter } from 'next/navigation'; // Añadimos useRouter
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true); // Control de renderizado
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Si ya hay sesión, lo mandamos al Dashboard de una
+      router.replace("/dashboard");
+    } else {
+      // Si no hay sesión, permitimos ver la Landing
+      setLoading(false);
+    }
+  }, [router]);
+
+  // Mientras verifica el token, mostramos la pantalla de carga elegante
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#1e293b] text-white italic font-black uppercase tracking-[0.3em]">
+        Cargando MeVocatio...
+      </div>
+    );
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center bg-[linear-gradient(180deg,_#b4b8c0_0%,_#e5e7eb_100%)] relative overflow-hidden">
 
@@ -30,14 +55,14 @@ export default function LandingPage() {
           />
         </div>
 
-        {/* Textos Secundarios: Ajuste de margen negativo para subir el bloque */}
+        {/* Textos Secundarios */}
         <div className="flex flex-col gap-1 -mt-8">
           <p className="text-[#1e293b] text-xl md:text-2xl font-black tracking-tight italic">
             Pulimos tu potencial profesional
           </p>
         </div>
 
-        {/* Botón Único: Reducido de mt-12 a mt-8 para mayor cercanía */}
+        {/* Botón Único */}
         <div className="mt-8">
           <Link href="/login">
             <button className="bg-[#1e293b] text-white px-16 py-4 rounded-md font-black shadow-[0_15px_30px_rgba(30,41,59,0.3)] hover:bg-slate-800 transition-all text-[12px] uppercase tracking-[0.3em] active:scale-95 border border-slate-700">
