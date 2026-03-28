@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Search, Filter, Code, Palette, BarChart3, Globe, ShieldCheck, Cpu, ArrowRight, ArrowLeft, CheckCircle2, Database, Layout, Smartphone, Server, Terminal, Cloud } from 'lucide-react';
 
 export default function Dashboard() {
-    const userName = "Samuel";
+    const userName = "Usuario";
     const [selectedId, setSelectedId] = useState(null);
     const [page, setPage] = useState(0);
 

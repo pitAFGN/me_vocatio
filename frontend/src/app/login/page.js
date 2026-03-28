@@ -32,7 +32,6 @@ function AuthContent() {
             : { email, password };
 
         try {
-
             const res = await fetch(endpoint, {
                 method: "POST",
                 headers: {
@@ -43,24 +42,22 @@ function AuthContent() {
 
             const data = await res.json();
 
-            console.log(data);
-
             if (res.ok) {
-
                 if (!esRegistro) {
+                    // 1. Guardamos el token en el navegador
                     localStorage.setItem("token", data.token);
-                    router.push("/");
+                    // 2. Redirigimos al Dashboard para que empiece a elegir su perfil
+                    router.push("/dashboard");
                 } else {
                     alert("Usuario registrado correctamente");
                     setEsRegistro(false);
                 }
-
             } else {
                 alert(data.message || "Ocurrió un error");
             }
-
         } catch (error) {
-            console.error(error);
+            console.error("Error en la autenticación:", error);
+            alert("No se pudo conectar con el servidor.");
         }
     };
 
