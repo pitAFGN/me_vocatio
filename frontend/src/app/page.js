@@ -1,193 +1,59 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 
-function AuthContent() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen flex flex-col items-center bg-[linear-gradient(180deg,_#b4b8c0_0%,_#e5e7eb_100%)] relative overflow-hidden">
 
-    const [esRegistro, setEsRegistro] = useState(false);
+      {/* CAPA DE FONDO: Los Rombos Estáticos y Perfectos */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none z-0">
+        <div className="relative flex items-center justify-center w-full h-full -translate-y-10">
+          <div className="absolute w-[30rem] h-[30rem] border-[40px] border-slate-400 rotate-45 -translate-x-44 shadow-2xl"></div>
+          <div className="absolute w-[30rem] h-[30rem] border-[40px] border-slate-400 rotate-45 translate-x-44 shadow-2xl"></div>
+        </div>
+      </div>
 
-    const [nombre, setNombre] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+      {/* CAPA DE CONTENIDO CENTRAL */}
+      <div className="z-10 flex flex-col items-center justify-center text-center mt-40 relative">
 
-    useEffect(() => {
-        const mode = searchParams.get('mode');
-        setEsRegistro(mode === 'signup');
-    }, [searchParams]);
+        {/* EL LOGO COMPLETO */}
+        <div className="flex items-center justify-center mb-0 transition-transform duration-700 hover:scale-105 group">
+          <Image
+            src="/mevocatio.png"
+            alt="Logo MeVocatio"
+            width={600}
+            height={200}
+            priority
+            className="w-auto h-44 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.1)] transition-all group-hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
+          />
+        </div>
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+        {/* Textos Secundarios: Ajuste de margen negativo para subir el bloque */}
+        <div className="flex flex-col gap-1 -mt-8">
+          <p className="text-[#1e293b] text-xl md:text-2xl font-black tracking-tight italic">
+            Pulimos tu potencial profesional
+          </p>
+        </div>
 
-        const endpoint = esRegistro
-            ? `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`
-            : `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`;
+        {/* Botón Único: Reducido de mt-12 a mt-8 para mayor cercanía */}
+        <div className="mt-8">
+          <Link href="/login">
+            <button className="bg-[#1e293b] text-white px-16 py-4 rounded-md font-black shadow-[0_15px_30px_rgba(30,41,59,0.3)] hover:bg-slate-800 transition-all text-[12px] uppercase tracking-[0.3em] active:scale-95 border border-slate-700">
+              Empieza a pulir tu futuro
+            </button>
+          </Link>
+        </div>
+      </div>
 
-        const bodyData = esRegistro
-            ? { name: nombre, email, password }
-            : { email, password };
+      {/* Frase inferior fija al fondo */}
+      <div className="absolute bottom-10 w-full text-center">
+        <p className="text-slate-500 uppercase tracking-[0.8em] text-[10px] font-black opacity-40">
+          Empieza hoy a pulir tu perfil profesional
+        </p>
+      </div>
 
-        try {
-
-            console.log("Enviando:", bodyData);
-
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(bodyData)
-            });
-
-            const data = await res.json();
-
-            console.log(data);
-
-            if (res.ok) {
-
-                if (!esRegistro) {
-                    localStorage.setItem("token", data.token);
-                    router.push("/");
-                } else {
-                    alert("Usuario registrado correctamente");
-                    setEsRegistro(false);
-                    setNombre("");
-                    setEmail("");
-                    setPassword("");
-                }
-
-            } else {
-                alert(data.error || "Ocurrió un error");
-            }
-
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    return (
-        <main className="min-h-screen flex flex-col lg:flex-row bg-white overflow-hidden">
-
-            {/* LADO IZQUIERDO */}
-            <div className="hidden lg:flex lg:w-1/2 relative bg-[#1e293b] justify-center border-r border-white/10 pt-20">
-
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                    <div className="absolute top-0 left-0 w-[50rem] h-[50rem] border-[60px] border-white rotate-45 -translate-x-1/2 -translate-y-1/2"></div>
-                </div>
-
-                <div className="relative z-10 w-full max-w-xl flex flex-col items-center text-center px-12">
-
-                    <div className="mb-6 italic font-black text-white">
-                        <Image
-                            src="/mevocatio.png"
-                            alt="Logo MeVocatio"
-                            width={650}
-                            height={250}
-                            priority
-                            className="brightness-0 invert object-contain h-48 w-auto transition-transform duration-700 hover:scale-105"
-                        />
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                        <h2 className="text-4xl font-black leading-[1.1] mb-4 tracking-tighter uppercase italic text-white max-w-md">
-                            {esRegistro ? "El diamante eres tú, lúcelo" : "Sigue puliendo tu profesión"}
-                        </h2>
-                        <p className="text-base text-slate-400 font-light max-w-sm leading-snug">
-                            {esRegistro
-                                ? "Crea tu perfil ahora y accede a la red de talentos más exclusiva."
-                                : "Bienvenido de nuevo al portal donde tu carrera toma un brillo superior."}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div className="flex-1 flex flex-col items-center justify-start pt-16 lg:pt-24 p-8 sm:p-12 bg-white relative overflow-y-auto">
-
-                <Link href="/" className="absolute top-10 right-10 text-slate-400 hover:text-slate-900 transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] z-50">
-                    Cerrar ✕
-                </Link>
-
-                <div className="w-full max-w-md">
-                    <div className="mb-8 text-center lg:text-left">
-                        <h3 className="text-4xl font-black text-slate-900 mb-1 tracking-tighter uppercase">
-                            {esRegistro ? "Registrate" : "Portal"}
-                        </h3>
-                        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
-                            Accede a MeVocatio
-                        </p>
-                    </div>
-
-                    <div className="flex border-b border-slate-100 mb-8">
-                        <button type="button" onClick={() => setEsRegistro(false)} className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${!esRegistro ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-300'}`}>LOGIN</button>
-                        <button type="button" onClick={() => setEsRegistro(true)} className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${esRegistro ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-300'}`}>REGISTER</button>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-
-                        {esRegistro && (
-                            <div className="space-y-1">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                                    Nombre Completo
-                                </label>
-                                <input
-                                    value={nombre}
-                                    onChange={(e) => setNombre(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-900 transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                    placeholder="JESUS TORRES"
-                                    type="text"
-                                />
-                            </div>
-                        )}
-
-                        <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                                Email
-                            </label>
-                            <input
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-900 transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                placeholder="NAME@COMPANY.COM"
-                                type="email"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
-                                Contraseña
-                            </label>
-                            <input
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-slate-900 transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                placeholder="••••••••"
-                                type="password"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="w-full py-4 bg-[#1e293b] hover:bg-slate-800 text-white font-black rounded-xl shadow-xl transition-all transform active:scale-[0.97] mt-4 uppercase text-[11px] tracking-[0.3em]"
-                        >
-                            {esRegistro ? "Crear Cuenta" : "Entrar al Portal"}
-                        </button>
-
-                    </form>
-
-                </div>
-            </div>
-        </main>
-    );
-}
-
-export default function AuthPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#1e293b] text-white italic font-black uppercase tracking-widest">MeVocatio...</div>}>
-            <AuthContent />
-        </Suspense>
-    );
+    </main>
+  );
 }

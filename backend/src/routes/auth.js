@@ -1,11 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+/* token */
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const SECRET = "mevocatio_secret";
 
-/* REGISTER */
+/* register y la vuelta de encriptacion */
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -16,9 +18,12 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Faltan datos" });
     }
 
+  
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = await pool.query(
       "INSERT INTO users (name, email, password_hash) VALUES ($1,$2,$3) RETURNING id, name, email",
-      [name, email, password]
+      [name, email, hashedPassword]
     );
 
     res.json(newUser.rows[0]);
@@ -29,7 +34,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-/* LOGIN */
+/* Login y todo eso */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -43,7 +48,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Usuario no encontrado" });
     }
 
-    const validPassword = password === user.rows[0].password_hash;
+
+    const validPassword = await bcrypt.compare(
+      password,
+      user.rows[0].password_hash
+    );
 
     if (!validPassword) {
       return res.status(401).json({ error: "Contraseña incorrecta" });
