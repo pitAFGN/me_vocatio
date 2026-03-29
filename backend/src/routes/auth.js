@@ -80,6 +80,16 @@ router.post("/reset-password", async (req, res) => {
   try {
     const decoded = jwt.verify(token, SECRET);
 
+    const validarPassword = (password) => {
+      const regex = /^(?=(?:.*\d){2,}).{7,}$/;
+      return regex.test(password);
+    };
+
+    if (!validarPassword(newPassword)) {
+      return res.status(400).json({
+        error: "La contraseña no cumple los requisitos"
+      });
+    }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await pool.query(
@@ -99,6 +109,17 @@ router.post("/reset-password", async (req, res) => {
 ========================= */
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
+
+  const validarPassword = (password) => {
+    const regex = /^(?=(?:.*\d){2,}).{7,}$/;
+    return regex.test(password);
+  };
+
+  if (!validarPassword(password)) {
+    return res.status(400).json({
+      error: "La contraseña debe tener mínimo 7 caracteres y 2 números"
+    });
+  }
 
   try {
     if (!name || !email || !password) {
