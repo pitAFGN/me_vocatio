@@ -110,10 +110,11 @@ function ResetPasswordContent() {
                 </form>
 
                 {/* Botón sutil para cancelar/volver al login */}
+                {/* Botón sutil para cancelar/volver al login */}
                 <div className="text-center mt-8 pt-6 border-t border-slate-100">
                     <button
                         type="button"
-                        onClick={() => router.push('/login')}
+                        onClick={() => router.replace('/login')} // <--- Cambiado de .push a .replace
                         className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
                     >
                         Cancelar y Volver al Login
