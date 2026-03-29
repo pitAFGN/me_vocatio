@@ -10,6 +10,11 @@ function AuthContent() {
     const [emailRecuperacion, setEmailRecuperacion] = useState("");
     const searchParams = useSearchParams();
     const router = useRouter();
+    const validarPassword = (password) => {
+        // mínimo 7 caracteres, al menos 2 números
+        const regex = /^(?=(?:.*\d){2,}).{7,}$/;
+        return regex.test(password);
+    };
 
     const [esRegistro, setEsRegistro] = useState(false);
     const [loading, setLoading] = useState(true); // <--- CONTROL DE ACCESO
@@ -109,6 +114,12 @@ function AuthContent() {
             console.error("Error en la autenticación:", error);
             alert("No se pudo conectar con el servidor.");
         }
+
+        const validarPassword = (password) => {
+            // mínimo 7 caracteres, al menos 2 números
+            const regex = /^(?=(?:.*\d){2,}).{7,}$/;
+            return regex.test(password);
+        };
     };
 
     return (
