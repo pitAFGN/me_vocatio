@@ -18,6 +18,32 @@ function AuthContent() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+
+    const [emailReset, setEmailReset] = useState("");
+
+    const handleForgotPassword = async () => {
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email: emailReset })
+                }
+            );
+
+            const data = await res.json();
+
+            console.log(data);
+            alert("Revisa la consola del backend 👀");
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     // --- PROTECCIÓN: SI YA HAY TOKEN, NO ENTRA AL LOGIN ---
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -145,6 +171,7 @@ function AuthContent() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
 
+
                         {esRegistro && (
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
@@ -232,10 +259,37 @@ function AuthContent() {
                             </p>
                         </div>
 
-                        <form onSubmit={(e) => {
+                        <form onSubmit={async (e) => {
                             e.preventDefault();
-                            alert("Enlace enviado a: " + emailRecuperacion);
-                            setMostrarOlvido(false);
+
+                            try {
+                                const res = await fetch(
+                                    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`,
+                                    {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        },
+                                        body: JSON.stringify({
+                                            email: emailRecuperacion
+                                        })
+                                    }
+                                );
+
+                                const data = await res.json();
+
+                                if (res.ok) {
+                                    alert("Correo enviado mi niño, revise porfi");
+                                    setMostrarOlvido(false);
+                                    setEmailRecuperacion("");
+                                } else {
+                                    alert(data.error || "Error al enviar correo");
+                                }
+
+                            } catch (error) {
+                                console.error(error);
+                                alert("Error de conexión");
+                            }
                         }} className="space-y-4">
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email de recuperación</label>
