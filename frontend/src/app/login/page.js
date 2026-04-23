@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import Swal from 'sweetalert2';
 
 function AuthContent() {
     const [mostrarOlvido, setMostrarOlvido] = useState(false);
@@ -294,11 +295,36 @@ function AuthContent() {
                                 const data = await res.json();
 
                                 if (res.ok) {
-                                    alert("Correo enviado mi niño, revise porfi");
+                                    Swal.fire({
+                                        title: '¡Correo Enviado exitosamente!',
+                                        text: 'Revisa la bandeja de entrada de tu correo.',
+                                        icon: 'success',
+                                        iconColor: '#3492ba', // El azul claro de tu logo para que resalte
+                                        background: '#2d2d2d', // El gris ratón que pediste
+                                        color: '#ffffff', // Texto blanco para que se lea perfecto
+                                        confirmButtonColor: '#1e293b', // El azul oscuro de tus botones principales
+                                        confirmButtonText: 'Entendido',
+                                        customClass: {
+                                            popup: 'rounded-2xl border border-slate-600' // Borde sutil para que no se pierda
+                                        }
+                                    });
+
                                     setMostrarOlvido(false);
                                     setEmailRecuperacion("");
                                 } else {
-                                    alert(data.error || "Error al enviar correo");
+                                    Swal.fire({
+                                        title: 'Hubo un error',
+                                        text: data.error || "No pudimos enviar el correo.",
+                                        icon: 'error',
+                                        iconColor: '#ef4444',
+                                        background: '#2d2d2d', // Mismo gris ratón aquí
+                                        color: '#ffffff',
+                                        confirmButtonColor: '#1e293b',
+                                        confirmButtonText: 'Reintentar',
+                                        customClass: {
+                                            popup: 'rounded-2xl border border-slate-600'
+                                        }
+                                    });
                                 }
 
                             } catch (error) {
