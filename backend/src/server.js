@@ -1,27 +1,50 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-
-const authRoutes = require("./routes/auth");
+const helmet = require("helmet");
+const { swaggerUi, specs } = require("./config/swagger");
+const authRoutes = require("./routes/auth.routes");
+const recomendacionRoutes = require("./routes/recomendacion");
+const pool = require("./config/db");
 
 const app = express();
 
+/* ─── Seguridad: Helmet ─── */
+app.use(helmet());
+
+/* ─── Middlewares globales ─── */
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10kb" })); // Limita el tamaño del body para evitar ataques de payload gigante
 
+/* ─── Documentación Swagger ─── */
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+
+/* ─── Rutas ─── */
 app.use("/api/auth", authRoutes);
+app.use("/api/v1", recomendacionRoutes);
 
-const PORT = 3001;
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+/* ─── Ruta no encontrada ─── */
+app.use((req, res) => {
+  res.status(404).json({ error: "Ruta no encontrada" });
 });
 
-const pool = require("./db");
+/* ─── Manejador de errores global ─── */
+app.use((err, req, res, next) => {
+  console.error("Error no controlado:", err);
+  res.status(500).json({ error: "Error interno del servidor" });
+});
 
-pool.query("SELECT NOW()", (err, res) => {
-  if (err) {
-    console.error("Error conectando a la DB:", err);
-  } else {
-    console.log("DB conectada:", res.rows);
+/* ─── Inicio del servidor ─── */
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, async () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Documentación en   http://localhost:${PORT}/api-docs`);
+
+  try {
+    await pool.query("SELECT NOW()");
+    console.log("Base de datos conectada correctamente");
+  } catch (error) {
+    console.error("Error conectando a la base de datos:", error.message);
   }
-}); 
+});
