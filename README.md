@@ -49,7 +49,7 @@ La carpeta `docs/` contiene todos los documentos oficiales del proyecto:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/SamuelMoreno19/mevocatio2
+git clone https://github.com/
 cd mevocatio
 ```
 
