@@ -15,7 +15,7 @@ const {
   reglasResetPassword,
   reglasVerifyEmail,
   reglasResendVerification,
-} = require("../middlewares/ValidarInput");
+} = require("../middlewares/validarInput");
 
 /**
  * @swagger
