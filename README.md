@@ -49,8 +49,8 @@ La carpeta `docs/` contiene todos los documentos oficiales del proyecto:
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/
-cd mevocatio
+git clone https://github.com/pitAFGN/me_vocatio.git
+cd me_vocatio
 ```
 
 ---
@@ -130,5 +130,5 @@ El frontend corre en `http://localhost:3000`
 ## Repositorio
 
 ```
-https://github.com/SamuelMoreno19/mevocatio2
+https://github.com/pitAFGN/me_vocatio
 ```
