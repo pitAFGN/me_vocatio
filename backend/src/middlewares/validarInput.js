@@ -1,4 +1,4 @@
-const { body, validationResult } = require("express-validator");
+const { body, query, validationResult } = require("express-validator");
 
 /**
  * Ejecuta los resultados de validación.
@@ -107,9 +107,35 @@ const reglasResetPassword = [
   validar,
 ];
 
+const reglasVerifyEmail = [
+  query("token")
+    .exists().withMessage("El token es obligatorio.")
+    .bail()
+    .isString().withMessage("El token debe ser texto.")
+    .bail()
+    .trim()
+    .notEmpty().withMessage("El token es obligatorio.")
+    .isHexadecimal().withMessage("El token no tiene un formato válido.")
+    .isLength({ min: 64, max: 64 }).withMessage("El token no tiene un formato válido."),
+
+  validar,
+];
+
+const reglasResendVerification = [
+  body("email")
+    .trim()
+    .normalizeEmail()
+    .notEmpty().withMessage("El email es obligatorio.")
+    .isEmail().withMessage("Ingresa un email válido."),
+
+  validar,
+];
+
 module.exports = {
   reglasRegister,
   reglasLogin,
   reglasForgotPassword,
   reglasResetPassword,
+  reglasVerifyEmail,
+  reglasResendVerification,
 };
