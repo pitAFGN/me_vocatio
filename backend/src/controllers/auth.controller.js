@@ -68,4 +68,50 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+/* ─────────────────────────────────────────
+   VERIFY EMAIL (Magic Link)
+───────────────────────────────────────── */
+const verifyEmail = async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: "Falta el parámetro obligatorio: token" });
+  }
+
+  try {
+    const resultado = await authService.verifyEmail(token);
+    res.json({
+      message: "Correo verificado exitosamente. Ya puedes iniciar sesión.",
+      email: resultado.email,
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error interno" });
+  }
+};
+
+/* ─────────────────────────────────────────
+   RESEND VERIFICATION
+───────────────────────────────────────── */
+const resendVerification = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "El campo email es obligatorio" });
+  }
+
+  try {
+    await authService.resendVerification(email);
+    res.json({ message: "Correo de verificación reenviado" });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error interno" });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+  verifyEmail,
+  resendVerification,
+};
