@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const { swaggerUi, specs } = require("./config/swagger");
 const authRoutes = require("./routes/auth.routes");
 const recomendacionRoutes = require("./routes/recomendacion");
+const testRoutes = require("./routes/test_groq"); // <--- 1. IMPORTAR RUTA
 const pool = require("./config/db");
 
 const app = express();
@@ -14,7 +15,7 @@ app.use(helmet());
 
 /* ─── Middlewares globales ─── */
 app.use(cors());
-app.use(express.json({ limit: "10kb" })); // Limita el tamaño del body para evitar ataques de payload gigante
+app.use(express.json({ limit: "10kb" }));
 
 /* ─── Documentación Swagger ─── */
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
@@ -22,6 +23,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 /* ─── Rutas ─── */
 app.use("/api/auth", authRoutes);
 app.use("/api/v1", recomendacionRoutes);
+app.use("/api/test", testRoutes); // <--- 2. REGISTRAR RUTA AQUÍ
 
 /* ─── Ruta no encontrada ─── */
 app.use((req, res) => {

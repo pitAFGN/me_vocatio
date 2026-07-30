@@ -1,17 +1,19 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import {
-  ArrowLeft, BrainCircuit, CheckCircle2, Sparkles,
-  LayoutDashboard, Compass, Award, Settings, RotateCcw, Trophy
-} from "lucide-react";
-import { useProtectedRoute } from "@/hooks/useRouteGuard";
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 
 const PROFESSIONS = [
   { id: 1, title: "Ingeniería de Software", area: "Tecnología & Desarrollo" },
   { id: 2, title: "Diseño de Producto", area: "Diseño & UX" },
-  { id: 3, title: "Ciencia de Datos", area: "Ciencia de Datos" },
+  { id: 3, title: "Ciencia de Datos", area: "Análisis de Datos" },
   { id: 4, title: "Arquitectura Cloud", area: "Infraestructura IT" },
   { id: 5, title: "Ciberseguridad", area: "Seguridad Digital" },
   { id: 6, title: "Desarrollo de IA", area: "Inteligencia Artificial" },
@@ -23,213 +25,250 @@ const PROFESSIONS = [
   { id: 12, title: "Ingeniería de Redes", area: "Sistemas" },
 ];
 
-const PREGUNTAS = [
-  { id: 1, texto: "¿Disfrutas resolver problemas complejos paso a paso?" },
-  { id: 2, texto: "¿Te sientes cómodo aprendiendo herramientas nuevas todo el tiempo?" },
-  { id: 3, texto: "¿Prefieres trabajar en equipo más que de forma individual?" },
-  { id: 4, texto: "¿Te interesa entender cómo funcionan las cosas por dentro?" },
-  { id: 5, texto: "¿Te consideras una persona organizada con tus tareas?" },
-  { id: 6, texto: "¿Te gusta tomar decisiones basadas en datos y evidencia?" },
-  { id: 7, texto: "¿Disfrutas comunicar ideas técnicas de forma sencilla?" },
-  { id: 8, texto: "¿Te motiva ver resultados rápidos de tu trabajo?" },
-  { id: 9, texto: "¿Te adaptas con facilidad a entornos cambiantes?" },
-  { id: 10, texto: "¿Sientes que esta área refleja tu vocación real?" },
-];
-
-const OPCIONES = [
-  { valor: 1, label: "Nada" },
-  { valor: 2, label: "Poco" },
-  { valor: 3, label: "Algo" },
-  { valor: 4, label: "Bastante" },
-  { valor: 5, label: "Mucho" },
-];
-
-export default function Diagnostico() {
-  const { id } = useParams();
+export default function DiagnosticoPage() {
+  const params = useParams();
   const router = useRouter();
-  const { loading } = useProtectedRoute();
+  const { id } = params;
 
-  const vocacion = useMemo(
-    () => PROFESSIONS.find((item) => item.id === parseInt(id)),
-    [id]
-  );
+  // Estados
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [testData, setTestData] = useState(null);
+  const [respuestas, setRespuestas] = useState({}); // { pregunta_id: opcion_idx }
+  const [error, setError] = useState(null);
 
-  const [paso, setPaso] = useState(0);
-  const [respuestas, setRespuestas] = useState({});
-  const [finalizado, setFinalizado] = useState(false);
+  // 1. Cargar las preguntas dinámicas al montar la página
+  useEffect(() => {
+    async function cargarTest() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Convertir ID a número y buscar la profesión
+        const profesionIdNum = Number(id);
+        const profesionEncontrada = PROFESSIONS.find(p => p.id === profesionIdNum);
+
+        // Si no existe la profesión en el array local, usamos un fallback preventivo
+        const profesionTitle = profesionEncontrada?.title || "Desarrollo de Software";
+        const profesionArea = profesionEncontrada?.area || "Tecnología";
+
+        const res = await fetch('http://localhost:3001/api/test/generar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            profesion_id: profesionIdNum,
+            profesion_title: profesionTitle,
+            profesion_area: profesionArea
+          })
+        });
+
+        if (!res.ok) {
+          const errorApi = await res.json().catch(() => ({}));
+          throw new Error(errorApi.error || 'Error al generar el examen.');
+        }
+
+        const data = await res.json();
+        setTestData(data.data);
+      } catch (err) {
+        setError(err.message || 'Ocurrió un error inesperado al conectar con el servidor.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) cargarTest();
+  }, [id]);
+
+  // Selección de opciones
+  const handleSelectOption = (preguntaId, opcionIdx) => {
+    setRespuestas(prev => ({
+      ...prev,
+      [preguntaId]: opcionIdx
+    }));
+  };
+
+  // 2. Enviar el test para evaluación y guardado
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+
+      // Obtener el título de la profesión de forma segura
+      const profesionEncontrada = PROFESSIONS.find(p => p.id === Number(id));
+      const nombreProfesion = testData?.profesion || profesionEncontrada?.title || "Ingeniería de Software";
+
+      const payload = {
+        usuario_id: 1, // ID temporal de sesión
+        profesion_id: Number(id),
+        profesion_title: nombreProfesion,
+        respuestas: Object.entries(respuestas).map(([pregunta_id, opcion_idx]) => ({
+          pregunta_id: Number(pregunta_id),
+          opcion_idx
+        }))
+      };
+
+      // Apuntamos al backend de Express en el puerto 3001
+      const res = await fetch('http://localhost:3001/api/test/evaluar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Error al procesar la evaluación.');
+
+      const data = await res.json();
+      
+      // Obtener nivel y nombre devueltos por el servidor de forma segura
+      const nivelCalculado = data.resultado?.nivel || data.nivel || "Principiante";
+      const vocacionFinal = data.resultado?.vocacion || nombreProfesion;
+
+      // Redirección hacia la página de recomendaciones con variables definidas
+      router.push(`/recomendacion?profesion=${encodeURIComponent(vocacionFinal)}&nivel=${encodeURIComponent(nivelCalculado)}`);
+    } catch (err) {
+      alert('Error enviando el test: ' + err.message);
+      setSubmitting(false);
+    }
+  };
+
+  // --- Renderizado de Estados ---
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1e293b] text-white italic font-black uppercase tracking-widest">
-        Verificando acceso...
+      <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+        <div className="text-center">
+          <h3 className="font-semibold text-lg text-gray-800 dark:text-white flex items-center gap-2 justify-center">
+            <Sparkles className="w-5 h-5 text-indigo-500" />
+            Generando evaluación...
+          </h3>
+          <p className="text-sm text-gray-500">
+            Estructurando preguntas específicas según la profesión seleccionada.
+          </p>
+        </div>
       </div>
     );
   }
 
-  if (!vocacion) {
+  if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#e5e7eb] text-[#1e293b] font-sans">
-        <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Vocación no encontrada</p>
+      <div className="max-w-md mx-auto my-12 p-6 bg-red-50 border border-red-200 rounded-xl text-center space-y-3">
+        <AlertCircle className="w-10 h-10 text-red-500 mx-auto" />
+        <h3 className="font-bold text-red-800">No se pudo cargar el examen</h3>
+        <p className="text-sm text-red-600">{error}</p>
         <button
-          onClick={() => router.push("/dashboard")}
-          className="mt-4 px-6 py-2.5 bg-[#1e293b] text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-all uppercase tracking-widest"
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700"
         >
-          Volver al Dashboard
+          Reintentar
         </button>
       </div>
     );
   }
 
-  const preguntaActual = PREGUNTAS[paso];
-  const progreso = Math.round((paso / PREGUNTAS.length) * 100);
-
-  const handleResponder = (valor) => {
-    const nuevasRespuestas = { ...respuestas, [preguntaActual.id]: valor };
-    setRespuestas(nuevasRespuestas);
-
-    if (paso + 1 < PREGUNTAS.length) {
-      setPaso(paso + 1);
-    } else {
-      setFinalizado(true);
-    }
-  };
-
-  const reiniciar = () => {
-    setRespuestas({});
-    setPaso(0);
-    setFinalizado(false);
-  };
-
-  const valores = Object.values(respuestas);
-  const puntajeTotal = valores.reduce((acc, v) => acc + v, 0);
-  const puntajeMaximo = PREGUNTAS.length * 5;
-  const compatibilidad = valores.length
-    ? Math.round((puntajeTotal / puntajeMaximo) * 100)
-    : 0;
-
-  const nivelSugerido =
-    compatibilidad >= 80 ? "Avanzado" :
-      compatibilidad >= 50 ? "Intermedio" :
-        "Principiante";
+  const preguntas = testData?.preguntas || [];
+  const totalPreguntas = preguntas.length;
+  const respondidas = Object.keys(respuestas).length;
+  const esCompleto = respondidas === totalPreguntas && totalPreguntas > 0;
 
   return (
-    <div className="min-h-screen bg-[#e5e7eb] text-slate-800 font-sans flex">
+    <div className="max-w-3xl mx-auto p-6 space-y-8">
+      {/* Header */}
+      <div className="border-b border-gray-200 dark:border-gray-700 pb-5 space-y-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 text-xs font-medium">
+          <Sparkles className="w-3.5 h-3.5" /> Test Diagnóstico
+        </span>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Evaluación de Nivel: {testData?.profesion}
+        </h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Responde las preguntas para determinar tu nivel y filtrar los recursos.
+        </p>
 
-      {/* Contenido principal */}
-      <main className="max-w-4xl mx-auto w-full p-6 md:p-10 pt-32">
+        {/* Barra de Progreso */}
+        <div className="pt-2">
+          <div className="flex justify-between text-xs text-gray-500 mb-1">
+            <span>Progreso</span>
+            <span>{respondidas} de {totalPreguntas} respondidas</span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-indigo-600 h-full transition-all duration-300"
+              style={{ width: totalPreguntas > 0 ? `${(respondidas / totalPreguntas) * 100}%` : '0%' }}
+            />
+          </div>
+        </div>
+      </div>
 
-        <header className="mb-8 border-b border-slate-300 pb-6">
-
-          <button
-            onClick={() => router.push(`/vocacion/${vocacion.id}`)}
-            className="mb-4 flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-[#1e293b] uppercase tracking-widest transition-all cursor-pointer"
+      {/* Preguntas */}
+      <div className="space-y-6">
+        {preguntas.map((p, index) => (
+          <div
+            key={p.id || index}
+            className="p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4 shadow-sm"
           >
-            <ArrowLeft className="w-4 h-4" /> Volver a la vocación
-          </button>
-
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
-            {vocacion.area}
-          </span>
-          <h1 className="text-3xl font-extrabold text-[#1e293b] tracking-tight flex items-center gap-3">
-            <BrainCircuit className="w-7 h-7" />
-            Diagnóstico: {vocacion.title}
-          </h1>
-        </header>
-
-        {!finalizado ? (
-          <section className="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm">
-
-            {/* Barra de progreso */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Pregunta {paso + 1} de {PREGUNTAS.length}
+            {/* Enunciado */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2">
+                <span className="text-indigo-600 font-bold text-sm pt-0.5">
+                  {index + 1}.
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#1e293b]">
-                  {progreso}%
-                </span>
+                <h3 className="font-medium text-gray-900 dark:text-white text-base">
+                  {p.enunciado}
+                </h3>
               </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#1e293b] rounded-full transition-all duration-500"
-                  style={{ width: `${progreso}%` }}
-                ></div>
-              </div>
+              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                p.dificultad === 'Principiante' ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400' :
+                p.dificultad === 'Intermedio' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400' :
+                'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400'
+              }`}>
+                {p.dificultad}
+              </span>
             </div>
 
-            <h3 className="text-xl font-bold text-slate-900 mb-8 leading-snug">
-              {preguntaActual.texto}
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-              {OPCIONES.map((op) => (
-                <button
-                  key={op.valor}
-                  onClick={() => handleResponder(op.valor)}
-                  className="px-3 py-5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-[#1e293b] hover:text-white hover:border-[#1e293b] transition-all text-xs font-black uppercase tracking-wider active:scale-95"
-                >
-                  {op.label}
-                </button>
-              ))}
+            {/* Opciones */}
+            <div className="grid grid-cols-1 gap-2 pt-2">
+              {p.opciones.map((opcion, idx) => {
+                const isSelected = respuestas[p.id || index] === idx;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSelectOption(p.id || index, idx)}
+                    className={`p-3.5 rounded-lg border text-left text-sm transition-all flex items-center justify-between ${
+                      isSelected
+                        ? 'border-indigo-600 bg-indigo-50/60 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 font-medium'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <span>{opcion}</span>
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 ml-2" />}
+                  </button>
+                );
+              })}
             </div>
-          </section>
-        ) : (
-          <section className="bg-white border border-slate-200 p-10 rounded-2xl shadow-sm text-center">
-            <div className="w-16 h-16 rounded-2xl bg-[#1e293b] text-white flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Trophy className="w-8 h-8" />
-            </div>
+          </div>
+        ))}
+      </div>
 
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
-              Resultado del Diagnóstico
-            </p>
-            <h2 className="text-5xl font-black text-[#1e293b] tracking-tighter mb-2">
-              {compatibilidad}%
-            </h2>
-            <p className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-8">
-              {nivelTexto} con {vocacion.title}
-            </p>
-
-            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-10">
-              <div
-                className="h-full bg-[linear-gradient(90deg,_#334155_0%,_#1e293b_100%)] rounded-full transition-all duration-700"
-                style={{ width: `${compatibilidad}%` }}
-              ></div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 mb-10 text-left flex items-start gap-4">
-              <Sparkles className="w-5 h-5 text-[#1e293b] shrink-0 mt-0.5" />
-              <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                Tus respuestas muestran afinidad con las competencias clave de
-                <span className="font-bold text-slate-900"> {vocacion.title}</span>.
-                Sigue puliendo tu perfil completando más diagnósticos y revisando
-                tu trayectoria en el dashboard.
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={reiniciar}
-                className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
-              >
-                <RotateCcw className="w-4 h-4" /> Repetir Diagnóstico
-              </button>
-              <button
-                onClick={() => router.push(`/recomendacion?vocacion=${encodeURIComponent(vocacion.title)}&nivel=${nivelSugerido}`)}
-                className="px-8 py-3.5 bg-[#1e293b] hover:bg-slate-800 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 shadow-md"
-              >
-                <Sparkles className="w-4 h-4" /> Ver Ruta de Aprendizaje
-              </button>
-              <button
-                onClick={() => router.push("/dashboard")}
-                className="px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95"
-              >
-                <CheckCircle2 className="w-4 h-4" /> Volver al Dashboard
-              </button>
-            </div>
-          </section>
-        )}
-
-      </main>
+      {/* Botón de Envío */}
+      <div className="pt-4 flex justify-end">
+        <button
+          onClick={handleSubmit}
+          disabled={!esCompleto || submitting}
+          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center space-x-2 shadow-md"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Evaluando nivel...</span>
+            </>
+          ) : (
+            <>
+              <span>Finalizar y Ver Recursos</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

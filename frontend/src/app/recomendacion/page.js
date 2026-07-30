@@ -1,11 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import './RecomendacionPage.css';
 
-const RecomendacionPage = () => {
-  const [vocacion, setVocacion] = useState('');
-  const [nivel, setNivel] = useState('Principiante');
+function RecomendacionContent() {
+  const searchParams = useSearchParams();
+
+  // 1. Capturar parámetros de la URL enviados desde el test
+  const profesionURL = searchParams.get('profesion') || searchParams.get('vocacion') || '';
+  const nivelURL = searchParams.get('nivel') || 'Principiante';
+
+  const [vocacion, setVocacion] = useState(profesionURL);
+  const [nivel, setNivel] = useState(nivelURL);
   const [cargando, setCargando] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState(null);
@@ -15,23 +22,29 @@ const RecomendacionPage = () => {
     return `https://loremflickr.com/600/400/${palabraClave}`;
   };
 
-  const manejarBusqueda = async (e) => {
-    e.preventDefault();
+  // 2. Función para consultar el endpoint /api/recomendar
+  const ejecutarPeticion = useCallback(async (vocacionQuery, nivelQuery) => {
+    if (!vocacionQuery) return;
+
     setCargando(true);
     setError(null);
     setResultado(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/v1/recomendar', {
+      const response = await fetch('http://localhost:3001/api/recomendar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vocacion, nivel, evitarUrls: [] })
+        body: JSON.stringify({ 
+          vocacion: vocacionQuery, 
+          nivel: nivelQuery, 
+          evitarUrls: [] 
+        })
       });
 
       if (!response.ok) {
         const textoError = await response.text();
         console.error("Error crudo del backend:", textoError);
-        throw new Error(`Error en el servidor (${response.status}). Revisa la consola.`);
+        throw new Error(`Error en el servidor (${response.status}).`);
       }
 
       const data = await response.json();
@@ -41,21 +54,34 @@ const RecomendacionPage = () => {
     } finally {
       setCargando(false);
     }
+  }, []);
+
+  // 3. Petición automática si el usuario viene del test
+  useEffect(() => {
+    if (profesionURL) {
+      setVocacion(profesionURL);
+      setNivel(nivelURL);
+      ejecutarPeticion(profesionURL, nivelURL);
+    }
+  }, [profesionURL, nivelURL, ejecutarPeticion]);
+
+  const manejarBusqueda = (e) => {
+    e.preventDefault();
+    ejecutarPeticion(vocacion, nivel);
   };
 
   return (
     <div className="rec-page-container">
-      {/* El fondo animado ahora se maneja directamente en el contenedor principal vía CSS */}
       <div className="rec-content-wrapper">
         
-        {/* Cabecera Principal */}
+        {/* Cabecera */}
         <header className="rec-header">
           <span className="brand-logo">💎</span>
           <h1>RUTAS DE APRENDIZAJE</h1>
           <p>Descubre los mejores recursos académicos adaptados a tu próximo paso profesional.</p>
         </header>
 
-        {/* Formulario Minimalista */}
+        {/* Formulario */}
         <div className="rec-form-card">
           <form onSubmit={manejarBusqueda} className="rec-minimal-form">
             <div className="form-row">
@@ -65,7 +91,7 @@ const RecomendacionPage = () => {
                   type="text" 
                   value={vocacion}
                   onChange={(e) => setVocacion(e.target.value)}
-                  placeholder="Ej. Astronomía, Programación, Cocina..." 
+                  placeholder="Ej. Ingeniería de Software, Gastronomía..." 
                   required 
                 />
               </div>
@@ -85,34 +111,41 @@ const RecomendacionPage = () => {
             </button>
           </form>
 
-          {/* Aviso sutil de UX */}
           <div className="ux-notice-box">
             <p>
-              <strong>Nota sobre los recursos:</strong> Las sugerencias son estructuradas de forma automatizada por Inteligencia Artificial. Aunque priorizamos plataformas estables y de libre acceso, de forma muy ocasional algunos enlaces externos podrían cambiar de ruta o no estar disponibles (Error 404).
+              <strong>Nota sobre los recursos:</strong> Las sugerencias son estructuradas de forma automatizada por Inteligencia Artificial. Aunque priorizamos plataformas estables y de libre acceso, de forma muy ocasional algunos enlaces externos podrían cambiar de ruta o no estar disponibles.
             </p>
           </div>
         </div>
 
-        {/* Zona de Errores e Indicadores */}
+        {/* Estado Carga y Error */}
+        {cargando && (
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#38bdf8' }}>
+            <p>🔄 Generando recomendaciones personalizadas con IA...</p>
+          </div>
+        )}
+
         {error && <div className="error-message-box">⚠️ {error}</div>}
 
-        {/* Zona de Resultados */}
-        {resultado && (
+        {/* Resultados */}
+        {!cargando && resultado && (
           <div className="results-section">
             <div className="results-focus-card">
-              <h3>Enfoque sugerido para tu nivel:</h3>
+              <h3>Enfoque sugerido para tu nivel ({nivel}):</h3>
               <p>{resultado.resumen_enfoque}</p>
             </div>
 
             <div className="cards-grid">
-              {resultado.materiales.map((material, index) => (
+              {resultado.materiales && resultado.materiales.map((material, index) => (
                 <div key={index} className="resource-card">
                   
                   <div 
                     className="card-banner" 
                     style={{ backgroundImage: `url(${obtenerImagenFondo(material.url, material.titulo)})` }}
                   >
-                    <span className={`badge type-${material.tipo.toLowerCase()}`}>{material.tipo}</span>
+                    <span className={`badge type-${(material.tipo || 'recurso').toLowerCase()}`}>
+                      {material.tipo || 'RECURSO'}
+                    </span>
                   </div>
 
                   <div className="card-body">
@@ -131,6 +164,12 @@ const RecomendacionPage = () => {
       </div>
     </div>
   );
-};
+}
 
-export default RecomendacionPage;
+export default function RecomendacionPage() {
+  return (
+    <Suspense fallback={<div style={{ color: '#fff', padding: '2rem' }}>Cargando página...</div>}>
+      <RecomendacionContent />
+    </Suspense>
+  );
+}
