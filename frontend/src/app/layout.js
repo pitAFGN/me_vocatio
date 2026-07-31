@@ -63,26 +63,23 @@ export default function RootLayout({ children }) {
     return () => window.removeEventListener("storage", checkAuth);
   }, [pathname]);
 
-  // Estilos de botones ajustados para contrastar bien sobre el nav oscuro
+  // Estilo con degradado elegante que combina con el fondo azul/morado (JS Puro)
   const getButtonStyle = (path) => {
     const isActive = path === "/login" ? isAccessActive : pathname === path;
     return isActive
-      ? "bg-slate-100 text-[#0b1329] border border-white shadow-lg scale-105 font-bold"
-      : "bg-slate-900/60 text-slate-200 border border-slate-700/60 hover:bg-slate-800 hover:text-white transition-all hover:scale-105";
+      ? "bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 text-white border border-purple-300/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] font-bold scale-105"
+      : "bg-gradient-to-r from-slate-800/90 via-[#1e293b]/80 to-[#2e1065]/60 text-slate-100 border border-purple-500/30 hover:border-purple-400/70 hover:from-slate-800 hover:to-[#3b0764] transition-all hover:scale-105 shadow-md hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]";
   };
 
   return (
     <html lang="es">
-      {/* Cambiamos el fondo general a la base oscura de la app (#0b1329) */}
       <body className="antialiased bg-[#0b1329] font-sans text-slate-100" suppressHydrationWarning>
 
-        {/* 
-          NAVBAR: Degradado fluido que pasa de un gris/azul medio en la izquierda
-          hacia el azul rey profundo y morado noche en el lado derecho
-        */}
+        {/* NAVBAR */}
         <nav className="fixed top-0 w-full z-50 px-10 py-3 flex justify-between items-center bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-b border-slate-800/80 shadow-2xl backdrop-blur-md">
 
           {/* Bloque Izquierda: Menú hamburguesa + Logo Diamante */}
+          {/* Bloque Izquierda: Menú hamburguesa + Logo Diamante + Nombre MeVocatio */}
           <div className="flex items-center gap-3">
 
             {isLoggedIn && isPrivateZone && (
@@ -94,17 +91,23 @@ export default function RootLayout({ children }) {
               </button>
             )}
 
-            <Link href="/" className="flex items-center justify-center group">
-              <div className="w-14 h-14 flex items-center justify-center bg-slate-900/80 border border-slate-700/50 rounded-xl relative overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-md">
+            <Link href="/" className="flex items-center gap-3 group">
+              {/* Cuadro del Diamante MÁS GRANDE (w-14 h-14) y con mayor escala de imagen */}
+              <div className="w-14 h-14 flex items-center justify-center bg-slate-900/90 border border-slate-700/70 rounded-xl relative overflow-hidden transition-all group-hover:scale-105 active:scale-95 shadow-lg group-hover:border-purple-500/50">
                 <Image
                   src="/layout3.png"
                   alt="Me Vocatio Diamond"
                   width={120}
                   height={120}
                   priority
-                  className="object-contain scale-[2.2] translate-y-[1px]"
+                  className="object-contain scale-[2.3] transition-transform group-hover:scale-[2.4] translate-y-[0.5px]"
                 />
               </div>
+
+              {/* Texto "MeVocatio" POR FUERA del cuadro */}
+              <span className="text-lg sm:text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 group-hover:to-purple-300 transition-colors">
+                MeVocatio
+              </span>
             </Link>
           </div>
 
@@ -113,7 +116,7 @@ export default function RootLayout({ children }) {
 
             <Link
               href="/nosotros"
-              className={`${getButtonStyle("/nosotros")} px-7 py-2.5 rounded-full text-[11px] transition-all active:scale-95 uppercase tracking-widest`}
+              className={`${getButtonStyle("/nosotros")} px-7 py-2.5 rounded-full text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold`}
             >
               NOSOTROS
             </Link>
@@ -121,7 +124,7 @@ export default function RootLayout({ children }) {
             {!isLoggedIn || !isPrivateZone ? (
               <Link
                 href="/login"
-                className={`${getButtonStyle("/login")} px-6 py-2.5 rounded-full text-[11px] transition-all active:scale-95 uppercase tracking-widest`}
+                className={`${getButtonStyle("/login")} px-6 py-2.5 rounded-full text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold`}
               >
                 ACCESO
               </Link>
@@ -148,8 +151,8 @@ export default function RootLayout({ children }) {
                   href={href}
                   onClick={() => setIsSideMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[12px] font-bold uppercase tracking-wide transition-all ${pathname === href
-                      ? "bg-slate-800 text-white border border-slate-700"
-                      : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                    ? "bg-slate-800 text-white border border-slate-700"
+                    : "text-slate-400 hover:bg-slate-900 hover:text-white"
                     }`}
                 >
                   <Icon className="w-4 h-4" /> {label}
@@ -159,7 +162,7 @@ export default function RootLayout({ children }) {
           </div>
         )}
 
-        {/* Contenedor principal sin el gris claro feo */}
+        {/* Contenedor principal */}
         <main className="mt-[72px] bg-[#0b1329] min-h-[calc(100vh-72px)]">{children}</main>
       </body>
     </html>
