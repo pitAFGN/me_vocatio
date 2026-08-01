@@ -38,4 +38,32 @@ const forgotPasswordLimiter = rateLimit({
   },
 });
 
-module.exports = { loginLimiter, registerLimiter, forgotPasswordLimiter };
+// Verify email: máximo 10 intentos cada 15 minutos (clics legítimos + algún reintento)
+const verifyEmailLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Demasiados intentos de verificación. Intenta de nuevo en 15 minutos.",
+  },
+});
+
+// Resend verification: máximo 3 reenvíos cada 15 minutos (mismo criterio que forgot-password)
+const resendVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Demasiadas solicitudes de reenvío. Intenta de nuevo en 15 minutos.",
+  },
+});
+
+module.exports = {
+  loginLimiter,
+  registerLimiter,
+  forgotPasswordLimiter,
+  verifyEmailLimiter,
+  resendVerificationLimiter,
+};
