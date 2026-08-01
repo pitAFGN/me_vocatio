@@ -4,7 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const { swaggerUi, specs } = require("./config/swagger");
 const authRoutes = require("./routes/auth.routes");
-const recomendacionRoutes = require("./routes/recomendacion");
+const recomendationRoutes = require("./routes/recomendation.routes");
 const pool = require("./config/db");
 
 const app = express();
@@ -14,14 +14,14 @@ app.use(helmet());
 
 /* ─── Middlewares globales ─── */
 app.use(cors());
-app.use(express.json({ limit: "10kb" })); // Limita el tamaño del body para evitar ataques de payload gigante
+app.use(express.json({ limit: "10kb" }));
 
 /* ─── Documentación Swagger ─── */
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 /* ─── Rutas ─── */
 app.use("/api/auth", authRoutes);
-app.use("/api/v1", recomendacionRoutes);
+app.use("/api", recomendationRoutes); // <--- Corregido y unificado aquí (maneja /generar, /evaluar y /recomendar)
 
 /* ─── Ruta no encontrada ─── */
 app.use((req, res) => {
@@ -39,7 +39,7 @@ const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, async () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`Documentación en   http://localhost:${PORT}/api-docs`);
+  console.log(`Documentación en    http://localhost:${PORT}/api-docs`);
 
   try {
     await pool.query("SELECT NOW()");
