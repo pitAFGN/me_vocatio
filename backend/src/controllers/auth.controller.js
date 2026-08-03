@@ -1,4 +1,5 @@
 const authService = require("../services/auth.service");
+const { verifyRefreshToken, generateAccessToken } = require("../utils/jwt");
 
 /* ─────────────────────────────────────────
    REGISTER
@@ -29,6 +30,32 @@ const login = async (req, res) => {
     res.json(resultado);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
+  }
+};
+
+/* ─────────────────────────────────────────
+   REFRESH TOKEN
+───────────────────────────────────────── */
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ error: "El campo refreshToken es obligatorio" });
+  }
+
+  try {
+    // 1. Verificamos la firma y expiración del Refresh Token
+    const decoded = verifyRefreshToken(refreshToken);
+
+    // 2. Opcional: Podrías validar en el servicio que el usuario siga existiendo o esté activo
+    // await authService.validateUserActive(decoded.id);
+
+    // 3. Generamos un nuevo Access Token fresco de 15 min
+    const newAccessToken = generateAccessToken({ id: decoded.id, email: decoded.email, role: decoded.role });
+
+    res.json({ accessToken: newAccessToken });
+  } catch (error) {
+    res.status(403).json({ error: "Refresh Token inválido o expirado" });
   }
 };
 
@@ -110,6 +137,7 @@ const resendVerification = async (req, res) => {
 module.exports = {
   register,
   login,
+  refreshToken,
   forgotPassword,
   resetPassword,
   verifyEmail,
