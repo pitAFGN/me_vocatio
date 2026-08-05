@@ -36,10 +36,14 @@ export function useAuth() {
     router.push("/login");
   };
 
+  const verifyEmail = async (token) => {
+    return await authService.verifyEmail(token);
+  };
+
   const getToken = () => {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("token");
   };
 
-  return { login, register, logout, forgotPassword, resetPassword, getToken };
+  return { login, register, logout, forgotPassword, resetPassword, verifyEmail, getToken };
 }
