@@ -8,6 +8,8 @@ const {
   verifyEmailLimiter,
   resendVerificationLimiter,
 } = require("../middlewares/rateLimiter");
+const { verificarTokenSupabase } = require('../middlewares/alternativeLogin');
+const { googleSyncController } = require('../controllers/alternativeLogin.controller');
 const {
   reglasRegister,
   reglasLogin,
@@ -15,7 +17,7 @@ const {
   reglasResetPassword,
   reglasVerifyEmail,
   reglasResendVerification,
-} = require("../middlewares/validarInput");
+} = require("../middlewares/validarInputs");
 
 /**
  * @swagger
@@ -152,5 +154,7 @@ router.post(
   reglasResendVerification,
   authController.resendVerification
 );
+
+router.post('/google-sync', verificarTokenSupabase, googleSyncController);
 
 module.exports = router;

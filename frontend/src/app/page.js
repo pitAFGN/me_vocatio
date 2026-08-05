@@ -3,59 +3,109 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePublicRoute } from "@/hooks/useRouteGuard";
+import { Search, BarChart3, Award, ArrowRight, ArrowUpRight } from "lucide-react";
 
 export default function LandingPage() {
   const { loading } = usePublicRoute();
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1e293b] text-white italic font-black uppercase tracking-[0.3em]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0b1329] text-white italic font-black uppercase tracking-[0.3em]">
         Cargando MeVocatio...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center bg-[linear-gradient(180deg,_#b4b8c0_0%,_#e5e7eb_100%)] relative overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none z-0">
-        <div className="relative flex items-center justify-center w-full h-full -translate-y-10">
-          <div className="absolute w-[30rem] h-[30rem] border-[40px] border-slate-400 rotate-45 -translate-x-44 shadow-2xl"></div>
-          <div className="absolute w-[30rem] h-[30rem] border-[40px] border-slate-400 rotate-45 translate-x-44 shadow-2xl"></div>
+    <main className="relative min-h-screen bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] text-slate-100 flex flex-col items-center justify-between px-6 py-12 md:py-16 overflow-hidden">
+
+      {/* 
+        1. DIAMANTE DE FONDO: CON UN MÁXIMO BRILLO TENUE
+      */}
+      <div className="absolute inset-0 flex justify-center pointer-events-none z-0 top-[22vh] sm:top-[20vh]">
+        <div className="relative w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] [perspective:1000px] opacity-35">
+          <div
+            className="w-full h-full relative drop-shadow-[0_0_60px_rgba(168,85,247,0.4)]"
+            style={{ animation: "rotar 12s linear infinite" }}
+          >
+            <Image
+              src="/diamante.png"
+              alt="Diamante MeVocatio"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </div>
       </div>
 
-      <div className="z-10 flex flex-col items-center justify-center text-center mt-40 relative">
-        <div className="flex items-center justify-center mb-0 transition-transform duration-700 hover:scale-105 group">
-          <Image
-            src="/mevocatio.png"
-            alt="Logo MeVocatio"
-            width={600}
-            height={200}
-            priority
-            className="w-auto h-44 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.1)] transition-all group-hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
-          />
-        </div>
+      {/* 2. CONTENIDO PRINCIPAL */}
+      <div className="z-10 flex flex-col items-center justify-center text-center max-w-4xl mx-auto space-y-6 mt-8 md:mt-12">
+        <h1 className="text-4xl sm:text-6xl font-normal tracking-tight leading-[1.15]">
+          Pulimos tu <span className="italic font-serif font-light text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.3)]">potencial</span> <br />
+          <span className="italic font-serif font-light text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.3)]">profesional</span>
+        </h1>
 
-        <div className="flex flex-col gap-1 -mt-8">
-          <p className="text-[#1e293b] text-xl md:text-2xl font-black tracking-tight italic">
-            Pulimos tu potencial profesional
-          </p>
-        </div>
+        <p className="text-slate-200 text-base sm:text-lg max-w-2xl leading-relaxed drop-shadow-md">
+          Un entorno de alta precisión diseñado para líderes visionarios. Descubre la estrategia definitiva para escalar tu carrera hacia el nivel de élite global.
+        </p>
 
-        <div className="mt-8">
-          <Link href="/login">
-            <button className="bg-[#1e293b] text-white px-16 py-4 rounded-md font-black shadow-[0_15px_30px_rgba(30,41,59,0.3)] hover:bg-slate-800 transition-all text-[12px] uppercase tracking-[0.3em] active:scale-95 border border-slate-700">
-              Empieza a pulir tu futuro
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <Link href="/login" className="w-full sm:w-auto">
+            {/* BOTÓN CTA OPTIMIZADO: Pasa a tener un brillo de acento Violeta/Neón con texto nítido */}
+            <button className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-full font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-[0_0_25px_rgba(168,85,247,0.4)] hover:shadow-[0_0_35px_rgba(168,85,247,0.6)] active:scale-95 border border-purple-400/40">
+              EMPIEZA A PULIR TU FUTURO
+              <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>
       </div>
 
-      <div className="absolute bottom-10 w-full text-center">
-        <p className="text-slate-500 uppercase tracking-[0.8em] text-[10px] font-black opacity-40">
-          Empieza hoy a pulir tu perfil profesional
-        </p>
+      {/* 3. TARJETAS INFERIORES */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mt-16 md:mt-24 text-left z-10">
+
+        {/* TARJETA 1 */}
+        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-md hover:border-purple-500/50 transition-all group shadow-2xl hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+          {/* Cajas de iconos con brillo y mejor visibilidad */}
+          <div className="p-3 w-fit rounded-xl bg-purple-950/60 border border-purple-500/40 mb-4 text-purple-300 group-hover:text-white group-hover:bg-purple-900/80 group-hover:border-purple-400 transition-all shadow-inner">
+            <Search className="w-5 h-5" />
+          </div>
+          <h3 className="text-lg font-serif font-medium text-white mb-2">Descubre tu Vocación</h3>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Análisis profundo de tus capacidades intrínsecas mediante psicometría avanzada y mentoría estratégica personalizada.
+          </p>
+        </div>
+
+        {/* TARJETA 2 */}
+        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-md hover:border-purple-500/50 transition-all group shadow-2xl hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+          <div className="p-3 w-fit rounded-xl bg-purple-950/60 border border-purple-500/40 mb-4 text-purple-300 group-hover:text-white group-hover:bg-purple-900/80 group-hover:border-purple-400 transition-all shadow-inner">
+            <BarChart3 className="w-5 h-5" />
+          </div>
+          <h3 className="text-lg font-serif font-medium text-white mb-2">Evalúa tu Nivel</h3>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Benchmark ejecutivo frente a los estándares de la industria global. Mapeo de brechas y oportunidades de alto impacto.
+          </p>
+        </div>
+
+        {/* TARJETA 3 */}
+        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-md hover:border-purple-500/50 transition-all group shadow-2xl hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+          <div className="p-3 w-fit rounded-xl bg-purple-950/60 border border-purple-500/40 mb-4 text-purple-300 group-hover:text-white group-hover:bg-purple-900/80 group-hover:border-purple-400 transition-all shadow-inner">
+            <Award className="w-5 h-5" />
+          </div>
+          <h3 className="text-lg font-serif font-medium text-white mb-2">Forja tu Legado</h3>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            Diseño de un plan de carrera vitalicio que garantiza relevancia, influencia y un impacto duradero en tu sector.
+          </p>
+        </div>
+
       </div>
+
+      {/* 4. DERECHOS DE AUTOR */}
+      <footer className="w-full pt-12 pb-4 z-10">
+        <p className="text-center text-slate-400 text-xs sm:text-sm">
+          © 2026 MeVocatio. Elite Professional Development. Transformando el potencial en legado.
+        </p>
+      </footer>
     </main>
   );
 }

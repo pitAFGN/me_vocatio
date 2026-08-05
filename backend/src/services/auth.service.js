@@ -1,12 +1,13 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken"); 
 const pool = require("../config/db");
 const transporter = require("../config/mailer");
 const { generarTokenSeguro, hashearToken, calcularExpiracion } = require("../utils/tokens");
+const { generateAccessToken, generateRefreshToken } = require("../utils/jwt");
+
 require("dotenv").config();
 
-// Se mantiene el fallback para no romper entornos ya desplegados,
-// pero en producción SIEMPRE debe definirse JWT_SECRET en el .env.
+// Mantenemos la clave por si acaso para forgotPassword/resetPassword
 const SECRET = process.env.JWT_SECRET || "mevocatio_secret";
 
 // Horas de validez del enlace de verificación de correo (magic link)
@@ -31,9 +32,6 @@ const register = async (name, email, password) => {
 
   const usuario = resultado.rows[0];
 
-  // Generamos el magic link de verificación y lo enviamos por correo.
-  // Si el envío falla, no revertimos el registro: el usuario ya existe
-  // y puede solicitar un reenvío con /resend-verification.
   try {
     await enviarCorreoVerificacion(usuario.id, usuario.email, usuario.name);
   } catch (error) {
@@ -48,8 +46,7 @@ const register = async (name, email, password) => {
 };
 
 /* ─────────────────────────────────────────
-   Helper interno: genera el token, lo guarda
-   hasheado en BD y envía el magic link.
+   Helper interno: correo verificación
 ───────────────────────────────────────── */
 const enviarCorreoVerificacion = async (userId, email, name) => {
   const token = generarTokenSeguro();
@@ -73,7 +70,7 @@ const enviarCorreoVerificacion = async (userId, email, name) => {
         <p>Confirma tu correo electrónico haciendo clic en el botón. El enlace expira en ${EMAIL_VERIFICATION_EXPIRES_HOURS} horas.</p>
         <a href="${verifyLink}"
            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-          Verificar mi correo
+           Verificar mi correo
         </a>
         <p>Si no creaste esta cuenta, puedes ignorar este mensaje.</p>
       </div>
@@ -82,7 +79,7 @@ const enviarCorreoVerificacion = async (userId, email, name) => {
 };
 
 /* ─────────────────────────────────────────
-   LOGIN
+   LOGIN (ACTUALIZADO PARA REFRESH TOKEN)
 ───────────────────────────────────────── */
 const login = async (email, password) => {
   const resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
@@ -105,9 +102,20 @@ const login = async (email, password) => {
     };
   }
 
-  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+  const payload = { id: user.id, email: user.email, name: user.name };
 
-  return { token };
+  const accessToken = generateAccessToken(payload);
+  const refreshToken = generateRefreshToken({ id: user.id });
+
+  return {
+    accessToken,
+    refreshToken,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  };
 };
 
 /* ─────────────────────────────────────────
@@ -134,7 +142,7 @@ const forgotPassword = async (email) => {
         <p>Haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos.</p>
         <a href="${resetLink}"
            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-          Cambiar contraseña
+           Cambiar contraseña
         </a>
       </div>
     `,
@@ -176,9 +184,6 @@ const verifyEmail = async (token) => {
   );
 
   if (resultado.rows.length === 0) {
-    // El token no existe: o nunca existió, o ya fue usado
-    // (se borra automáticamente al verificar), o el usuario
-    // pidió uno nuevo y este quedó invalidado.
     throw { status: 400, message: "El enlace es inválido o ya fue utilizado." };
   }
 
@@ -195,7 +200,6 @@ const verifyEmail = async (token) => {
     };
   }
 
-  // Se marca como verificado y se invalida el token (enlace de un solo uso)
   await pool.query(
     `UPDATE users
      SET email_verified = true,
@@ -228,11 +232,32 @@ const resendVerification = async (email) => {
     throw { status: 400, message: "Este correo ya ha sido verificado." };
   }
 
-  // Genera un nuevo token y sobrescribe el anterior:
-  // esto invalida automáticamente cualquier enlace previo sin usar.
   await enviarCorreoVerificacion(user.id, user.email, user.name);
 };
 
+/* ─────────────────────────────────────────
+   GOOGLE SYNC (LOGIN / REGISTER ALTERNATIVO)
+───────────────────────────────────────── */
+const encontrarOCrearUsuarioGoogle = async (email, name) => {
+  let resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  let user;
+
+  if (resultado.rows.length > 0) {
+    user = resultado.rows[0];
+  } else {
+    const nuevoUsuario = await pool.query(
+      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
+      [name, email, ""]
+    );
+    user = nuevoUsuario.rows[0];
+  }
+
+  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+
+  return { token };
+};
+
+// Exportamos todas las funciones juntas de manera correcta
 module.exports = {
   register,
   login,
@@ -240,4 +265,5 @@ module.exports = {
   resetPassword,
   verifyEmail,
   resendVerification,
+  encontrarOCrearUsuarioGoogle,
 };
