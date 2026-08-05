@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
+const { verificarTokenSupabase } = require('../middlewares/alternativeLogin');
+const { googleSyncController } = require('../controllers/alternativeLogin.controller');
 const { loginLimiter, registerLimiter, forgotPasswordLimiter } = require("../middlewares/rateLimiter");
 const {
   reglasRegister,
@@ -98,5 +100,7 @@ router.post("/forgot-password", forgotPasswordLimiter, reglasForgotPassword, aut
  *       400: { description: Token inválido, expirado o contraseña débil }
  */
 router.post("/reset-password", reglasResetPassword, authController.resetPassword);
+
+router.post('/google-sync', verificarTokenSupabase, googleSyncController);
 
 module.exports = router;

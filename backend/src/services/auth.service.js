@@ -97,4 +97,29 @@ const resetPassword = async (token, newPassword) => {
   ]);
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+/* ─────────────────────────────────────────
+   GOOGLE SYNC (LOGIN / REGISTER ALTERNATIVO)
+───────────────────────────────────────── */
+const encontrarOCrearUsuarioGoogle = async (email, name) => {
+  // 1. Verificamos si el usuario ya existe en la base de datos
+  let resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  let user;
+
+  if (resultado.rows.length > 0) {
+    user = resultado.rows[0];
+  } else {
+    // 2. Si no existe, lo creamos con una contraseña vacía o nula ya que entra por Google
+    const nuevoUsuario = await pool.query(
+      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
+      [name, email, ""] // Contraseña vacía porque usa OAuth
+    );
+    user = nuevoUsuario.rows[0];
+  }
+
+  // 3. Generamos exactamente el mismo JWT que usa tu función de login normal
+  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+
+  return { token };
+};
+
+module.exports = { register, login, forgotPassword, resetPassword, encontrarOCrearUsuarioGoogle };
