@@ -17,9 +17,27 @@ export function useAuth() {
     router.push("/dashboard");
   };
 
-  const register = async (name, email, password) => {
-    await authService.register(name, email, password);
-    // Después de registrar, cambia al modo login
+  const register = async (name, email, password, captchaToken) => {
+    const response = await fetch('http://localhost:3001/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        captchaToken // <-- ¡Asegúrate de incluir esta propiedad aquí!
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Error al registrarse");
+    }
+
+    return data;
   };
 
   const logout = () => {

@@ -3,6 +3,7 @@ const router = express.Router();
 const authController = require("../controllers/auth.controller");
 const { verificarTokenSupabase } = require('../middlewares/alternativeLogin');
 const { googleSyncController } = require('../controllers/alternativeLogin.controller');
+const { verificarCaptcha } = require('../middlewares/recaptcha');
 const { loginLimiter, registerLimiter, forgotPasswordLimiter } = require("../middlewares/rateLimiter");
 const {
   reglasRegister,
@@ -33,7 +34,7 @@ const {
  *       409: { description: El correo ya está registrado }
  *       429: { description: Demasiados registros, intenta más tarde }
  */
-router.post("/register", registerLimiter, reglasRegister, authController.register);
+router.post("/register", registerLimiter, reglasRegister, verificarCaptcha,  authController.register);
 
 /**
  * @swagger
@@ -56,7 +57,7 @@ router.post("/register", registerLimiter, reglasRegister, authController.registe
  *       401: { description: Credenciales inválidas }
  *       429: { description: Demasiados intentos, intenta en 15 minutos }
  */
-router.post("/login", loginLimiter, reglasLogin, authController.login);
+router.post("/login", loginLimiter, reglasLogin, verificarCaptcha, authController.login);
 
 /**
  * @swagger

@@ -4,10 +4,10 @@ const authService = require("../services/auth.service");
    REGISTER
 ───────────────────────────────────────── */
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, captchaToken } = req.body;
 
   try {
-    const usuario = await authService.register(name, email, password);
+    const usuario = await authService.register(name, email, password, captchaToken);
     res.status(201).json(usuario);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
@@ -18,7 +18,7 @@ const register = async (req, res) => {
    LOGIN
 ───────────────────────────────────────── */
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password} = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: "Faltan campos obligatorios: email, password" });

@@ -7,9 +7,43 @@ require("dotenv").config();
 const SECRET = "mevocatio_secret";
 
 /* ─────────────────────────────────────────
+   FUNCIÓN AUXILIAR PARA VERIFICAR RECAPTCHA
+───────────────────────────────────────── */
+const verificarCaptchaEnGoogle = async (captchaToken) => {
+ if (!captchaToken) {
+    throw { status: 400, message: "Validación de reCAPTCHA inválida o expirada." };
+  }
+
+  console.log("TOKEN QUE LLEGÓ AL BACKEND:", captchaToken);
+  console.log("ESTADO DE LA SECRET KEY:", process.env.RECAPTCHA_SECRET_KEY ? "Existe y está cargada" : "¡ESTÁ VACÍA O FALTA EN EL .ENV!");
+
+  try {
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    const response = await fetch(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`,
+      { method: "POST" }
+    );
+    const data = await response.json();
+    
+    console.log("RESPUESTA EXACTA DE GOOGLE:", data); // <-- Revisa esto en tu terminal
+    
+    return data.success;
+  } catch (error) {
+    console.error("Error al verificar reCAPTCHA en la petición a Google:", error);
+    return false;
+  }
+};
+
+/* ─────────────────────────────────────────
    REGISTER
 ───────────────────────────────────────── */
-const register = async (name, email, password) => {
+const register = async (name, email, password, captchaToken) => {
+  // 1. Validar reCAPTCHA primero
+  const esHumano = await verificarCaptchaEnGoogle(captchaToken);
+  if (!esHumano) {
+    throw { status: 400, message: "Validación de reCAPTCHA inválida o expirada" };
+  }
+
   const existe = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existe.rows.length > 0) {
     throw { status: 409, message: "El correo ya está registrado" };
@@ -70,7 +104,7 @@ const forgotPassword = async (email) => {
         <h2>Recuperar contraseña</h2>
         <p>Haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos.</p>
         <a href="${resetLink}"
-           style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
+            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
           Cambiar contraseña
         </a>
       </div>
@@ -101,22 +135,19 @@ const resetPassword = async (token, newPassword) => {
    GOOGLE SYNC (LOGIN / REGISTER ALTERNATIVO)
 ───────────────────────────────────────── */
 const encontrarOCrearUsuarioGoogle = async (email, name) => {
-  // 1. Verificamos si el usuario ya existe en la base de datos
   let resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   let user;
 
   if (resultado.rows.length > 0) {
     user = resultado.rows[0];
   } else {
-    // 2. Si no existe, lo creamos con una contraseña vacía o nula ya que entra por Google
     const nuevoUsuario = await pool.query(
       "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
-      [name, email, ""] // Contraseña vacía porque usa OAuth
+      [name, email, ""]
     );
     user = nuevoUsuario.rows[0];
   }
 
-  // 3. Generamos exactamente el mismo JWT que usa tu función de login normal
   const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
 
   return { token };

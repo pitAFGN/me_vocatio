@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import ModalOlvidePassword from "@/components/ModalOlvidePassword";
 import { createClient } from "@supabase/supabase-js";
-
-// Inicializar cliente de Supabase para el login con Google
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import ReCAPTCHA from "react-google-recaptcha";
 
 /* ─────────────────────────────────────────
    VALIDACIONES
@@ -23,21 +18,21 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d\s]).{8,}$
 
 const validarCamposLogin = ({ email, password }) => {
   const errores = {};
-  if (!email.trim())                  errores.email    = "El email es obligatorio.";
-  else if (!EMAIL_REGEX.test(email))   errores.email    = "Ingresa un email válido.";
-  if (!password)                      errores.password = "La contraseña es obligatoria.";
+  if (!email.trim()) errores.email = "El email es obligatorio.";
+  else if (!EMAIL_REGEX.test(email)) errores.email = "Ingresa un email válido.";
+  if (!password) errores.password = "La contraseña es obligatoria.";
   return errores;
 };
 
 const validarCamposRegistro = ({ nombre, email, password }) => {
   const errores = {};
-  if (!nombre.trim())                         errores.nombre   = "El nombre es obligatorio.";
-  else if (nombre.trim().length < 3)          errores.nombre   = "El nombre debe tener al menos 3 caracteres.";
-  else if (!NOMBRE_REGEX.test(nombre.trim()))  errores.nombre   = "El nombre solo puede contener letras y espacios.";
-  if (!email.trim())                          errores.email    = "El email es obligatorio.";
-  else if (!EMAIL_REGEX.test(email))          errores.email    = "Ingresa un email válido.";
-  if (!password)                              errores.password = "La contraseña es obligatoria.";
-  else if (!PASSWORD_REGEX.test(password))    errores.password = "Mínimo 8 caracteres, mayúscula, minúscula, número y carácter especial.";
+  if (!nombre.trim()) errores.nombre = "El nombre es obligatorio.";
+  else if (nombre.trim().length < 3) errores.nombre = "El nombre debe tener al menos 3 caracteres.";
+  else if (!NOMBRE_REGEX.test(nombre.trim())) errores.nombre = "El nombre solo puede contener letras y espacios.";
+  if (!email.trim()) errores.email = "El email es obligatorio.";
+  else if (!EMAIL_REGEX.test(email)) errores.email = "Ingresa un email válido.";
+  if (!password) errores.password = "La contraseña es obligatoria.";
+  else if (!PASSWORD_REGEX.test(password)) errores.password = "Mínimo 8 caracteres, mayúscula, minúscula, número y carácter especial.";
   return errores;
 };
 
@@ -90,30 +85,51 @@ function AuthContent() {
 
   useAntiInspeccion();
 
-  const [esRegistro, setEsRegistro]       = useState(false);
+  const [supabase] = useState(() =>
+    createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+  );
+
+  const [esRegistro, setEsRegistro] = useState(false);
   const [mostrarOlvido, setMostrarOlvido] = useState(false);
-  const [enviando, setEnviando]           = useState(false);
-  const [nombre, setNombre]               = useState("");
-  const [email, setEmail]                 = useState("");
-  const [password, setPassword]           = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
-  const [errores, setErrores]             = useState({});
-  const [errorGeneral, setErrorGeneral]   = useState("");
+  const [errores, setErrores] = useState({});
+  const [errorGeneral, setErrorGeneral] = useState("");
+
+  // Estado para el token del reCAPTCHA oficial
+  const [captchaToken, setCaptchaToken] = useState("");
+  const recaptchaRef = useRef(null);
 
   useEffect(() => {
     setEsRegistro(searchParams.get("mode") === "signup");
   }, [searchParams]);
 
-  // ── DETECTOR DE RETORNO DE GOOGLE Y LLAMADA AL BACKEND ──
-// ── DETECTOR REACTIVO DE SESIÓN DE GOOGLE ──
-  useEffect(() => {
-    // Escucha cuando Supabase detecta y establece la sesión desde la URL automáticamente
+useEffect(() => {
+    let isProcessing = false;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session && !enviando) {
+      // Verificamos si realmente estamos en medio del flujo de retorno de Google (con ?code= o #access_token)
+      const hasOAuthParams = typeof window !== 'undefined' && 
+        (window.location.search.includes('code=') || window.location.hash.includes('access_token='));
+
+      // ÚNICAMENTE procesamos si el evento es SIGNED_IN, hay sesión, venimos de Google y NO estamos procesando ya
+      if (event === 'SIGNED_IN' && session && hasOAuthParams && !isProcessing && !enviando) {
+        isProcessing = true;
         setEnviando(true);
+
         try {
           const user = session.user;
-          
+          const nombreGoogle =
+            user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            user.email.split('@')[0];
+
           const response = await fetch('http://localhost:3001/api/auth/google-sync', {
             method: 'POST',
             headers: {
@@ -122,36 +138,32 @@ function AuthContent() {
             },
             body: JSON.stringify({
               email: user.email,
-              name: user.user_metadata?.full_name || user.email.split('@')[0]
+              name: nombreGoogle
             })
           });
 
-const data = await response.json();
+          const data = await response.json();
 
           if (response.ok && data.token) {
             localStorage.setItem("token", data.token);
             window.location.replace('/dashboard');
           } else {
-            // AQUÍ: Mostramos el error exacto que viene del backend o de la respuesta
-            console.error("Detalle del error del backend:", data);
             setErrorGeneral(data.message || `Error del servidor: ${response.status}`);
             setEnviando(false);
+            isProcessing = false;
           }
         } catch (err) {
-          // AQUÍ: Si el backend está apagado o hay un bloqueo de red/CORS
-          console.error("Error de red/conexión:", err);
           setErrorGeneral(`Fallo de conexión con el backend: ${err.message}`);
           setEnviando(false);
+          isProcessing = false;
         }
       }
     });
 
-    // Limpiamos la suscripción al desmontar el componente
     return () => {
       subscription.unsubscribe();
     };
-  }, [enviando]);
-
+  }, [supabase, enviando]);
   const limpiarFormulario = () => {
     setNombre("");
     setEmail("");
@@ -159,6 +171,10 @@ const data = await response.json();
     setMostrarPassword(false);
     setErrores({});
     setErrorGeneral("");
+    setCaptchaToken("");
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset();
+    }
   };
 
   const cambiarModo = (modoRegistro) => {
@@ -166,7 +182,6 @@ const data = await response.json();
     setEsRegistro(modoRegistro);
   };
 
-  // Botón para iniciar el flujo de Google
   const handleGoogleLogin = async () => {
     try {
       setErrorGeneral("");
@@ -195,12 +210,17 @@ const data = await response.json();
       return;
     }
 
+    if (esRegistro && !captchaToken) {
+      setErrorGeneral("Por favor, completa la verificación de reCAPTCHA.");
+      return;
+    }
+
     setErrores({});
     setEnviando(true);
 
     try {
       if (esRegistro) {
-        await register(nombre, email, password);
+        await register(nombre, email, password, captchaToken);
         limpiarFormulario();
         setEsRegistro(false);
         setErrorGeneral("");
@@ -210,26 +230,30 @@ const data = await response.json();
       }
     } catch (err) {
       const msg = err.message || "";
-      if (msg.includes("Credenciales"))       setErrorGeneral("Email o contraseña incorrectos.");
-      else if (msg.includes("registrado"))    setErrorGeneral("Este email ya tiene una cuenta. Inicia sesión.");
-      else if (msg.includes("correo"))        setErrorGeneral("No encontramos una cuenta con ese email.");
-      else                                    setErrorGeneral(msg || "Ocurrió un error, intenta de nuevo.");
+      if (msg.includes("Credenciales")) setErrorGeneral("Email o contraseña incorrectos.");
+      else if (msg.includes("registrado")) setErrorGeneral("Este email ya tiene una cuenta. Inicia sesión.");
+      else if (msg.includes("correo")) setErrorGeneral("No encontramos una cuenta con ese email.");
+      else if (msg.includes("reCAPTCHA")) setErrorGeneral("Validación de reCAPTCHA inválida o expirada.");
+      else setErrorGeneral(msg || "Ocurrió un error, intenta de nuevo.");
+
+      if (esRegistro && recaptchaRef.current) {
+        recaptchaRef.current.reset();
+        setCaptchaToken("");
+      }
     } finally {
       setEnviando(false);
     }
   };
 
   const inputClass = (campo) =>
-    `w-full px-5 py-3.5 bg-slate-50 border rounded-xl outline-none transition-all font-bold text-slate-800 text-sm shadow-sm ${
-      errores[campo]
-        ? "border-red-400 focus:border-red-500 bg-red-50"
-        : "border-slate-200 focus:border-slate-900"
+    `w-full px-5 py-3.5 bg-slate-50 border rounded-xl outline-none transition-all font-bold text-slate-800 text-sm shadow-sm ${errores[campo]
+      ? "border-red-400 focus:border-red-500 bg-red-50"
+      : "border-slate-200 focus:border-slate-900"
     }`;
 
   return (
-    <main className="min-h-screen flex flex-col lg:flex-row bg-white overflow-hidden">
-
-      {enviando && window.location.hash.includes("access_token") && (
+    <main className="min-h-screen flex flex-col lg:flex-row bg-white overflow-hidden relative">
+      {enviando && (
         <div className="absolute inset-0 bg-[#1e293b]/90 z-50 flex flex-col items-center justify-center text-white">
           <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="font-black uppercase tracking-widest text-xs">Validando credenciales con el servidor...</p>
@@ -289,34 +313,32 @@ const data = await response.json();
             <button
               type="button"
               onClick={() => cambiarModo(false)}
-              className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${
-                !esRegistro ? "border-slate-900 text-slate-900" : "border-transparent text-slate-300"
-              }`}
+              className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${!esRegistro ? "border-slate-900 text-slate-900" : "border-transparent text-slate-300"
+                }`}
             >
               INICIAR SESIÓN
             </button>
             <button
               type="button"
               onClick={() => cambiarModo(true)}
-              className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${
-                esRegistro ? "border-slate-900 text-slate-900" : "border-transparent text-slate-300"
-              }`}
+              className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${esRegistro ? "border-slate-900 text-slate-900" : "border-transparent text-slate-300"
+                }`}
             >
               REGISTRATE
             </button>
           </div>
 
-          {/* Botón de Google (Inicio de sesión alternativo) */}
+          {/* Botón de Google */}
           <button
             type="button"
             onClick={handleGoogleLogin}
             className="w-full py-3.5 px-4 border border-slate-200 rounded-xl shadow-sm bg-white hover:bg-slate-50 transition-all flex items-center justify-center gap-3 text-slate-700 font-bold text-xs uppercase tracking-wider mb-6 active:scale-[0.97]"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.19v3.15C3.17 21.36 7.23 24 12 24z"/>
-              <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.39-1.5-.39-2.24s.14-1.52.39-2.24V6.6H1.19C.43 8.13 0 9.87 0 11.75s.43 3.62 1.19 5.15l4.08-2.66z"/>
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.23 0 3.17 2.64 1.19 6.6l4.08 3.15c.95-2.85 3.6-4.96 6.73-4.96z"/>
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z" />
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.13 0-5.78-2.11-6.73-4.96H1.19v3.15C3.17 21.36 7.23 24 12 24z" />
+              <path fill="#FBBC05" d="M5.27 14.24c-.25-.72-.39-1.5-.39-2.24s.14-1.52.39-2.24V6.6H1.19C.43 8.13 0 9.87 0 11.75s.43 3.62 1.19 5.15l4.08-2.66z" />
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.23 0 3.17 2.64 1.19 6.6l4.08 3.15c.95-2.85 3.6-4.96 6.73-4.96z" />
             </svg>
             Continuar con Google
           </button>
@@ -397,19 +419,32 @@ const data = await response.json();
                 >
                   {mostrarPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                      <line x1="1" y1="1" x2="23" y2="23"/>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
                     </svg>
                   )}
                 </button>
               </div>
               <CampoError mensaje={errores.password} />
             </div>
+
+            {/* reCAPTCHA Oficial de React */}
+            {esRegistro && (
+              <div className="flex justify-center my-3">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setCaptchaToken(token || "")}
+                  onExpired={() => setCaptchaToken("")}
+                  onErrored={() => setCaptchaToken("")}
+                />
+              </div>
+            )}
 
             {errores.exito && (
               <p className="text-green-600 text-[10px] font-black uppercase tracking-wide flex items-center gap-1">
@@ -439,20 +474,13 @@ const data = await response.json();
 
             <button
               type="submit"
-              onClick={(e) => {
-                if (enviando) e.preventDefault();
-              }}
-              className={`w-full py-4 font-black rounded-xl shadow-xl transition-all transform mt-4 uppercase text-[11px] tracking-[0.3em] ${
-                enviando
+              disabled={enviando}
+              className={`w-full py-4 font-black rounded-xl shadow-xl transition-all transform mt-4 uppercase text-[11px] tracking-[0.3em] ${enviando
                   ? "bg-slate-400 text-slate-200 cursor-not-allowed"
                   : "bg-[#1e293b] hover:bg-slate-800 text-white active:scale-[0.97]"
-              }`}
+                }`}
             >
-              {enviando
-                ? "Procesando..."
-                : esRegistro
-                ? "Crear Cuenta"
-                : "Entrar al Portal"}
+              {enviando ? "Procesando..." : esRegistro ? "Crear Cuenta" : "Entrar al Portal"}
             </button>
           </form>
         </div>
@@ -464,6 +492,20 @@ const data = await response.json();
 }
 
 export default function AuthPage() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#1e293b] text-white italic font-black uppercase tracking-widest">
+        Cargando MeVocatio...
+      </div>
+    );
+  }
+
   return (
     <Suspense
       fallback={
