@@ -25,7 +25,6 @@ const register = async (name, email, password) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 🔽 RESTAURADO: Se quitó el true forzado para que pida verificación por correo
   const resultado = await pool.query(
     "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
     [name, email, hashedPassword]
@@ -71,7 +70,7 @@ const enviarCorreoVerificacion = async (userId, email, name) => {
         <p>Confirma tu correo electrónico haciendo clic en el botón. El enlace expira en ${EMAIL_VERIFICATION_EXPIRES_HOURS} horas.</p>
         <a href="${verifyLink}"
            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-          Verificar mi correo
+           Verificar mi correo
         </a>
         <p>Si no creaste esta cuenta, puedes ignorar este mensaje.</p>
       </div>
@@ -103,10 +102,8 @@ const login = async (email, password) => {
     };
   }
 
-  // Payload que viajará en ambos tokens
   const payload = { id: user.id, email: user.email, name: user.name };
 
-  // Generamos Access Token (15 min) y Refresh Token (7 días)
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken({ id: user.id });
 
@@ -145,7 +142,7 @@ const forgotPassword = async (email) => {
         <p>Haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos.</p>
         <a href="${resetLink}"
            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-          Cambiar contraseña
+           Cambiar contraseña
         </a>
       </div>
     `,
@@ -238,6 +235,29 @@ const resendVerification = async (email) => {
   await enviarCorreoVerificacion(user.id, user.email, user.name);
 };
 
+/* ─────────────────────────────────────────
+   GOOGLE SYNC (LOGIN / REGISTER ALTERNATIVO)
+───────────────────────────────────────── */
+const encontrarOCrearUsuarioGoogle = async (email, name) => {
+  let resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+  let user;
+
+  if (resultado.rows.length > 0) {
+    user = resultado.rows[0];
+  } else {
+    const nuevoUsuario = await pool.query(
+      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
+      [name, email, ""]
+    );
+    user = nuevoUsuario.rows[0];
+  }
+
+  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+
+  return { token };
+};
+
+// Exportamos todas las funciones juntas de manera correcta
 module.exports = {
   register,
   login,
@@ -245,4 +265,5 @@ module.exports = {
   resetPassword,
   verifyEmail,
   resendVerification,
+  encontrarOCrearUsuarioGoogle,
 };
