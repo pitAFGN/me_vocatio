@@ -57,7 +57,7 @@ router.post("/register", registerLimiter, reglasRegister, verificarCaptcha,  aut
  *       401: { description: Credenciales inválidas }
  *       429: { description: Demasiados intentos, intenta en 15 minutos }
  */
-router.post("/login", loginLimiter, reglasLogin, verificarCaptcha, authController.login);
+router.post("/login", loginLimiter, reglasLogin, authController.login);
 
 /**
  * @swagger

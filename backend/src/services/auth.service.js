@@ -7,43 +7,9 @@ require("dotenv").config();
 const SECRET = "mevocatio_secret";
 
 /* ─────────────────────────────────────────
-   FUNCIÓN AUXILIAR PARA VERIFICAR RECAPTCHA
-───────────────────────────────────────── */
-const verificarCaptchaEnGoogle = async (captchaToken) => {
- if (!captchaToken) {
-    throw { status: 400, message: "Validación de reCAPTCHA inválida o expirada." };
-  }
-
-  console.log("TOKEN QUE LLEGÓ AL BACKEND:", captchaToken);
-  console.log("ESTADO DE LA SECRET KEY:", process.env.RECAPTCHA_SECRET_KEY ? "Existe y está cargada" : "¡ESTÁ VACÍA O FALTA EN EL .ENV!");
-
-  try {
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-    const response = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`,
-      { method: "POST" }
-    );
-    const data = await response.json();
-    
-    console.log("RESPUESTA EXACTA DE GOOGLE:", data); // <-- Revisa esto en tu terminal
-    
-    return data.success;
-  } catch (error) {
-    console.error("Error al verificar reCAPTCHA en la petición a Google:", error);
-    return false;
-  }
-};
-
-/* ─────────────────────────────────────────
    REGISTER
 ───────────────────────────────────────── */
-const register = async (name, email, password, captchaToken) => {
-  // 1. Validar reCAPTCHA primero
-  const esHumano = await verificarCaptchaEnGoogle(captchaToken);
-  if (!esHumano) {
-    throw { status: 400, message: "Validación de reCAPTCHA inválida o expirada" };
-  }
-
+const register = async (name, email, password) => {
   const existe = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existe.rows.length > 0) {
     throw { status: 409, message: "El correo ya está registrado" };
@@ -76,7 +42,7 @@ const login = async (email, password) => {
     throw { status: 401, message: "Credenciales inválidas" };
   }
 
-  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "24h" });
 
   return { token };
 };
@@ -148,7 +114,7 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
     user = nuevoUsuario.rows[0];
   }
 
-  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "24h" });
 
   return { token };
 };

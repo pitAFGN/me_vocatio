@@ -4,10 +4,10 @@ const authService = require("../services/auth.service");
    REGISTER
 ───────────────────────────────────────── */
 const register = async (req, res) => {
-  const { name, email, password, captchaToken } = req.body;
+  const { name, email, password } = req.body;
 
   try {
-    const usuario = await authService.register(name, email, password, captchaToken);
+    const usuario = await authService.register(name, email, password);
     res.status(201).json(usuario);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
