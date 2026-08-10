@@ -67,6 +67,18 @@ export const authService = {
   },
 
   /**
+   * Verifica el correo electrónico usando el token del magic link.
+   */
+  async verifyEmail(token) {
+    const res = await fetch(`${API_URL}/api/auth/verify-email?token=${token}`, {
+      method: "GET",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "El enlace es inválido o expiró.");
+    return data; // { message, email }
+  },
+
+  /**
    * Cambia la contraseña usando el token del correo.
    */
   async resetPassword(token, newPassword) {
