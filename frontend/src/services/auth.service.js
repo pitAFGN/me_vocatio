@@ -17,22 +17,39 @@ export const authService = {
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Credenciales inválidas");
+    if (!res.ok) throw new Error(data.error || data.message || "Credenciales inválidas");
     return data; // { token }
   },
 
   /**
    * Registra un nuevo usuario.
    */
-  async register(name, email, password) {
+  async register(name, email, password, captchaToken) {
     const res = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, captchaToken }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error al registrar");
+    if (!res.ok) throw new Error(data.error || data.message || "Error al registrar");
     return data; // { id, name, email }
+  },
+
+  /**
+   * Sincroniza la sesión de Google (Supabase) con el backend y devuelve el JWT de MeVocatio.
+   */
+  async googleSync(email, name, accessToken) {
+    const res = await fetch(`${API_URL}/api/auth/google-sync`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ email, name }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || "Error al iniciar sesión con Google");
+    return data; // { token }
   },
 
   /**

@@ -133,7 +133,7 @@ const forgotPassword = async (email) => {
         <h2>Recuperar contraseña</h2>
         <p>Haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos.</p>
         <a href="${resetLink}"
-           style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
+            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
           Cambiar contraseña
         </a>
       </div>

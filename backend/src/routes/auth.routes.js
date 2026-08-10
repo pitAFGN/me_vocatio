@@ -39,7 +39,7 @@ const {
  *       409: { description: El correo ya está registrado }
  *       429: { description: Demasiados registros, intenta más tarde }
  */
-router.post("/register", registerLimiter, reglasRegister, authController.register);
+router.post("/register", registerLimiter, reglasRegister, verificarCaptcha,  authController.register);
 
 /**
  * @swagger

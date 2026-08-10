@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { User, LogOut, FolderHeart } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function NavbarProfile() {
     const router = useRouter();
     const pathname = usePathname();
+    const { logout } = useAuth();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -43,10 +45,9 @@ export default function NavbarProfile() {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
+        logout();
         setIsLoggedIn(false);
         setIsMenuOpen(false);
-        router.replace("/login");
     };
 
     const handleMisRecursos = () => {
