@@ -141,13 +141,8 @@ const forgotPassword = async (email) => {
         <h2>Recuperar contraseña</h2>
         <p>Haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos.</p>
         <a href="${resetLink}"
-<<<<<<< HEAD
-            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-          Cambiar contraseña
-=======
            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
            Cambiar contraseña
->>>>>>> 6a29beca2c75d5e373264ecc0a881c8ba61a6bfd
         </a>
       </div>
     `,
@@ -270,9 +265,5 @@ module.exports = {
   resetPassword,
   verifyEmail,
   resendVerification,
-<<<<<<< HEAD
-};
-=======
   encontrarOCrearUsuarioGoogle,
 };
->>>>>>> 6a29beca2c75d5e373264ecc0a881c8ba61a6bfd
