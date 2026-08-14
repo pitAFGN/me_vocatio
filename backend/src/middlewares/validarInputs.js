@@ -131,6 +131,87 @@ const reglasResendVerification = [
   validar,
 ];
 
+const NIVELES_VALIDOS = ["Principiante", "Intermedio", "Avanzado"];
+const MODALIDADES_VALIDAS = ["Virtual", "Presencial"];
+
+const reglasCrearCurso = [
+  body("title")
+    .exists().withMessage("El título es obligatorio.")
+    .bail()
+    .isString().trim()
+    .notEmpty().withMessage("El título es obligatorio.")
+    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres.")
+    .escape(),
+
+  body("description")
+    .exists().withMessage("La descripción es obligatoria.")
+    .bail()
+    .isString().trim()
+    .notEmpty().withMessage("La descripción es obligatoria.")
+    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres.")
+    .escape(),
+
+  body("category")
+    .exists().withMessage("La categoría es obligatoria.")
+    .bail()
+    .isString().trim()
+    .notEmpty().withMessage("La categoría es obligatoria.")
+    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres.")
+    .escape(),
+
+  body("level")
+    .optional()
+    .isIn(NIVELES_VALIDOS).withMessage(`El nivel debe ser uno de: ${NIVELES_VALIDOS.join(", ")}.`),
+
+  body("modality")
+    .optional()
+    .isIn(MODALIDADES_VALIDAS).withMessage(`La modalidad debe ser una de: ${MODALIDADES_VALIDAS.join(", ")}.`),
+
+  body("duration_hours")
+    .optional({ nullable: true })
+    .isInt({ min: 1, max: 1000 }).withMessage("La duración debe ser un número de horas entre 1 y 1000."),
+
+  validar,
+];
+
+const reglasActualizarCurso = [
+  body("title")
+    .optional()
+    .isString().trim()
+    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres.")
+    .escape(),
+
+  body("description")
+    .optional()
+    .isString().trim()
+    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres.")
+    .escape(),
+
+  body("category")
+    .optional()
+    .isString().trim()
+    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres.")
+    .escape(),
+
+  body("level")
+    .optional()
+    .isIn(NIVELES_VALIDOS).withMessage(`El nivel debe ser uno de: ${NIVELES_VALIDOS.join(", ")}.`),
+
+  body("modality")
+    .optional()
+    .isIn(MODALIDADES_VALIDAS).withMessage(`La modalidad debe ser una de: ${MODALIDADES_VALIDAS.join(", ")}.`),
+
+  body("duration_hours")
+    .optional({ nullable: true })
+    .isInt({ min: 1, max: 1000 }).withMessage("La duración debe ser un número de horas entre 1 y 1000."),
+
+  body("status")
+    .optional()
+    .isIn(["activo", "inactivo"]).withMessage("El estado debe ser 'activo' o 'inactivo'."),
+
+  validar,
+];
+
 module.exports = {
   reglasRegister,
   reglasLogin,
@@ -138,4 +219,6 @@ module.exports = {
   reglasResetPassword,
   reglasVerifyEmail,
   reglasResendVerification,
+  reglasCrearCurso,
+  reglasActualizarCurso,
 };
