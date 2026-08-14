@@ -3,9 +3,9 @@
 # =========================================================
 # Etapa 1: "deps" - Instalación de dependencias
 # =========================================================
-# Se usa node:20-alpine porque es una imagen oficial, ligera (~5x más
-# pequeña que la imagen "full") y con soporte activo (Node 20 LTS).
-FROM node:20-alpine AS deps
+# Se usa node:22-alpine porque es una imagen oficial, ligera (~5x más
+# pequeña que la imagen "full") y con soporte activo (Node 22 LTS).
+FROM node:22-alpine AS deps
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ RUN npm ci --omit=dev \
 # =========================================================
 # Etapa 2: "runner" - Imagen final de producción
 # =========================================================
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
