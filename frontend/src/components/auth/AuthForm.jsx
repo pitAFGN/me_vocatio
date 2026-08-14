@@ -11,7 +11,7 @@ import ModalOlvidePassword from "@/components/ModalOlvidePassword";
 function CampoError({ mensaje }) {
   if (!mensaje) return null;
   return (
-    <p className="text-red-500 text-[10px] font-black uppercase tracking-wide mt-1 ml-1 flex items-center gap-1">
+    <p className="text-red-400 text-[10px] font-black uppercase tracking-wide mt-1 ml-1 flex items-center gap-1">
       <span>⚠</span> {mensaje}
     </p>
   );
@@ -40,11 +40,9 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   const [errores, setErrores] = useState({});
   const [errorGeneral, setErrorGeneral] = useState("");
 
-  // El reCAPTCHA solo se pide en el registro.
   const [captchaToken, setCaptchaToken] = useState("");
   const recaptchaRef = useRef(null);
 
-  // Referencias para que el listener de Supabase siempre use la última lógica.
   const googleHandlerRef = useRef(null);
   const procesandoOAuth = useRef(false);
 
@@ -104,6 +102,9 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         setErrores({ exito: "¡Cuenta creada! Ahora inicia sesión." });
       } else {
         await login(formData.email, formData.password);
+
+        // Redirección directa al dashboard forzando la actualización de cookies
+        window.location.href = "/dashboard";
       }
     } catch (err) {
       const msg = err.message || "";
@@ -119,9 +120,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     }
   };
 
-  /* ─────────────────────────────────────────
-     LOGIN CON GOOGLE (Supabase OAuth)
-  ───────────────────────────────────────── */
   const handleGoogleSession = async (session) => {
     if (!session?.user || procesandoOAuth.current || enviando) return;
     procesandoOAuth.current = true;
@@ -136,9 +134,11 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         "Usuario";
 
       await googleLogin(user.email, nombreGoogle, session.access_token);
-      // googleLogin navega al dashboard; los flags se limpian por si la navegación se demora.
       procesandoOAuth.current = false;
       setGoogleEnviando(false);
+
+      // Redirección directa al dashboard tras login con Google
+      window.location.href = "/dashboard";
     } catch (err) {
       setErrorGeneral(err.message || "No se pudo completar el inicio de sesión con Google.");
       procesandoOAuth.current = false;
@@ -146,7 +146,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     }
   };
 
-  // Mantener siempre la última versión de la lógica para el listener de Supabase.
   useEffect(() => {
     googleHandlerRef.current = handleGoogleSession;
   });
@@ -155,10 +154,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     if (!supabase) return;
     let active = true;
 
-    // Solo reanudamos la sesión de Google si VENIMOS de vuelta del flujo OAuth
-    // (Supabase deja ?code= o #access_token= en la URL al redirigir de regreso).
-    // En una visita normal a /login NO se procesa ninguna sesión guardada,
-    // así el usuario siempre decide explícitamente iniciar sesión con Google.
     const esRetornoOAuth =
       window.location.search.includes("code=") ||
       window.location.hash.includes("access_token=");
@@ -178,7 +173,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       }
     });
 
-    // El intercambio del código por la sesión puede tardar unos instantes: reintentamos.
     procesarSesion();
     const intervalo = setInterval(procesarSesion, 300);
     setTimeout(() => clearInterval(intervalo), 6000);
@@ -208,8 +202,9 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   };
 
   const inputClass = (campo) =>
-    `w-full px-5 py-3.5 bg-slate-50 border rounded-xl outline-none transition-all font-bold text-slate-800 text-sm shadow-sm ${
-      errores[campo] ? "border-red-400 focus:border-red-500 bg-red-50" : "border-slate-200 focus:border-slate-900"
+    `w-full px-5 py-3.5 bg-[#0f172a] border rounded-xl outline-none transition-all font-bold text-slate-100 text-sm shadow-inner placeholder:text-slate-500 ${errores[campo]
+      ? "border-red-500 focus:border-red-400 bg-red-950/20"
+      : "border-slate-700 focus:border-purple-500 hover:border-slate-600"
     }`;
 
   const botonDeshabilitado = enviando || googleEnviando;
@@ -217,31 +212,33 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   return (
     <div className="w-full max-w-md">
       <div className="mb-8 text-center lg:text-left">
-        <h3 className="text-4xl font-black text-slate-900 mb-1 tracking-tighter uppercase">
+        <h3 className="text-4xl font-black text-white mb-1 tracking-tighter uppercase">
           {esRegistro ? "Regístrate" : "Inicia Sesión"}
         </h3>
-        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
+        <p className="text-purple-400 font-bold text-[10px] uppercase tracking-[0.2em]">
           Accede a MeVocatio
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-100 mb-8">
+      <div className="flex border-b border-slate-700/80 mb-8">
         <button
           type="button"
           onClick={() => cambiarModo(false)}
-          className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${
-            !esRegistro ? "border-slate-900 text-slate-900" : "border-transparent text-slate-300"
-          }`}
+          className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${!esRegistro
+            ? "border-purple-500 text-purple-300"
+            : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
         >
           INICIAR SESIÓN
         </button>
         <button
           type="button"
           onClick={() => cambiarModo(true)}
-          className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${
-            esRegistro ? "border-slate-900 text-slate-900" : "border-transparent text-slate-300"
-          }`}
+          className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${esRegistro
+            ? "border-purple-500 text-purple-300"
+            : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
         >
           REGÍSTRATE
         </button>
@@ -254,18 +251,18 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             type="button"
             onClick={handleGoogleLogin}
             disabled={botonDeshabilitado}
-            className="w-full py-3.5 px-4 border border-slate-200 rounded-xl shadow-sm bg-white hover:bg-slate-50 transition-all flex items-center justify-center gap-3 text-slate-700 font-bold text-xs uppercase tracking-wider mb-6 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full py-3.5 px-4 border border-slate-700 rounded-xl shadow-sm bg-[#0f172a] hover:bg-slate-800 hover:border-slate-600 transition-all flex items-center justify-center gap-3 text-slate-200 font-bold text-xs uppercase tracking-wider mb-6 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             <IconoGoogle />
             {googleEnviando ? "Conectando con Google..." : "Continuar con Google"}
           </button>
 
           <div className="relative flex py-2 items-center mb-4">
-            <div className="flex-grow border-t border-slate-200"></div>
+            <div className="flex-grow border-t border-slate-700"></div>
             <span className="flex-shrink mx-4 text-slate-400 text-[9px] font-black uppercase tracking-widest">
               o con email
             </span>
-            <div className="flex-grow border-t border-slate-200"></div>
+            <div className="flex-grow border-t border-slate-700"></div>
           </div>
         </>
       )}
@@ -319,7 +316,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             <button
               type="button"
               onClick={() => setMostrarPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
               aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               tabIndex={-1}
             >
@@ -329,28 +326,29 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
           <CampoError mensaje={errores.password} />
         </div>
 
-        {/* reCAPTCHA oficial de React — solo en el registro */}
+        {/* reCAPTCHA limpio y centrado */}
         {esRegistro && RECAPTCHA_SITE_KEY && (
-          <div className="flex justify-center my-3">
+          <div className="flex justify-center my-4 overflow-x-auto">
             <ReCAPTCHA
               ref={recaptchaRef}
               sitekey={RECAPTCHA_SITE_KEY}
               onChange={(token) => setCaptchaToken(token || "")}
               onExpired={() => setCaptchaToken("")}
               onErrored={() => setCaptchaToken("")}
+              theme="dark"
             />
           </div>
         )}
 
         {errores.exito && (
-          <p className="text-green-600 text-[10px] font-black uppercase tracking-wide flex items-center gap-1">
+          <p className="text-emerald-400 text-[10px] font-black uppercase tracking-wide flex items-center gap-1">
             <span>✓</span> {errores.exito}
           </p>
         )}
 
         {errorGeneral && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-            <p className="text-red-600 text-[11px] font-black uppercase tracking-wide flex items-center gap-2">
+          <div className="bg-red-950/40 border border-red-500/30 rounded-xl px-4 py-3">
+            <p className="text-red-400 text-[11px] font-black uppercase tracking-wide flex items-center gap-2">
               <span>⚠</span> {errorGeneral}
             </p>
           </div>
@@ -361,7 +359,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             <button
               type="button"
               onClick={() => setMostrarOlvido(true)}
-              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-[#1e293b] transition-colors"
+              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-purple-300 transition-colors"
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -371,11 +369,10 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         <button
           type="submit"
           disabled={botonDeshabilitado}
-          className={`w-full py-4 font-black rounded-xl shadow-xl transition-all transform mt-4 uppercase text-[11px] tracking-[0.3em] ${
-            botonDeshabilitado
-              ? "bg-slate-400 text-slate-200 cursor-not-allowed"
-              : "bg-[#1e293b] hover:bg-slate-800 text-white active:scale-[0.97]"
-          }`}
+          className={`w-full py-4 font-black rounded-xl shadow-xl transition-all transform mt-4 uppercase text-[11px] tracking-[0.3em] cursor-pointer ${botonDeshabilitado
+            ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
+            : "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] active:scale-[0.97] border border-purple-400/30"
+            }`}
         >
           {enviando ? "Procesando..." : esRegistro ? "Crear Cuenta" : "Entrar al Portal"}
         </button>

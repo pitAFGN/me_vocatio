@@ -1,13 +1,21 @@
 import Image from "next/image";
+import dynamic from "next/dynamic";
+
+// Carga dinámica de las estrellas solo para el banner
+const BackgroundStars = dynamic(() => import("@/components/BackgroundStars"), {
+  ssr: false,
+});
 
 export default function AuthBanner({ esRegistro }) {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative bg-[#1e293b] justify-center border-r border-white/10 pt-20">
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-0 left-0 w-[50rem] h-[50rem] border-[60px] border-white rotate-45 -translate-x-1/2 -translate-y-1/2" />
-      </div>
-      
-      <div className="relative z-10 w-full max-w-xl flex flex-col items-center text-center px-12">
+    <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] justify-center border-r border-white/10 pt-20 overflow-hidden">
+      {/* BRILLITOS Y ESTRELLAS (Exclusivo en el lado izquierdo) */}
+      <BackgroundStars />
+
+      {/* Halo de fondo en gradiente */}
+      <div className="absolute w-[80%] h-[80%] bg-gradient-to-tr from-purple-600/20 via-indigo-500/15 to-blue-500/10 rounded-full blur-[100px] pointer-events-none -z-0 animate-pulse" />
+
+      <div className="relative z-20 w-full max-w-xl flex flex-col items-center text-center px-12">
         <div className="mb-6 italic font-black text-white">
           <Image
             src="/mevocatio.png"
@@ -19,10 +27,10 @@ export default function AuthBanner({ esRegistro }) {
           />
         </div>
         <div className="flex flex-col items-center">
-          <h2 className="text-4xl font-black leading-[1.1] mb-4 tracking-tighter uppercase italic text-white max-w-md">
+          <h2 className="text-4xl font-black leading-[1.1] mb-4 tracking-tighter uppercase italic text-white max-w-md drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
             {esRegistro ? "El diamante eres tú, lúcelo" : "Sigue puliendo tu profesión"}
           </h2>
-          <p className="text-base text-slate-400 font-light max-w-sm leading-snug">
+          <p className="text-base text-slate-300 font-light max-w-sm leading-snug">
             {esRegistro
               ? "Crea tu perfil ahora y accede a la red de talentos más exclusiva."
               : "Bienvenido de nuevo al portal donde tu carrera toma un brillo superior."}

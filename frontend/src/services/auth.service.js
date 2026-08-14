@@ -3,13 +3,8 @@ import { API_URL } from "@/lib/constants";
 /**
  * Servicio de autenticación.
  * Centraliza todas las llamadas al backend relacionadas con auth.
- * Las páginas NO deben usar fetch directamente — siempre llaman a este servicio.
  */
-
 export const authService = {
-  /**
-   * Inicia sesión y retorna el token JWT.
-   */
   async login(email, password) {
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
@@ -18,12 +13,9 @@ export const authService = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || data.message || "Credenciales inválidas");
-    return data; // { token }
+    return data;
   },
 
-  /**
-   * Registra un nuevo usuario.
-   */
   async register(name, email, password, captchaToken) {
     const res = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
@@ -32,12 +24,9 @@ export const authService = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || data.message || "Error al registrar");
-    return data; // { id, name, email }
+    return data;
   },
 
-  /**
-   * Sincroniza la sesión de Google (Supabase) con el backend y devuelve el JWT de MeVocatio.
-   */
   async googleSync(email, name, accessToken) {
     const res = await fetch(`${API_URL}/api/auth/google-sync`, {
       method: "POST",
@@ -49,12 +38,9 @@ export const authService = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || data.message || "Error al iniciar sesión con Google");
-    return data; // { token }
+    return data;
   },
 
-  /**
-   * Envía el correo de recuperación de contraseña.
-   */
   async forgotPassword(email) {
     const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
       method: "POST",
@@ -66,21 +52,15 @@ export const authService = {
     return data;
   },
 
-  /**
-   * Verifica el correo electrónico usando el token del magic link.
-   */
   async verifyEmail(token) {
     const res = await fetch(`${API_URL}/api/auth/verify-email?token=${token}`, {
       method: "GET",
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "El enlace es inválido o expiró.");
-    return data; // { message, email }
+    return data;
   },
 
-  /**
-   * Cambia la contraseña usando el token del correo.
-   */
   async resetPassword(token, newPassword) {
     const res = await fetch(`${API_URL}/api/auth/reset-password`, {
       method: "POST",

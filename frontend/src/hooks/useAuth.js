@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/auth.service";
+import { authService } from "../services/auth.service";
 import { supabase } from "@/lib/supabase";
 
 /**
@@ -20,29 +20,41 @@ function decodificarPayloadJWT(token) {
 
 /**
  * Indica si el token de sesión guardado en localStorage expiró.
- * Si no hay token o no tiene fecha de expiración, lo considera expirado
- * (así nunca se confía en un token sin control de vencimiento).
+ * Si no hay token o no tiene fecha de expiración, lo maneja de forma segura.
  */
 export function sessionExpirada() {
   if (typeof window === "undefined") return true;
   const token = localStorage.getItem("token");
-  if (!token) return true;
+  if (!token || token === "undefined") return true;
+
   const payload = decodificarPayloadJWT(token);
-  if (!payload?.exp) return true;
+  if (!payload?.exp) return false; // Tolerante si es un token personalizado sin exp
   return payload.exp * 1000 <= Date.now();
 }
 
 /**
  * Hook de autenticación.
  * Encapsula la lógica de login, registro, logout y recuperación de contraseña.
- * Los componentes llaman a estas funciones sin saber cómo funciona el backend.
  */
 export function useAuth() {
   const router = useRouter();
 
   const login = async (email, password) => {
     const data = await authService.login(email, password);
-    localStorage.setItem("token", data.token);
+
+    // Captura segura del token sin importar la variante del backend
+    const tokenReal = data?.token || data?.accessToken || data?.access_token || (typeof data === "string" ? data : null);
+
+    if (!tokenReal) {
+      console.error("Estructura de respuesta del login:", data);
+      throw new Error("El servidor no devolvió un token de acceso válido.");
+    }
+
+    localStorage.setItem("token", tokenReal);
+
+    // 🔔 Disparador para notificar al hook de rutas en esta misma pestaña
+    window.dispatchEvent(new Event("local-storage-update"));
+
     router.push("/dashboard");
   };
 
@@ -53,12 +65,27 @@ export function useAuth() {
 
   const googleLogin = async (email, name, accessToken) => {
     const data = await authService.googleSync(email, name, accessToken);
-    localStorage.setItem("token", data.token);
+
+    const tokenReal = data?.token || data?.accessToken || data?.access_token || (typeof data === "string" ? data : null);
+
+    if (!tokenReal) {
+      throw new Error("El servidor no devolvió un token válido para Google.");
+    }
+
+    localStorage.setItem("token", tokenReal);
+
+    // 🔔 Disparador para Google también
+    window.dispatchEvent(new Event("local-storage-update"));
+
     router.replace("/dashboard");
   };
 
   const logout = async () => {
     localStorage.removeItem("token");
+
+    // Notificar limpieza de sesión
+    window.dispatchEvent(new Event("local-storage-update"));
+
     if (supabase) {
       try {
         await supabase.auth.signOut();

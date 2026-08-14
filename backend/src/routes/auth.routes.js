@@ -17,6 +17,9 @@ const {
   reglasResendVerification,
 } = require("../middlewares/validarInputs");
 
+// (Si tu archivo se llama distinto en middlewares, ajusta la ruta del require)
+const { verificarCaptcha } = require("../middlewares/recaptcha");
+
 /**
  * @swagger
  * /api/auth/register:
@@ -39,7 +42,7 @@ const {
  *       409: { description: El correo ya está registrado }
  *       429: { description: Demasiados registros, intenta más tarde }
  */
-router.post("/register", registerLimiter, reglasRegister, verificarCaptcha,  authController.register);
+router.post("/register", registerLimiter, reglasRegister, verificarCaptcha, authController.register);
 
 /**
  * @swagger
