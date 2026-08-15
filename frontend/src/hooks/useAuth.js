@@ -114,5 +114,5 @@ export function useAuth() {
     return localStorage.getItem("token");
   };
 
-  return { login, register, logout, forgotPassword, resetPassword, verifyEmail, getToken };
+  return { login, register, logout, forgotPassword, resetPassword, verifyEmail, getToken, googleLogin };
 }
