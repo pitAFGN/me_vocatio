@@ -5,6 +5,10 @@ const authController = require("../src/controllers/auth.controller");
 
 // Interceptamos el controlador para controlar sus respuestas
 jest.mock("../src/controllers/auth.controller");
+// El reCAPTCHA real no se ejecuta en tests: el middleware solo deja pasar la petición
+jest.mock("../src/middlewares/recaptcha", () => ({
+  verificarCaptcha: (req, res, next) => next(),
+}));
 
 const app = express();
 app.use(express.json());

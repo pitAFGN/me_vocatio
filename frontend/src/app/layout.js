@@ -28,7 +28,8 @@ export default function RootLayout({ children }) {
     pathname.startsWith("/configuracion") ||
     pathname.startsWith("/insignias") ||
     pathname.startsWith("/diagnostico") ||
-    pathname.startsWith("/recomendacion");
+    pathname.startsWith("/recomendacion") ||
+    pathname.startsWith("/creacion_recursos");
 
   const sideMenuLinks = [
     { href: "/dashboard", label: "Panel Principal", icon: LayoutDashboard },

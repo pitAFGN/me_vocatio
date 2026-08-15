@@ -2,49 +2,68 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { sessionExpirada } from "@/hooks/useAuth";
 
-/**
- * Protege una ruta privada.
- * Si no hay token, redirige al login.
- * Retorna `loading` para evitar que la página se muestre antes de verificar.
- *
- * Uso: const { loading } = useProtectedRoute();
- */
-export function useProtectedRoute() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace("/login");
-    } else {
-      setLoading(false);
-    }
-  }, [router]);
-
-  return { loading };
+// Función auxiliar para comprobar token directamente
+function comprobarSesion() {
+  if (typeof window === "undefined") return false;
+  const token = localStorage.getItem("token");
+  return Boolean(token && !sessionExpirada());
 }
 
 /**
- * Protege una ruta pública (login, landing).
- * Si ya hay token, redirige al dashboard.
- * Retorna `loading` para evitar flasheos visuales.
- *
- * Uso: const { loading } = usePublicRoute();
+ * Hook para obtener el estado actual de la sesión de forma segura en cliente
+ */
+function useEstadoSesion() {
+  const [esValida, setEsValida] = useState(null); // null = cargando/SSR
+
+  useEffect(() => {
+    // Verificar al montar en el cliente
+    setEsValida(comprobarSesion());
+
+    // Escuchar cambios de storage (entre pestañas y eventos manuales)
+    const ManejarCambio = () => setEsValida(comprobarSesion());
+    window.addEventListener("storage", ManejarCambio);
+    window.addEventListener("local-storage-update", ManejarCambio);
+
+    return () => {
+      window.removeEventListener("storage", ManejarCambio);
+      window.removeEventListener("local-storage-update", ManejarCambio);
+    };
+  }, []);
+
+  return esValida;
+}
+
+/**
+ * Protege rutas privadas (ej. /dashboard)
+ */
+export function useProtectedRoute() {
+  const router = useRouter();
+  const sesionValida = useEstadoSesion();
+
+  useEffect(() => {
+    if (sesionValida === false) {
+      router.replace("/login");
+    }
+  }, [sesionValida, router]);
+
+  return { loading: sesionValida === null };
+}
+
+/**
+ * Protege rutas de autenticación (SÓLO /login o /registro)
+ * Si ya tiene sesión, lo manda al dashboard.
  */
 export function usePublicRoute() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const sesionValida = useEstadoSesion();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    if (sesionValida === true) {
       router.replace("/dashboard");
-    } else {
-      setLoading(false);
     }
-  }, [router]);
+  }, [sesionValida, router]);
 
-  return { loading };
+  return { loading: sesionValida === null };
 }

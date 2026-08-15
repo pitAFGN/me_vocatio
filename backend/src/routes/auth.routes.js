@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
+const { googleSyncController } = require("../controllers/alternativeLogin.controller");
+const { verificarTokenSupabase } = require("../middlewares/alternativeLogin");
 const {
   loginLimiter,
   registerLimiter,
@@ -8,8 +10,6 @@ const {
   verifyEmailLimiter,
   resendVerificationLimiter,
 } = require("../middlewares/rateLimiter");
-const { verificarTokenSupabase } = require('../middlewares/alternativeLogin');
-const { googleSyncController } = require('../controllers/alternativeLogin.controller');
 const {
   reglasRegister,
   reglasLogin,
@@ -18,6 +18,9 @@ const {
   reglasVerifyEmail,
   reglasResendVerification,
 } = require("../middlewares/validarInputs");
+
+// (Si tu archivo se llama distinto en middlewares, ajusta la ruta del require)
+const { verificarCaptcha } = require("../middlewares/recaptcha");
 
 /**
  * @swagger
@@ -41,7 +44,7 @@ const {
  *       409: { description: El correo ya está registrado }
  *       429: { description: Demasiados registros, intenta más tarde }
  */
-router.post("/register", registerLimiter, reglasRegister, authController.register);
+router.post("/register", registerLimiter, reglasRegister, verificarCaptcha, authController.register);
 
 /**
  * @swagger
@@ -66,6 +69,30 @@ router.post("/register", registerLimiter, reglasRegister, authController.registe
  *       429: { description: Demasiados intentos, intenta en 15 minutos }
  */
 router.post("/login", loginLimiter, reglasLogin, authController.login);
+
+/**
+ * @swagger
+ * /api/auth/google-sync:
+ *   post:
+ *     summary: Sincroniza el login con Google y devuelve un JWT interno
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, name]
+ *             properties:
+ *               email: { type: string, example: "juan@gmail.com" }
+ *               name: { type: string, example: "Juan Pérez" }
+ *     responses:
+ *       200: { description: Usuario sincronizado exitosamente con Google }
+ *       401: { description: Token de Supabase inválido o expirado }
+ *       500: { description: Error interno al procesar Google }
+ */
+router.post("/google-sync", verificarTokenSupabase, googleSyncController);
 
 /**
  * @swagger
@@ -154,7 +181,5 @@ router.post(
   reglasResendVerification,
   authController.resendVerification
 );
-
-router.post('/google-sync', verificarTokenSupabase, googleSyncController);
 
 module.exports = router;
