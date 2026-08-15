@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const { swaggerUi, specs } = require("./config/swagger");
 const authRoutes = require("./routes/auth.routes");
 const recomendationRoutes = require("./routes/recomendation.routes");
+const courseRoutes = require("./routes/course.routes");
 const pool = require("./config/db");
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 /* ─── Rutas ─── */
 app.use("/api/auth", authRoutes);
 app.use("/api", recomendationRoutes); // <--- Corregido y unificado aquí (maneja /generar, /evaluar y /recomendar)
+app.use("/api/courses", courseRoutes);
 
 /* ─── Ruta no encontrada ─── */
 app.use((req, res) => {

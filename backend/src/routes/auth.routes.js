@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
+const { googleSyncController } = require("../controllers/alternativeLogin.controller");
+const { verificarTokenSupabase } = require("../middlewares/alternativeLogin");
 const {
   loginLimiter,
   registerLimiter,
@@ -67,6 +69,30 @@ router.post("/register", registerLimiter, reglasRegister, verificarCaptcha, auth
  *       429: { description: Demasiados intentos, intenta en 15 minutos }
  */
 router.post("/login", loginLimiter, reglasLogin, authController.login);
+
+/**
+ * @swagger
+ * /api/auth/google-sync:
+ *   post:
+ *     summary: Sincroniza el login con Google y devuelve un JWT interno
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, name]
+ *             properties:
+ *               email: { type: string, example: "juan@gmail.com" }
+ *               name: { type: string, example: "Juan Pérez" }
+ *     responses:
+ *       200: { description: Usuario sincronizado exitosamente con Google }
+ *       401: { description: Token de Supabase inválido o expirado }
+ *       500: { description: Error interno al procesar Google }
+ */
+router.post("/google-sync", verificarTokenSupabase, googleSyncController);
 
 /**
  * @swagger
