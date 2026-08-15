@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react"; // 1. Importamos useEffect
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const opiniones = [
@@ -15,19 +15,35 @@ const opiniones = [
 
 export default function OpinionesCarrusel() {
     const [index, setIndex] = useState(0);
-    const cardsVisibles = 4;
+    const [cardsVisibles, setCardsVisibles] = useState(4);
 
-    // --- MAGIA PARA EL MOVIMIENTO AUTOMÁTICO ---
+    // Detectar el ancho de la pantalla para ajustar cuántas tarjetas mostrar
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 640) {
+                setCardsVisibles(1); // En celulares se ve 1 sola
+            } else if (window.innerWidth < 1024) {
+                setCardsVisibles(2); // En tablets se ven 2
+            } else {
+                setCardsVisibles(4); // En escritorio se ven 4
+            }
+        };
+
+        handleResize(); // Ejecutar al cargar
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    // --- MOVIMIENTO AUTOMÁTICO ---
     useEffect(() => {
         const intervalo = setInterval(() => {
             siguiente();
-        }, 3000); // Se mueve cada 3 segundos
+        }, 3500);
 
-        return () => clearInterval(intervalo); // Limpiamos el reloj al salir
-    }, [index]); // Se reinicia el reloj cada vez que cambia el index
+        return () => clearInterval(intervalo);
+    }, [index, cardsVisibles]);
 
     const siguiente = () => {
-        // Si llega al final, vuelve al principio
         if (index + cardsVisibles >= opiniones.length) {
             setIndex(0);
         } else {
@@ -39,36 +55,36 @@ export default function OpinionesCarrusel() {
         if (index > 0) {
             setIndex(index - 1);
         } else {
-            // Si está al principio y da atrás, va al final
             setIndex(opiniones.length - cardsVisibles);
         }
     };
 
     return (
-        <div className="z-10 w-full max-w-5xl absolute bottom-24 px-6 drop-shadow-xl">
+        <div className="z-10 w-full max-w-4xl mx-auto absolute left-0 right-0 bottom-16 sm:bottom-20 px-4 sm:px-6 drop-shadow-xl">
 
-            <div className="bg-slate-800/90 backdrop-blur-md p-4 rounded-2xl flex items-center gap-4 shadow-2xl border border-white/10 overflow-hidden">
+            <div className="bg-slate-800/90 backdrop-blur-md p-3 sm:p-4 rounded-2xl flex items-center gap-2 sm:gap-4 shadow-2xl border border-white/10 overflow-hidden">
 
-                <button onClick={anterior} className="text-white bg-white/10 w-8 h-8 rounded-full hover:bg-white/20 transition-all flex items-center justify-center text-xs z-20 active:scale-90">
+                <button onClick={anterior} className="text-white bg-white/10 w-8 h-8 rounded-full hover:bg-white/20 transition-all flex items-center justify-center text-xs z-20 active:scale-90 shrink-0">
                     ←
                 </button>
 
-                <div className="flex-1 overflow-hidden h-20">
+                <div className="flex-1 overflow-hidden h-20 flex items-center">
                     <motion.div
-                        className="flex gap-3"
+                        className="flex gap-3 w-full"
                         animate={{ x: `-${index * (100 / cardsVisibles)}%` }}
-                        transition={{ type: "spring", stiffness: 100, damping: 20 }} // Más suave para el modo automático
+                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     >
                         {opiniones.map((op) => (
                             <div
                                 key={op.id}
-                                className="min-w-[calc(25%-9px)] bg-white/5 p-3 rounded-xl border border-white/5 text-white flex flex-col justify-center"
+                                style={{ minWidth: `calc(${100 / cardsVisibles}% - ${(cardsVisibles - 1) * 12 / cardsVisibles}px)` }}
+                                className="bg-white/5 p-3 rounded-xl border border-white/5 text-white flex flex-col justify-center shrink-0 shadow-inner"
                             >
                                 <div className="flex items-center gap-2 mb-1">
-                                    <div className="w-6 h-6 bg-slate-500 rounded-full flex items-center justify-center text-[10px]">👤</div>
-                                    <div className="text-yellow-400 text-[8px]">★★★★★</div>
+                                    <div className="w-6 h-6 bg-slate-600/80 rounded-full flex items-center justify-center text-[10px]">👤</div>
+                                    <div className="text-yellow-400 text-[9px]">★★★★★</div>
                                 </div>
-                                <p className="text-[9px] leading-tight opacity-90 italic">
+                                <p className="text-[10px] sm:text-xs leading-tight opacity-90 italic">
                                     "{op.texto}" <span className="text-cyan-400 font-bold cursor-pointer ml-1">más</span>
                                 </p>
                             </div>
@@ -76,7 +92,7 @@ export default function OpinionesCarrusel() {
                     </motion.div>
                 </div>
 
-                <button onClick={siguiente} className="text-white bg-white/10 w-8 h-8 rounded-full hover:bg-white/20 transition-all flex items-center justify-center text-xs z-20 active:scale-90">
+                <button onClick={siguiente} className="text-white bg-white/10 w-8 h-8 rounded-full hover:bg-white/20 transition-all flex items-center justify-center text-xs z-20 active:scale-90 shrink-0">
                     →
                 </button>
             </div>
