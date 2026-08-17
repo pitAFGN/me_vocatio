@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import NavbarProfile from "../components/NavbarProfile";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -74,13 +75,15 @@ export default function RootLayout({ children }) {
               NOSOTROS
             </Link>
 
-            {(!isLoggedIn || !isPrivateZone) && (
+            {(!isLoggedIn || !isPrivateZone) ? (
               <Link
                 href="/login"
                 className={`${getButtonStyle("/login")} px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold shrink-0`}
               >
                 ACCESO
               </Link>
+            ) : (
+              <NavbarProfile />
             )}
           </div>
 
