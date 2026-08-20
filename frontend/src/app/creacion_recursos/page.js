@@ -6,6 +6,7 @@ import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
 import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCustomizationPanel";
 import ResourceStructurePanel from "@/components/creacion_recursos/ResourceStructurePanel";
 import AnalyticsPanel from "@/components/creacion_recursos/AnalyticsPanel";
+import { usePayment } from "@/hooks/usePayment";
 
 const metricCards = [
   { label: "Estudiantes totales", value: "2.4K", delta: "+12.4%" },
@@ -48,9 +49,37 @@ export default function CreacionRecursosPage() {
     nombre: "Curso de Diseño UX",
     url: "https://mevocatio.com/cursos/diseno-ux",
     descripcion: "Aprende a crear experiencias digitales claras, funcionales y estratégicas.",
+    category: "Diseño",
+    level: "Principiante",
+    modality: "Virtual",
+    duration_hours: "",
+    price: "",
   });
 
+  const { pagarCurso, cargando, error } = usePayment();
+  const [mensaje, setMensaje] = useState(null);
+
   const isPremium = plan === "premium";
+
+  const handlePublicarYPagar = () => {
+    setMensaje(null);
+    pagarCurso(
+      {
+        title: curso.nombre,
+        description: curso.descripcion,
+        category: curso.category,
+        level: curso.level,
+        modality: curso.modality,
+        duration_hours: curso.duration_hours ? Number(curso.duration_hours) : undefined,
+        price: Number(curso.price),
+      },
+      {
+        onExito: () => setMensaje({ tipo: "ok", texto: "¡Pago aprobado! Tu curso quedó activo." }),
+        onError: (msg) => setMensaje({ tipo: "error", texto: msg }),
+        onCerrado: () => setMensaje({ tipo: "info", texto: "Cerraste la ventana de pago sin terminar." }),
+      }
+    );
+  };
 
   const toggleBadge = (badge) => {
     setSelectedBadges((prev) =>
@@ -81,6 +110,32 @@ export default function CreacionRecursosPage() {
         <div className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-6">
             <CourseBasicForm curso={curso} setCurso={setCurso} isPremium={isPremium} />
+
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-5">
+              <button
+                type="button"
+                onClick={handlePublicarYPagar}
+                disabled={cargando || !curso.price}
+                className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-3 text-sm font-black uppercase tracking-widest text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {cargando ? "Abriendo pasarela de pago..." : "Publicar y pagar con Wompi"}
+              </button>
+
+              {mensaje && (
+                <p
+                  className={`mt-3 text-sm font-medium ${
+                    mensaje.tipo === "ok"
+                      ? "text-emerald-400"
+                      : mensaje.tipo === "error"
+                      ? "text-red-400"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {mensaje.texto}
+                </p>
+              )}
+              {error && !mensaje && <p className="mt-3 text-sm font-medium text-red-400">{error}</p>}
+            </div>
 
             <CourseCustomizationPanel
               isPremium={isPremium}
