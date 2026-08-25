@@ -7,6 +7,7 @@ import { RECAPTCHA_SITE_KEY } from "@/lib/constants";
 import { supabase, isGoogleLoginEnabled } from "@/lib/supabase";
 import { validarCamposLogin, validarCamposRegistro } from "@/lib/validations/auth";
 import ModalOlvidePassword from "@/components/ModalOlvidePassword";
+import PlanSelectionModal from "@/components/PlanSelectionModal";
 
 function CampoError({ mensaje }) {
   if (!mensaje) return null;
@@ -32,6 +33,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   const { login, register, googleLogin } = useAuth();
 
   const [mostrarOlvido, setMostrarOlvido] = useState(false);
+  const [mostrarPlan, setMostrarPlan] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [googleEnviando, setGoogleEnviando] = useState(false);
   const [mostrarPassword, setMostrarPassword] = useState(false);
@@ -99,7 +101,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         await register(formData.nombre, formData.email, formData.password, captchaToken);
         limpiarFormulario();
         setEsRegistro(false);
-        setErrores({ exito: "¡Cuenta creada! Ahora inicia sesión." });
+        setMostrarPlan(true);
       } else {
         await login(formData.email, formData.password);
 
@@ -208,6 +210,12 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     }`;
 
   const botonDeshabilitado = enviando || googleEnviando;
+
+  const seleccionarPlan = (plan) => {
+    localStorage.setItem("mevocatio_plan", plan);
+    setMostrarPlan(false);
+    setErrores({ exito: "¡Cuenta creada! Ahora inicia sesión." });
+  };
 
   return (
     <div className="w-full max-w-md">
@@ -379,6 +387,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       </form>
 
       {mostrarOlvido && <ModalOlvidePassword onClose={() => setMostrarOlvido(false)} />}
+      {mostrarPlan && <PlanSelectionModal onSelect={seleccionarPlan} />}
     </div>
   );
 }

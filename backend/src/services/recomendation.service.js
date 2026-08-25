@@ -18,6 +18,8 @@ const openai = new OpenAI({
   baseURL: "https://api.groq.com/openai/v1",
 });
 
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+
 // 2. Generar test dinámico usando Groq Cloud
 const generarTestConGroq = async (professionTitle, professionArea) => {
   const apiKey = process.env.GROQ_API_KEY;
@@ -32,7 +34,7 @@ const generarTestConGroq = async (professionTitle, professionArea) => {
       "Authorization": `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
@@ -131,7 +133,7 @@ const generarYGuardarBloque = async (evaluationId, vocation, nivel, evitarUrls =
   try {
     // 2. Usamos tu cliente openai en lugar de groq
     const response = await openai.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // 👈 Cambia esto por el modelo que estés usando (ej: "llama3-8b-8192" si estás ruteando hacia Groq)
+      model: GROQ_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" } // Obliga a la IA a responder con un JSON limpio
     });

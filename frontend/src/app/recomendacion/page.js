@@ -92,7 +92,7 @@ function RecomendacionContent() {
           onClick={() => router.push("/dashboard")}
           className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4" /> Volver al Dashboard
+          <ArrowLeft className="w-4 h-4" /> Volver
         </button>
 
         <header className="rec-header">

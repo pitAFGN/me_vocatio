@@ -1,4 +1,10 @@
-export default function AnalyticsPanel({ isPremium, metricCards, funnelData, recentStudents }) {
+export default function AnalyticsPanel({
+  isPremium,
+  onUpgrade,
+  metricCards,
+  funnelData,
+  recentStudents,
+}) {
   if (!isPremium) {
     return (
       <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
@@ -12,6 +18,7 @@ export default function AnalyticsPanel({ isPremium, metricCards, funnelData, rec
           </p>
           <button
             type="button"
+            onClick={onUpgrade}
             className="mt-6 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-[0_0_18px_rgba(168,85,247,0.35)]"
           >
             Mejorar plan
