@@ -185,3 +185,7 @@ Toda comunicación con la API pasa por `services/auth.service.js`. La URL base s
 | Login | POST | `/api/auth/login` |
 | Recuperar contraseña | POST | `/api/auth/forgot-password` |
 | Cambiar contraseña | POST | `/api/auth/reset-password` |
+
+## 🎨 Vista Previa de la Interfaz (Mockups)
+¿Quieres ver cómo luce la plataforma en acción? Explora los diseños de la interfaz para versiones de escritorio y dispositivos móviles:
+👉 **[Ver todos los Mockups del Proyecto](MOCKUPS.md)**

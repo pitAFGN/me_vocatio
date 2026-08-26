@@ -1,12 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import PlanSelector from "@/components/creacion_recursos/PlanSelector";
 import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
 import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCustomizationPanel";
 import ResourceStructurePanel from "@/components/creacion_recursos/ResourceStructurePanel";
 import AnalyticsPanel from "@/components/creacion_recursos/AnalyticsPanel";
+<<<<<<< HEAD
 import { usePayment } from "@/hooks/usePayment";
+=======
+import PlanSelectionModal from "@/components/PlanSelectionModal";
+
+const FREE_RESOURCE_LIMIT = 3;
+>>>>>>> origin/dev
 
 const metricCards = [
   { label: "Estudiantes totales", value: "2.4K", delta: "+12.4%" },
@@ -40,7 +48,18 @@ const backgroundOptions = [
 const badgeOptions = ["Elite", "Top 10%", "Nuevo", "Bestseller", "En tendencia"];
 
 export default function CreacionRecursosPage() {
-  const [plan, setPlan] = useState("free");
+  const [plan, setPlan] = useState(() => {
+    if (typeof window === "undefined") return "free";
+    const savedPlan = window.localStorage.getItem("mevocatio_plan");
+    return savedPlan === "premium" ? "premium" : "free";
+  });
+  const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
+  const [recursos, setRecursos] = useState([
+    { id: 1, title: "Introducción al diseño UX", type: "Video + guía práctica" },
+    { id: 2, title: "Investigación de usuarios", type: "Video + guía práctica" },
+    { id: 3, title: "Prototipado de soluciones", type: "Video + guía práctica" },
+    { id: 4, title: "Presentación del proyecto", type: "Video + guía práctica" },
+  ]);
   const [selectedBackground, setSelectedBackground] = useState(
     "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950"
   );
@@ -61,6 +80,7 @@ export default function CreacionRecursosPage() {
 
   const isPremium = plan === "premium";
 
+<<<<<<< HEAD
   const handlePublicarYPagar = () => {
     setMensaje(null);
     pagarCurso(
@@ -79,6 +99,27 @@ export default function CreacionRecursosPage() {
         onCerrado: () => setMensaje({ tipo: "info", texto: "Cerraste la ventana de pago sin terminar." }),
       }
     );
+=======
+  const cambiarPlan = (nextPlan) => {
+    setPlan(nextPlan);
+    window.localStorage.setItem("mevocatio_plan", nextPlan);
+  };
+
+  const crearRecurso = () => {
+    if (!isPremium) {
+      setMostrarPlanModal(true);
+      return;
+    }
+
+    setRecursos((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        title: `Nuevo recurso ${prev.length + 1}`,
+        type: "Video + guía práctica",
+      },
+    ]);
+>>>>>>> origin/dev
   };
 
   const toggleBadge = (badge) => {
@@ -100,16 +141,31 @@ export default function CreacionRecursosPage() {
             </h1>
           </div>
 
-          <div className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.28em] text-violet-100">
-            Vista previa
+          <div className="flex shrink-0 items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-800 hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              <span>Volver</span>
+            </Link>
+
+            <div className="hidden rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.28em] text-violet-100 md:block">
+              Vista previa
+            </div>
           </div>
         </div>
 
-        <PlanSelector plan={plan} setPlan={setPlan} />
+        <PlanSelector plan={plan} setPlan={cambiarPlan} />
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-6">
-            <CourseBasicForm curso={curso} setCurso={setCurso} isPremium={isPremium} />
+            <CourseBasicForm
+              curso={curso}
+              setCurso={setCurso}
+              isPremium={isPremium}
+              onUpgrade={() => setMostrarPlanModal(true)}
+            />
 
             <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-5">
               <button
@@ -148,12 +204,19 @@ export default function CreacionRecursosPage() {
               curso={curso}
             />
 
-            <ResourceStructurePanel isPremium={isPremium} />
+            <ResourceStructurePanel
+              isPremium={isPremium}
+              resources={recursos}
+              freeResourceLimit={FREE_RESOURCE_LIMIT}
+              onCreateResource={crearRecurso}
+              onUpgrade={() => setMostrarPlanModal(true)}
+            />
           </div>
 
           <div className="space-y-6">
             <AnalyticsPanel
               isPremium={isPremium}
+              onUpgrade={() => setMostrarPlanModal(true)}
               metricCards={metricCards}
               funnelData={funnelData}
               recentStudents={recentStudents}
@@ -161,6 +224,15 @@ export default function CreacionRecursosPage() {
           </div>
         </div>
       </div>
+
+      {mostrarPlanModal && (
+        <PlanSelectionModal
+          onSelect={(selectedPlan) => {
+            cambiarPlan(selectedPlan);
+            setMostrarPlanModal(false);
+          }}
+        />
+      )}
     </main>
   );
 }

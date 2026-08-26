@@ -1,4 +1,4 @@
-export default function CourseBasicForm({ curso, setCurso, isPremium }) {
+export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade }) {
   const inputClass =
     "w-full rounded-xl border border-slate-700 bg-[#0f172a] px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-violet-500";
 
@@ -27,8 +27,18 @@ export default function CourseBasicForm({ curso, setCurso, isPremium }) {
 
       {!isPremium && (
         <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm font-medium text-amber-100">
-          🔒 En el plan gratuito solo puedes crear la información base del curso.
+            🔒 La creación de cursos es exclusiva del Plan Premium. Actualiza tu plan para crear y publicar cursos.
         </div>
+      )}
+
+      {!isPremium && (
+        <button
+          type="button"
+          onClick={onUpgrade}
+          className="mb-5 w-full rounded-xl bg-violet-600 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-colors hover:bg-violet-500"
+        >
+          Actualizar a Premium
+        </button>
       )}
 
       <div className="space-y-4">
@@ -38,6 +48,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium }) {
           </label>
           <input
             value={curso.nombre}
+            disabled={!isPremium}
             onChange={(e) => setCurso({ ...curso, nombre: e.target.value })}
             className={inputClass}
             placeholder="Ej: Curso de Diseño UX"
@@ -50,6 +61,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium }) {
           </label>
           <input
             value={curso.url}
+            disabled={!isPremium}
             onChange={(e) => setCurso({ ...curso, url: e.target.value })}
             className={inputClass}
             placeholder="https://..."
@@ -62,6 +74,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium }) {
           </label>
           <textarea
             value={curso.descripcion}
+            disabled={!isPremium}
             onChange={(e) => setCurso({ ...curso, descripcion: e.target.value })}
             rows={4}
             className={inputClass}

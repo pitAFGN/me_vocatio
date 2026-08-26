@@ -5,21 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import {
-  Menu,
-  LayoutDashboard,
-  Award,
-  Settings,
-  BrainCircuit,
-  Compass
-} from "lucide-react";
 import NavbarProfile from "../components/NavbarProfile";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
-  const isDiagnostico = pathname.startsWith("/diagnostico");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   const isAccessActive = pathname.startsWith("/login");
   const isPrivateZone =
@@ -31,29 +21,7 @@ export default function RootLayout({ children }) {
     pathname.startsWith("/recomendacion") ||
     pathname.startsWith("/creacion_recursos");
 
-  const sideMenuLinks = [
-    { href: "/dashboard", label: "Panel Principal", icon: LayoutDashboard },
-    { href: "/recomendacion", label: "Rutas de Aprendizaje", icon: Compass },
-
-    ...(isDiagnostico
-      ? [
-        {
-          href: pathname,
-          label: "Diagnóstico",
-          icon: BrainCircuit,
-        },
-      ]
-      : []),
-
-    { href: "/insignias", label: "Insignias", icon: Award },
-    { href: "/configuracion", label: "Configuración", icon: Settings },
-  ];
-
-  useEffect(() => {
-    setIsSideMenuOpen(false);
-  }, [pathname]);
-
-  // Verificar la sesión para saber si pintar ACCESO o el Perfil
+  // Verificar la sesión para saber si pintar ACCESO
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
@@ -64,7 +32,6 @@ export default function RootLayout({ children }) {
     return () => window.removeEventListener("storage", checkAuth);
   }, [pathname]);
 
-  // Estilo con degradado elegante que combina con el fondo azul/morado (JS Puro)
   const getButtonStyle = (path) => {
     const isActive = path === "/login" ? isAccessActive : pathname === path;
     return isActive
@@ -76,25 +43,13 @@ export default function RootLayout({ children }) {
     <html lang="es">
       <body className="antialiased bg-[#0b1329] font-sans text-slate-100" suppressHydrationWarning>
 
-        {/* NAVBAR */}
-        <nav className="fixed top-0 w-full z-50 px-10 py-3 flex justify-between items-center bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-b border-slate-800/80 shadow-2xl backdrop-blur-md">
+        {/* NAVBAR SUPERIOR RESPONSIVO (Protegido contra choques en inspector) */}
+        <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-3 flex justify-between items-center bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-b border-slate-800/80 shadow-2xl backdrop-blur-md">
 
-          {/* Bloque Izquierda: Menú hamburguesa + Logo Diamante */}
-          {/* Bloque Izquierda: Menú hamburguesa + Logo Diamante + Nombre MeVocatio */}
-          <div className="flex items-center gap-3">
-
-            {isLoggedIn && isPrivateZone && (
-              <button
-                onClick={() => setIsSideMenuOpen(true)}
-                className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700 text-white transition-all active:scale-95 cursor-pointer"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            )}
-
-            <Link href="/" className="flex items-center gap-3 group">
-              {/* Cuadro del Diamante MÁS GRANDE (w-14 h-14) y con mayor escala de imagen */}
-              <div className="w-14 h-14 flex items-center justify-center bg-slate-900/90 border border-slate-700/70 rounded-xl relative overflow-hidden transition-all group-hover:scale-105 active:scale-95 shadow-lg group-hover:border-purple-500/50">
+          {/* LOGO Y DIAMANTE RESPONSIVO */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center bg-slate-900/90 border border-slate-700/70 rounded-xl relative overflow-hidden transition-all group-hover:scale-105 active:scale-95 shadow-lg group-hover:border-purple-500/50 shrink-0">
                 <Image
                   src="/layout3.png"
                   alt="Me Vocatio Diamond"
@@ -105,63 +60,34 @@ export default function RootLayout({ children }) {
                 />
               </div>
 
-              {/* Texto "MeVocatio" POR FUERA del cuadro */}
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 group-hover:to-purple-300 transition-colors">
+              <span className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 group-hover:to-purple-300 transition-colors truncate">
                 MeVocatio
               </span>
             </Link>
           </div>
 
-          {/* Bloque de Acciones Derecha */}
-          <div className="flex gap-4 items-center">
-
+          {/* BOTONES DE NAVEGACIÓN SUPERIOR (Con flex-wrap y gaps seguros) */}
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
             <Link
               href="/nosotros"
-              className={`${getButtonStyle("/nosotros")} px-7 py-2.5 rounded-full text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold`}
+              className={`${getButtonStyle("/nosotros")} px-4 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold shrink-0`}
             >
               NOSOTROS
             </Link>
 
-            {!isLoggedIn || !isPrivateZone ? (
+            {(!isLoggedIn || !isPrivateZone) ? (
               <Link
                 href="/login"
-                className={`${getButtonStyle("/login")} px-6 py-2.5 rounded-full text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold`}
+                className={`${getButtonStyle("/login")} px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] transition-all active:scale-95 uppercase tracking-widest font-semibold shrink-0`}
               >
                 ACCESO
               </Link>
             ) : (
               <NavbarProfile />
             )}
-
           </div>
 
         </nav>
-
-        {/* Overlay de navegación lateral */}
-        {isSideMenuOpen && (
-          <div className="fixed inset-0 z-[60] flex">
-            <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setIsSideMenuOpen(false)}
-            ></div>
-
-            <div className="relative w-64 h-full bg-[#0f172a] border-r border-slate-800 shadow-2xl p-4 flex flex-col gap-2 text-slate-200">
-              {sideMenuLinks.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setIsSideMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[12px] font-bold uppercase tracking-wide transition-all ${pathname === href
-                    ? "bg-slate-800 text-white border border-slate-700"
-                    : "text-slate-400 hover:bg-slate-900 hover:text-white"
-                    }`}
-                >
-                  <Icon className="w-4 h-4" /> {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Contenedor principal */}
         <main className="mt-[72px] bg-[#0b1329] min-h-[calc(100vh-72px)]">{children}</main>

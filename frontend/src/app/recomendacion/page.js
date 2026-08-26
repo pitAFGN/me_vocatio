@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense, useRef} from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback, Suspense, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import './RecomendacionPage.css';
 
 function RecomendacionContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const peticionInicialRealizada = useRef(false);
 
@@ -15,7 +17,7 @@ function RecomendacionContent() {
 
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const [paginasRecursos, setPaginasRecursos] = useState([]);
   const [urlsVistas, setUrlsVistas] = useState([]);
   const [paginaActualIndex, setPaginaActualIndex] = useState(0);
@@ -36,11 +38,11 @@ function RecomendacionContent() {
       const response = await fetch('http://localhost:3001/api/recomendar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           evaluation_id: evaluationIdURL, // Clave para guardar en resource_blocks
-          vocation: vocacionQuery, 
-          nivel: nivelQuery, 
-          evitarUrls: urlsActuales 
+          vocation: vocacionQuery,
+          nivel: nivelQuery,
+          evitarUrls: urlsActuales
         })
       });
 
@@ -54,7 +56,7 @@ function RecomendacionContent() {
 
       if (data.materiales && Array.isArray(data.materiales)) {
         const nuevasUrls = data.materiales.map(m => m.url);
-        
+
         setUrlsVistas(prev => [...prev, ...nuevasUrls]);
 
         setPaginasRecursos(prev => {
@@ -84,7 +86,15 @@ function RecomendacionContent() {
   return (
     <div className="rec-page-container">
       <div className="rec-content-wrapper">
-        
+
+        {/* Botón de retorno al Dashboard */}
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" /> Volver
+        </button>
+
         <header className="rec-header">
           <span className="brand-logo">💎</span>
           <h1>RUTAS DE APRENDIZAJE</h1>
@@ -129,9 +139,9 @@ function RecomendacionContent() {
             <div className="cards-grid">
               {paginasRecursos[paginaActualIndex].materiales?.map((material, index) => (
                 <div key={index} className="resource-card">
-                  
-                  <div 
-                    className="card-banner" 
+
+                  <div
+                    className="card-banner"
                     style={{ backgroundImage: `url(${obtenerImagenFondo(material.url, material.titulo)})` }}
                   >
                     <span className={`badge type-${(material.tipo || 'recurso').toLowerCase()}`}>
@@ -160,9 +170,9 @@ function RecomendacionContent() {
         )}
 
         <div style={{ textAlign: 'center', marginTop: '2.5rem', marginBottom: '1rem' }}>
-          <button 
-            onClick={manejarCargarMas} 
-            className="rec-submit-btn" 
+          <button
+            onClick={manejarCargarMas}
+            className="rec-submit-btn"
             disabled={cargando}
             style={{ maxWidth: '320px', margin: '0 auto' }}
           >

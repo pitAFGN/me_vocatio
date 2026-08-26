@@ -53,13 +53,13 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] text-slate-100 flex flex-col items-center justify-between px-6 py-6 md:py-8 overflow-x-hidden">
+    <main className="relative min-h-screen bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] text-slate-100 flex flex-col items-center justify-between px-4 sm:px-6 py-6 md:py-8 overflow-x-hidden">
 
       {/* BRILLITOS / ESTRELLITAS EN TODO EL FONDO (Z-0) */}
       <BackgroundStars />
 
       {/* SECCIÓN HERO COMPACTA (Z-10) */}
-      <div className="z-10 flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-2 mt-1">
+      <div className="z-10 flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-2 mt-4">
 
         {/* 1. TÍTULO PRINCIPAL */}
         <h1 className="text-3xl sm:text-5xl font-normal tracking-tight leading-[1.12] text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
