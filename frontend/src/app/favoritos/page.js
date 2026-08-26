@@ -9,13 +9,25 @@ import Link from "next/link";
 export default function FavoritosPage() {
     const [favoritos, setFavoritos] = useState([]);
 
-    // Al cargar la página, leemos los favoritos guardados en el navegador
+    // Al cargar la página y escuchar cambios en tiempo real
     useEffect(() => {
-        const storedFavorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
-        setFavoritos(storedFavorites);
+        const cargarFavoritos = () => {
+            const storedFavorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
+            setFavoritos(storedFavorites);
+        };
+
+        cargarFavoritos();
+
+        // Escuchamos eventos de otras pestañas o de las tarjetas en vivo
+        window.addEventListener("storage", cargarFavoritos);
+        window.addEventListener("favoritesUpdated", cargarFavoritos);
+
+        return () => {
+            window.removeEventListener("storage", cargarFavoritos);
+            window.removeEventListener("favoritesUpdated", cargarFavoritos);
+        };
     }, []);
 
-    // Función opcional para manejar la simulación de cierre de sesión si tu SidebarNav lo requiere
     const handleLogout = () => {
         localStorage.clear();
         window.location.href = "/";

@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 
 const opiniones = [
     { id: 1, texto: "Me encantó, excelente acompañamiento" },
@@ -17,24 +16,22 @@ export default function OpinionesCarrusel() {
     const [index, setIndex] = useState(0);
     const [cardsVisibles, setCardsVisibles] = useState(4);
 
-    // Detectar el ancho de la pantalla para ajustar cuántas tarjetas mostrar
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 640) {
-                setCardsVisibles(1); // En celulares se ve 1 sola
+                setCardsVisibles(1);
             } else if (window.innerWidth < 1024) {
-                setCardsVisibles(2); // En tablets se ven 2
+                setCardsVisibles(2);
             } else {
-                setCardsVisibles(4); // En escritorio se ven 4
+                setCardsVisibles(4);
             }
         };
 
-        handleResize(); // Ejecutar al cargar
+        handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    // --- MOVIMIENTO AUTOMÁTICO ---
     useEffect(() => {
         const intervalo = setInterval(() => {
             siguiente();
@@ -59,6 +56,8 @@ export default function OpinionesCarrusel() {
         }
     };
 
+    const offset = -(index * (100 / cardsVisibles));
+
     return (
         <div className="z-10 w-full max-w-4xl mx-auto absolute left-0 right-0 bottom-16 sm:bottom-20 px-4 sm:px-6 drop-shadow-xl">
 
@@ -69,10 +68,12 @@ export default function OpinionesCarrusel() {
                 </button>
 
                 <div className="flex-1 overflow-hidden h-20 flex items-center">
-                    <motion.div
+                    <div
                         className="flex gap-3 w-full"
-                        animate={{ x: `-${index * (100 / cardsVisibles)}%` }}
-                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                        style={{
+                            transform: `translateX(${offset}%)`,
+                            transition: "transform 0.5s ease",
+                        }}
                     >
                         {opiniones.map((op) => (
                             <div
@@ -85,11 +86,11 @@ export default function OpinionesCarrusel() {
                                     <div className="text-yellow-400 text-[9px]">★★★★★</div>
                                 </div>
                                 <p className="text-[10px] sm:text-xs leading-tight opacity-90 italic">
-                                    "{op.texto}" <span className="text-cyan-400 font-bold cursor-pointer ml-1">más</span>
+                                    &ldquo;{op.texto}&rdquo; <span className="text-cyan-400 font-bold cursor-pointer ml-1">más</span>
                                 </p>
                             </div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
 
                 <button onClick={siguiente} className="text-white bg-white/10 w-8 h-8 rounded-full hover:bg-white/20 transition-all flex items-center justify-center text-xs z-20 active:scale-90 shrink-0">

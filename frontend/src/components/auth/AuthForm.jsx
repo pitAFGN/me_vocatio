@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
+
+const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), {
+  ssr: false,
+  loading: () => <div className="h-[78px]" />,
+});
 import { RECAPTCHA_SITE_KEY } from "@/lib/constants";
 import { supabase, isGoogleLoginEnabled } from "@/lib/supabase";
 import { validarCamposLogin, validarCamposRegistro } from "@/lib/validations/auth";

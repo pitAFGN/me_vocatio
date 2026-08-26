@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import OpinionesCarrusel from "@/components/OpinionesCarrusel";
 
@@ -48,7 +46,6 @@ export default function NosotrosPage() {
     return (
         <main className="relative min-h-screen bg-gradient-to-b from-slate-100 via-slate-200 to-white dark:from-[#0b1329] dark:via-[#0f172a] dark:to-[#080d1a] text-slate-900 dark:text-slate-100 flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6 overflow-x-hidden transition-colors duration-300">
 
-            {/* CONTENEDOR SUPERIOR CON BOTÓN DE CERRAR ALINEADO (RESPONSIVE) */}
             <div className="w-full max-w-6xl flex justify-end pt-2 pb-4 z-20">
                 <Link
                     href="/"
@@ -58,7 +55,6 @@ export default function NosotrosPage() {
                 </Link>
             </div>
 
-            {/* TÍTULO DE BIENVENIDA */}
             <div className="text-center z-10 mb-8 max-w-2xl">
                 <h1 className="text-3xl sm:text-5xl font-normal tracking-tight leading-[1.12] text-slate-900 dark:text-white drop-shadow-sm">
                     Nuestra{" "}
@@ -71,11 +67,9 @@ export default function NosotrosPage() {
                 </p>
             </div>
 
-            {/* CUADRO DE CRISTAL PRINCIPAL */}
             <div className="bg-white/90 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200 dark:border-slate-700/60 rounded-3xl shadow-xl dark:shadow-2xl max-w-6xl w-full p-6 sm:p-10 md:p-12 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
 
-                    {/* LADO IZQUIERDO: BENEFICIOS */}
                     <div className="flex flex-col gap-6 text-left">
                         <h2 className="text-slate-900 dark:text-white text-xl sm:text-2xl font-serif font-medium border-b-2 border-cyan-500 w-fit pb-2">
                             Beneficios
@@ -99,7 +93,6 @@ export default function NosotrosPage() {
                         </ul>
                     </div>
 
-                    {/* LADO DERECHO: FUNCIONAMIENTO */}
                     <div className="flex flex-col gap-6 bg-slate-100 dark:bg-slate-950/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-800/80 text-left shadow-inner">
                         <h2 className="text-slate-900 dark:text-white text-xl sm:text-2xl font-serif font-medium border-b-2 border-indigo-500/60 w-fit pb-2">
                             Funcionamiento
@@ -126,7 +119,6 @@ export default function NosotrosPage() {
                 </div>
             </div>
 
-            {/* SECCIÓN DE OPINIONES */}
             <div className="mt-14 sm:mt-16 w-full max-w-5xl z-10">
                 <div className="text-center mb-8">
                     <h2 className="text-2xl sm:text-4xl font-normal tracking-tight text-slate-900 dark:text-white">

@@ -6,36 +6,33 @@ import { Bookmark, ExternalLink, Sparkles } from "lucide-react";
 export default function VocacionCard({ vocacion }) {
     const [isFavorite, setIsFavorite] = useState(false);
 
-    // 1. Al cargar la tarjeta, revisamos en el navegador si ya estaba guardada en favoritos
+    // 1. Al cargar la tarjeta, revisamos en el navegador si ya estaba guardada
     useEffect(() => {
         const favorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
-        const exists = favorites.some((fav) => fav.id === vocacion.id);
+        const exists = favorites.some((fav) => fav.id === vocacion?.id);
         setIsFavorite(exists);
-    }, [vocacion.id]);
+    }, [vocacion]);
 
-    // 2. Función para alternar el estado (guardar o quitar de localStorage)
     const toggleFavorite = () => {
         const favorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
 
         let updatedFavorites;
         if (isFavorite) {
-            // Si ya era favorito, lo sacamos de la lista
             updatedFavorites = favorites.filter((fav) => fav.id !== vocacion.id);
             setIsFavorite(false);
         } else {
-            // Si no era favorito, lo agregamos completo
             updatedFavorites = [...favorites, vocacion];
             setIsFavorite(true);
         }
 
-        // Guardamos la lista actualizada en el navegador
         localStorage.setItem("me_vocatio_favorites", JSON.stringify(updatedFavorites));
+        window.dispatchEvent(new Event("favoritesUpdated"));
     };
 
-    // Función temporal para el botón de IA (por ahora no funcional)
+    // Función temporal para el botón de IA
     const handleTestIA = (e) => {
         e.preventDefault();
-        alert(`¡Pronto podrás iniciar el test con IA para: ${vocacion.nombre || "esta vocación"}! 🚀`);
+        alert(`¡Pronto podrás iniciar el test con IA para: ${vocacion?.nombre || "esta vocación"}! 🚀`);
     };
 
     return (
@@ -45,7 +42,7 @@ export default function VocacionCard({ vocacion }) {
                 {/* Cabecera de la tarjeta: Categoría y Botón del marcador */}
                 <div className="flex items-center justify-between mb-4">
                     <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300">
-                        {vocacion.categoria || "Tecnología & Desarrollo"}
+                        {vocacion?.categoria || "Tecnología & Desarrollo"}
                     </span>
 
                     {/* Botón de Guardar en Favoritos */}
@@ -64,10 +61,10 @@ export default function VocacionCard({ vocacion }) {
 
                 {/* Información principal de la tarjeta */}
                 <h3 className="text-lg font-bold text-white tracking-tight mb-2">
-                    {vocacion.nombre}
+                    {vocacion?.nombre}
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-6">
-                    {vocacion.descripcion}
+                    {vocacion?.descripcion}
                 </p>
             </div>
 
@@ -84,7 +81,7 @@ export default function VocacionCard({ vocacion }) {
 
                 {/* Botón de Ver Módulo */}
                 <a
-                    href={vocacion.ruta || "#"}
+                    href={vocacion?.ruta || "#"}
                     className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-slate-200 transition-all hover:bg-white/10 hover:text-white"
                 >
                     <span>Ver Módulo / Ruta</span>

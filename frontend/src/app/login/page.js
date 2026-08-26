@@ -26,10 +26,8 @@ function AuthContent() {
 
   return (
     <main className="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-300">
-      {/* Banner con estrellas a la izquierda */}
       <AuthBanner esRegistro={esRegistro} />
 
-      {/* Lado derecho con el formulario */}
       <div className="flex-1 flex flex-col items-center justify-start pt-16 lg:pt-24 p-8 sm:p-12 bg-white dark:bg-[#1e293b] relative overflow-y-auto transition-colors duration-300">
         <Link
           href="/"
