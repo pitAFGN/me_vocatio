@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import PlanSelector from "@/components/creacion_recursos/PlanSelector";
 import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
 import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCustomizationPanel";
@@ -97,13 +99,15 @@ export default function CreacionRecursosPage() {
 
   return (
     <main className="min-h-screen bg-[#070b17] text-slate-100">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between gap-4">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+
+        {/* Cabecera: Título a la izquierda y Botón + Vista previa a la derecha */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
               Creador / Recursos
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+            <h1 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
               Gestión de recursos y cursos
             </h1>
           </div>
@@ -154,7 +158,7 @@ export default function CreacionRecursosPage() {
             />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0">
             <AnalyticsPanel
               isPremium={isPremium}
               onUpgrade={() => setMostrarPlanModal(true)}

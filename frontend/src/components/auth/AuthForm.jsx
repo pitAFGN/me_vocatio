@@ -12,7 +12,7 @@ import PlanSelectionModal from "@/components/PlanSelectionModal";
 function CampoError({ mensaje }) {
   if (!mensaje) return null;
   return (
-    <p className="text-red-400 text-[10px] font-black uppercase tracking-wide mt-1 ml-1 flex items-center gap-1">
+    <p className="text-red-500 dark:text-red-400 text-[10px] font-black uppercase tracking-wide mt-1 ml-1 flex items-center gap-1">
       <span>⚠</span> {mensaje}
     </p>
   );
@@ -104,8 +104,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         setMostrarPlan(true);
       } else {
         await login(formData.email, formData.password);
-
-        // Redirección directa al dashboard forzando la actualización de cookies
         window.location.href = "/dashboard";
       }
     } catch (err) {
@@ -139,7 +137,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       procesandoOAuth.current = false;
       setGoogleEnviando(false);
 
-      // Redirección directa al dashboard tras login con Google
       window.location.href = "/dashboard";
     } catch (err) {
       setErrorGeneral(err.message || "No se pudo completar el inicio de sesión con Google.");
@@ -204,9 +201,9 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   };
 
   const inputClass = (campo) =>
-    `w-full px-5 py-3.5 bg-[#0f172a] border rounded-xl outline-none transition-all font-bold text-slate-100 text-sm shadow-inner placeholder:text-slate-500 ${errores[campo]
-      ? "border-red-500 focus:border-red-400 bg-red-950/20"
-      : "border-slate-700 focus:border-purple-500 hover:border-slate-600"
+    `w-full px-5 py-3.5 bg-white dark:bg-[#0f172a] border rounded-xl outline-none transition-all font-bold text-slate-900 dark:text-slate-100 text-sm shadow-sm dark:shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-500 ${errores[campo]
+      ? "border-red-500 focus:border-red-400 bg-red-50 dark:bg-red-950/20"
+      : "border-slate-300 dark:border-slate-700 focus:border-purple-500 hover:border-slate-400 dark:hover:border-slate-600"
     }`;
 
   const botonDeshabilitado = enviando || googleEnviando;
@@ -218,24 +215,24 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-md transition-colors duration-300">
       <div className="mb-8 text-center lg:text-left">
-        <h3 className="text-4xl font-black text-white mb-1 tracking-tighter uppercase">
+        <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-1 tracking-tighter uppercase">
           {esRegistro ? "Regístrate" : "Inicia Sesión"}
         </h3>
-        <p className="text-purple-400 font-bold text-[10px] uppercase tracking-[0.2em]">
+        <p className="text-purple-600 dark:text-purple-400 font-bold text-[10px] uppercase tracking-[0.2em]">
           Accede a MeVocatio
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-700/80 mb-8">
+      <div className="flex border-b border-slate-300 dark:border-slate-700/80 mb-8">
         <button
           type="button"
           onClick={() => cambiarModo(false)}
           className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${!esRegistro
-            ? "border-purple-500 text-purple-300"
-            : "border-transparent text-slate-400 hover:text-slate-200"
+              ? "border-purple-600 dark:border-purple-500 text-purple-700 dark:text-purple-300"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
         >
           INICIAR SESIÓN
@@ -244,8 +241,8 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
           type="button"
           onClick={() => cambiarModo(true)}
           className={`flex-1 py-3 text-[10px] font-black tracking-[0.2em] transition-all border-b-2 ${esRegistro
-            ? "border-purple-500 text-purple-300"
-            : "border-transparent text-slate-400 hover:text-slate-200"
+              ? "border-purple-600 dark:border-purple-500 text-purple-700 dark:text-purple-300"
+              : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
         >
           REGÍSTRATE
@@ -259,18 +256,18 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             type="button"
             onClick={handleGoogleLogin}
             disabled={botonDeshabilitado}
-            className="w-full py-3.5 px-4 border border-slate-700 rounded-xl shadow-sm bg-[#0f172a] hover:bg-slate-800 hover:border-slate-600 transition-all flex items-center justify-center gap-3 text-slate-200 font-bold text-xs uppercase tracking-wider mb-6 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full py-3.5 px-4 border border-slate-300 dark:border-slate-700 rounded-xl shadow-sm bg-white dark:bg-[#0f172a] hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 transition-all flex items-center justify-center gap-3 text-slate-700 dark:text-slate-200 font-bold text-xs uppercase tracking-wider mb-6 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             <IconoGoogle />
             {googleEnviando ? "Conectando con Google..." : "Continuar con Google"}
           </button>
 
           <div className="relative flex py-2 items-center mb-4">
-            <div className="flex-grow border-t border-slate-700"></div>
-            <span className="flex-shrink mx-4 text-slate-400 text-[9px] font-black uppercase tracking-widest">
+            <div className="flex-grow border-t border-slate-300 dark:border-slate-700"></div>
+            <span className="flex-shrink mx-4 text-slate-500 dark:text-slate-400 text-[9px] font-black uppercase tracking-widest">
               o con email
             </span>
-            <div className="flex-grow border-t border-slate-700"></div>
+            <div className="flex-grow border-t border-slate-300 dark:border-slate-700"></div>
           </div>
         </>
       )}
@@ -278,7 +275,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {esRegistro && (
           <div className="space-y-1">
-            <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+            <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">
               Nombre Completo
             </label>
             <input
@@ -294,7 +291,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         )}
 
         <div className="space-y-1">
-          <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+          <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">
             Email
           </label>
           <input
@@ -309,7 +306,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         </div>
 
         <div className="space-y-1">
-          <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+          <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">
             Contraseña {esRegistro && "(8+ caracteres, mayúscula, minúscula, número y símbolo)"}
           </label>
           <div className="relative">
@@ -324,7 +321,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             <button
               type="button"
               onClick={() => setMostrarPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors p-1"
               aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               tabIndex={-1}
             >
@@ -334,7 +331,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
           <CampoError mensaje={errores.password} />
         </div>
 
-        {/* reCAPTCHA limpio y centrado */}
+        {/* reCAPTCHA */}
         {esRegistro && RECAPTCHA_SITE_KEY && (
           <div className="flex justify-center my-4 overflow-x-auto">
             <ReCAPTCHA
@@ -349,14 +346,14 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         )}
 
         {errores.exito && (
-          <p className="text-emerald-400 text-[10px] font-black uppercase tracking-wide flex items-center gap-1">
+          <p className="text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wide flex items-center gap-1">
             <span>✓</span> {errores.exito}
           </p>
         )}
 
         {errorGeneral && (
-          <div className="bg-red-950/40 border border-red-500/30 rounded-xl px-4 py-3">
-            <p className="text-red-400 text-[11px] font-black uppercase tracking-wide flex items-center gap-2">
+          <div className="bg-red-50 dark:bg-red-950/40 border border-red-500/30 rounded-xl px-4 py-3">
+            <p className="text-red-600 dark:text-red-400 text-[11px] font-black uppercase tracking-wide flex items-center gap-2">
               <span>⚠</span> {errorGeneral}
             </p>
           </div>
@@ -367,7 +364,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             <button
               type="button"
               onClick={() => setMostrarOlvido(true)}
-              className="text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-purple-300 transition-colors"
+              className="text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors"
             >
               ¿Olvidaste tu contraseña?
             </button>
@@ -378,8 +375,8 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
           type="submit"
           disabled={botonDeshabilitado}
           className={`w-full py-4 font-black rounded-xl shadow-xl transition-all transform mt-4 uppercase text-[11px] tracking-[0.3em] cursor-pointer ${botonDeshabilitado
-            ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
-            : "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] active:scale-[0.97] border border-purple-400/30"
+              ? "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700"
+              : "bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] active:scale-[0.97] border border-purple-400/30"
             }`}
         >
           {enviando ? "Procesando..." : esRegistro ? "Crear Cuenta" : "Entrar al Portal"}

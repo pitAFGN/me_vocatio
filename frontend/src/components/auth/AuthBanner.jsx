@@ -8,7 +8,7 @@ const BackgroundStars = dynamic(() => import("@/components/BackgroundStars"), {
 
 export default function AuthBanner({ esRegistro }) {
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] justify-center border-r border-white/10 pt-20 overflow-hidden">
+    <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] justify-center border-r border-slate-300 dark:border-white/10 pt-20 overflow-hidden transition-colors duration-300">
       {/* BRILLITOS Y ESTRELLAS (Exclusivo en el lado izquierdo) */}
       <BackgroundStars />
 
