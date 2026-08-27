@@ -115,6 +115,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       const msg = err.message || "";
       if (msg.includes("Credenciales")) setErrorGeneral("Email o contraseña incorrectos.");
       else if (msg.includes("registrado")) setErrorGeneral("Este email ya tiene una cuenta. Inicia sesión.");
+      else if (msg.includes("verificar tu correo")) setErrorGeneral("Debes verificar tu correo electrónico antes de iniciar sesión.");
       else if (msg.includes("correo")) setErrorGeneral("No encontramos una cuenta con ese email.");
       else if (msg.includes("reCAPTCHA")) setErrorGeneral("Validación de reCAPTCHA inválida o expirada. Inténtalo de nuevo.");
       else setErrorGeneral(msg || "Ocurrió un error, intenta de nuevo.");

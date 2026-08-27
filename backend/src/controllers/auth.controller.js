@@ -1,5 +1,6 @@
 const authService = require("../services/auth.service");
 const { verifyRefreshToken, generateAccessToken } = require("../utils/jwt");
+const achievementService = require("../services/achievement.service");
 
 /* ─────────────────────────────────────────
    REGISTER
@@ -107,6 +108,7 @@ const verifyEmail = async (req, res) => {
 
   try {
     const resultado = await authService.verifyEmail(token);
+    await achievementService.registrarVerificacionCorreo(resultado.userId);
     res.json({
       message: "Correo verificado exitosamente. Ya puedes iniciar sesión.",
       email: resultado.email,
