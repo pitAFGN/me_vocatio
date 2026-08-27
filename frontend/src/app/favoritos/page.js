@@ -1,42 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import VocacionCard from "@/components/VocacionCard";
 import SidebarNav from "@/components/SidebarNav";
 import { Bookmark, Compass, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function FavoritosPage() {
-    const [favoritos, setFavoritos] = useState([]);
-
-    // Al cargar la página y escuchar cambios en tiempo real
-    useEffect(() => {
-        const cargarFavoritos = () => {
-            const storedFavorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
-            setFavoritos(storedFavorites);
-        };
-
-        cargarFavoritos();
-
-        // Escuchamos eventos de otras pestañas o de las tarjetas en vivo
-        window.addEventListener("storage", cargarFavoritos);
-        window.addEventListener("favoritesUpdated", cargarFavoritos);
-
-        return () => {
-            window.removeEventListener("storage", cargarFavoritos);
-            window.removeEventListener("favoritesUpdated", cargarFavoritos);
-        };
-    }, []);
-
-    const handleLogout = () => {
-        localStorage.clear();
-        window.location.href = "/";
-    };
+    const { favorites } = useFavorites();
+    const { logout } = useAuth();
 
     return (
-        <div className="min-h-screen bg-[#040613] text-slate-100 flex">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 flex transition-colors duration-300">
             {/* Menú de Navegación Lateral / Inferior */}
-            <SidebarNav logout={handleLogout} />
+            <SidebarNav logout={logout} />
 
             {/* Contenido Principal */}
             <main className="flex-1 md:pl-64 p-6 md:p-10 pb-24 md:pb-10">
@@ -46,14 +24,14 @@ export default function FavoritosPage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <div className="p-2.5 rounded-2xl bg-violet-500/10 border border-violet-500/20 text-violet-400">
-                                    <Bookmark className="w-6 h-6 fill-violet-400" />
+                                <div className="p-2.5 rounded-2xl bg-violet-500/10 border border-violet-500/20 text-violet-500 dark:text-violet-400">
+                                    <Bookmark className="w-6 h-6 fill-violet-500 dark:fill-violet-400" />
                                 </div>
-                                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+                                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                                     Tus Vocaciones Guardadas
                                 </h1>
                             </div>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
                                 Aquí tienes el listado de las rutas y áreas profesionales que marcaste como favoritas para consultar después.
                             </p>
                         </div>
@@ -61,28 +39,28 @@ export default function FavoritosPage() {
                         {/* Botón para volver al Dashboard */}
                         <Link
                             href="/dashboard"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 text-xs font-semibold transition-all w-fit cursor-pointer"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all w-fit cursor-pointer"
                         >
-                            <ArrowLeft className="w-4 h-4 text-violet-400" />
+                            <ArrowLeft className="w-4 h-4 text-violet-500 dark:text-violet-400" />
                             <span>Volver al Dashboard</span>
                         </Link>
                     </div>
 
                     {/* Listado dinámico de favoritos */}
-                    {favoritos.length > 0 ? (
+                    {favorites.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {favoritos.map((vocacion) => (
+                            {favorites.map((vocacion) => (
                                 <VocacionCard key={vocacion.id} vocacion={vocacion} />
                             ))}
                         </div>
                     ) : (
                         /* Estado vacío si no hay nada guardado */
-                        <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-white/10 bg-[#0c1222]/50 text-center mt-10">
-                            <div className="p-4 rounded-full bg-white/5 border border-white/10 text-slate-500 mb-4">
+                        <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222]/50 text-center mt-10">
+                            <div className="p-4 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 mb-4">
                                 <Compass className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-bold text-white mb-2">No tienes favoritos aún</h3>
-                            <p className="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No tienes favoritos aún</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-6 leading-relaxed">
                                 Explora las rutas de aprendizaje o el panel principal y haz clic en el ícono de marcador para guardar tus opciones favoritas aquí.
                             </p>
                             <Link

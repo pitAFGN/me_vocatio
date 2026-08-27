@@ -6,6 +6,7 @@ import { Bell } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
+import { useFavorites } from "@/hooks/useFavorites";
 import { PROFESSIONS } from "@/app/data/professions";
 
 import SidebarNav from "@/components/SidebarNav";
@@ -18,7 +19,7 @@ export default function ExecutiveDashboard() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
-  const [savedIds, setSavedIds] = useState([]);
+  const { savedIds, toggleSave } = useFavorites();
 
   // Datos del perfil
   const [profileData] = useState({
@@ -33,13 +34,6 @@ export default function ExecutiveDashboard() {
     job.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
     job.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const toggleSave = (id, e) => {
-    e.stopPropagation();
-    setSavedIds(prev =>
-      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-    );
-  };
 
   if (loading) return null;
 

@@ -41,7 +41,7 @@ export default function Insignias() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0b14] text-indigo-400 font-bold uppercase tracking-widest text-sm">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0b14] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
         Verificando acceso...
       </div>
     );
@@ -50,7 +50,7 @@ export default function Insignias() {
   const logradas = insignias.filter((insignia) => insignia.earned).length;
 
   return (
-    <div className="min-h-screen bg-[#0a0b14] text-slate-100 flex">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0b14] text-slate-900 dark:text-slate-100 flex transition-colors duration-300">
       {/* Barra lateral fija */}
       <SidebarNav logout={logout} />
 
@@ -60,18 +60,18 @@ export default function Insignias() {
         {/* Botón de retorno al Dashboard */}
         <button
           onClick={() => router.push("/dashboard")}
-          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" /> Volver al Dashboard
         </button>
 
-        <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/10 pb-6">
+        <header className="mb-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
           <div>
-            <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block mb-1">
+            <span className="text-[10px] font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block mb-1">
               Reconocimientos
             </span>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-              <Trophy className="w-7 h-7 text-indigo-400" /> Mis Insignias
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+              <Trophy className="w-7 h-7 text-indigo-500 dark:text-indigo-400" /> Mis Insignias
             </h1>
           </div>
 

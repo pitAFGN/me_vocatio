@@ -9,19 +9,19 @@ export default function ResourceStructurePanel({
 
   return (
     <section
-      className={`rounded-3xl border p-5 transition-all ${
+      className={`rounded-3xl border p-5 transition-all transition-colors duration-300 ${
         isPremium
-          ? "border-violet-500/30 bg-slate-900/80"
-          : "border-slate-800 bg-slate-900/50 opacity-60"
+          ? "border-violet-300 dark:border-violet-500/30 bg-white dark:bg-slate-900/80"
+          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 opacity-60"
       }`}
     >
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-300/80">
             Flujo del curso
           </p>
-          <h2 className="mt-2 text-xl font-black text-white">Estructura de recursos</h2>
-          <p className="mt-2 text-xs text-slate-400">
+          <h2 className="mt-2 text-xl font-black text-slate-900 dark:text-white">Estructura de recursos</h2>
+          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
             {isPremium
               ? `${resources.length} recursos visibles · sin límite`
               : `${visibleResources.length} de ${freeResourceLimit} recursos gratuitos visibles`}
@@ -42,19 +42,19 @@ export default function ResourceStructurePanel({
 
       <div className="space-y-4">
         {visibleResources.map((resource, index) => (
-          <div key={resource.id} className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+          <div key={resource.id} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/15 text-sm font-black text-violet-200">
                   {String(index + 1).padStart(2, "0")}
                 </div>
                 <div>
-                  <p className="font-bold text-white">{resource.title}</p>
-                  <p className="text-xs text-slate-400">{resource.type}</p>
+                  <p className="font-bold text-slate-900 dark:text-white">{resource.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{resource.type}</p>
                 </div>
               </div>
 
-              <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300">
+              <span className="rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600 dark:text-slate-300">
                 Activo
               </span>
             </div>

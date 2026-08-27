@@ -96,16 +96,16 @@ export default function CreacionRecursosPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#070b17] text-slate-100">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#070b17] text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
         {/* Cabecera: Título a la izquierda y Botón + Vista previa a la derecha */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-300/80">
               Creador / Recursos
             </p>
-            <h1 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white">
+            <h1 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
               Gestión de recursos y cursos
             </h1>
           </div>
@@ -113,13 +113,13 @@ export default function CreacionRecursosPage() {
           <div className="flex shrink-0 items-center gap-3">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-700 dark:text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-800 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>Volver</span>
             </Link>
 
-            <div className="hidden rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.28em] text-violet-100 md:block">
+            <div className="hidden rounded-full border border-violet-300 dark:border-violet-500/30 bg-violet-100 dark:bg-violet-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.28em] text-violet-700 dark:text-violet-100 md:block">
               Vista previa
             </div>
           </div>

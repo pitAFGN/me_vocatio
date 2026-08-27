@@ -99,9 +99,9 @@ export default function DiagnosticoPage() {
     try {
       const response = await fetch(`${API_URL}/api/evaluar`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           test_id: testId,
@@ -138,9 +138,9 @@ export default function DiagnosticoPage() {
 
   if (cargandoTest) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-400 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
           <p className="text-sm font-semibold">Cargando preguntas del test...</p>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function DiagnosticoPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-red-400">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-red-500 dark:text-red-400 transition-colors duration-300">
         <p className="text-sm font-semibold">Error: {error}</p>
       </div>
     );
@@ -159,34 +159,34 @@ export default function DiagnosticoPage() {
   const total = preguntas.length;
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white p-6 pt-24 max-w-3xl mx-auto font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white p-6 pt-24 max-w-3xl mx-auto font-sans transition-colors duration-300">
       <button
         onClick={() => router.push("/dashboard")}
-        className="flex items-center gap-2 px-4 py-2.5 mb-8 bg-slate-900/80 border border-indigo-950 rounded-xl text-xs font-semibold text-indigo-200 hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
+        className="flex items-center gap-2 px-4 py-2.5 mb-8 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-indigo-950 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
       >
-        <ArrowLeft className="w-4 h-4 text-indigo-400" />
+        <ArrowLeft className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
         Volver al Dashboard
       </button>
 
       <h1 className="text-2xl font-bold mb-2">Cuestionario de Diagnóstico</h1>
-      <p className="text-slate-400 text-sm mb-2">Responde las siguientes preguntas para evaluar tu nivel técnico.</p>
-      <p className="text-indigo-400 text-xs font-semibold mb-8">{respondidas} / {total} respondidas</p>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">Responde las siguientes preguntas para evaluar tu nivel técnico.</p>
+      <p className="text-indigo-500 dark:text-indigo-400 text-xs font-semibold mb-8">{respondidas} / {total} respondidas</p>
 
       <div className="flex flex-col gap-6">
         {preguntas.map((pregunta, index) => (
-          <div key={pregunta.id} className="bg-slate-800/60 border border-slate-700/50 p-5 rounded-2xl">
+          <div key={pregunta.id} className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 p-5 rounded-2xl">
             <p className="font-bold mb-4 text-sm">
               {index + 1}. {pregunta.enunciado}
             </p>
-            
+
             <div className="flex flex-col gap-2">
               {pregunta.opciones.map((opcion, opcionIndex) => (
                 <label
                   key={opcionIndex}
                   className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                     respuestasUsuario[pregunta.id] === opcionIndex
-                      ? "bg-indigo-600/20 border-indigo-500/50 text-white"
-                      : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                      ? "bg-indigo-50 dark:bg-indigo-600/20 border-indigo-300 dark:border-indigo-500/50 text-slate-900 dark:text-white"
+                      : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
                   }`}
                 >
                   <input
@@ -206,12 +206,12 @@ export default function DiagnosticoPage() {
       </div>
 
       <div className="text-center mt-10 mb-8">
-        <button 
+        <button
           onClick={finalizarDiagnostico}
           disabled={cargandoEnvio}
           className={`inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl transition-all text-sm ${
             cargandoEnvio
-              ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+              ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-400 cursor-not-allowed"
               : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 cursor-pointer"
           }`}
         >

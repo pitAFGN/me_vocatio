@@ -1,33 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Bookmark, ExternalLink, Sparkles } from "lucide-react";
+import { ExternalLink, Sparkles } from "lucide-react";
+import { Bookmark } from "lucide-react";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export default function VocacionCard({ vocacion }) {
-    const [isFavorite, setIsFavorite] = useState(false);
-
-    // 1. Al cargar la tarjeta, revisamos en el navegador si ya estaba guardada
-    useEffect(() => {
-        const favorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
-        const exists = favorites.some((fav) => fav.id === vocacion?.id);
-        setIsFavorite(exists);
-    }, [vocacion]);
-
-    const toggleFavorite = () => {
-        const favorites = JSON.parse(localStorage.getItem("me_vocatio_favorites") || "[]");
-
-        let updatedFavorites;
-        if (isFavorite) {
-            updatedFavorites = favorites.filter((fav) => fav.id !== vocacion.id);
-            setIsFavorite(false);
-        } else {
-            updatedFavorites = [...favorites, vocacion];
-            setIsFavorite(true);
-        }
-
-        localStorage.setItem("me_vocatio_favorites", JSON.stringify(updatedFavorites));
-        window.dispatchEvent(new Event("favoritesUpdated"));
-    };
+    const { savedIds, toggleSave } = useFavorites();
+    const isFavorite = savedIds.includes(vocacion?.id);
 
     // Función temporal para el botón de IA
     const handleTestIA = (e) => {
@@ -47,7 +26,7 @@ export default function VocacionCard({ vocacion }) {
 
                     {/* Botón de Guardar en Favoritos */}
                     <button
-                        onClick={toggleFavorite}
+                        onClick={() => toggleSave(vocacion)}
                         className={`p-2.5 rounded-xl border transition-all active:scale-95 cursor-pointer ${isFavorite
                                 ? "bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/30"
                                 : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white"
