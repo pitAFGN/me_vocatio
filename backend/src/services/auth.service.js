@@ -8,7 +8,7 @@ const { generateAccessToken, generateRefreshToken } = require("../utils/jwt");
 require("dotenv").config();
 
 // Mantenemos la clave por si acaso para forgotPassword/resetPassword
-const SECRET = process.env.JWT_SECRET || "mevocatio_secret";
+const SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || "mevocatio_secret";
 
 // Horas de validez del enlace de verificación de correo (magic link)
 const EMAIL_VERIFICATION_EXPIRES_HOURS =
@@ -117,6 +117,7 @@ const login = async (email, password) => {
     },
   };
 };
+
 
 /* ─────────────────────────────────────────
    FORGOT PASSWORD

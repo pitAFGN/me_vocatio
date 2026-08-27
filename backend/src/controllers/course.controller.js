@@ -8,8 +8,8 @@ const crear = async (req, res) => {
   try {
     const curso = await courseService.crearCurso(req.user.id, req.body);
     await achievementService.incrementarProgreso(req.user.id, "resources_created");
-    await achievementService.evaluarLogros(req.user.id);
-    res.status(201).json(curso);
+    const unlocked = await achievementService.evaluarLogros(req.user.id);
+    res.status(201).json({ ...curso, unlocked });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al crear el curso" });
   }

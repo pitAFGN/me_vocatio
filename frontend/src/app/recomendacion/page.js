@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { API_URL } from '@/lib/constants';
 import './RecomendacionPage.css';
+import AchievementToast from '@/components/AchievementToast';
 
 function RecomendacionContent() {
   const router = useRouter();
@@ -18,10 +19,22 @@ function RecomendacionContent() {
 
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+  const [newAchievements, setNewAchievements] = useState([]);
 
   const [paginasRecursos, setPaginasRecursos] = useState([]);
   const [urlsVistas, setUrlsVistas] = useState([]);
   const [paginaActualIndex, setPaginaActualIndex] = useState(0);
+
+  useEffect(() => {
+    const savedAchievements = localStorage.getItem("mevocatio_new_achievements");
+    if (!savedAchievements) return;
+
+    try {
+      setNewAchievements(JSON.parse(savedAchievements));
+    } catch {
+      localStorage.removeItem("mevocatio_new_achievements");
+    }
+  }, []);
 
   const obtenerImagenFondo = (url, titulo) => {
     const palabraClave = encodeURIComponent(titulo.split(' ')[0] || 'study');
@@ -89,6 +102,10 @@ function RecomendacionContent() {
 
   return (
     <div className="rec-page-container">
+      <AchievementToast
+        achievementCodes={newAchievements}
+        onClose={() => setNewAchievements([])}
+      />
       <div className="rec-content-wrapper">
 
         {/* Botón de retorno al Dashboard */}

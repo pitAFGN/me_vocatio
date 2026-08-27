@@ -70,6 +70,7 @@ router.post("/register", registerLimiter, reglasRegister, verificarCaptcha, auth
  */
 router.post("/login", loginLimiter, reglasLogin, authController.login);
 
+
 /**
  * @swagger
  * /api/auth/google-sync:

@@ -3,9 +3,21 @@
 import { LayoutDashboard, Compass, Award, Settings, Code2, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function SidebarNav({ logout }) {
     const pathname = usePathname();
+    const [hasNewAchievements, setHasNewAchievements] = useState(false);
+
+    useEffect(() => {
+        const updateIndicator = () => {
+            setHasNewAchievements(Boolean(localStorage.getItem("mevocatio_new_achievements")));
+        };
+
+        updateIndicator();
+        window.addEventListener("storage", updateIndicator);
+        return () => window.removeEventListener("storage", updateIndicator);
+    }, []);
 
     return (
         <>
@@ -32,7 +44,10 @@ export default function SidebarNav({ logout }) {
 
                         <Link href="/insignias" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/insignias" ? "bg-white/10 border border-white/10 text-white shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}>
                             <Award className="w-5 h-5" />
-                            <span>INSIGNIAS</span>
+                            <span className="flex items-center gap-2">
+                                INSIGNIAS
+                                {hasNewAchievements && <strong className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] text-white">!</strong>}
+                            </span>
                         </Link>
 
                         <Link href="/configuracion" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/configuracion" ? "bg-white/10 border border-white/10 text-white shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}>
@@ -68,7 +83,10 @@ export default function SidebarNav({ logout }) {
 
                 <Link href="/insignias" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/insignias" ? "text-indigo-400 bg-white/5" : "text-slate-400"}`}>
                     <Award className="w-5 h-5" />
-                    <span className="text-[9px] font-medium">Insignias</span>
+                    <span className="flex items-center gap-1 text-[9px] font-medium">
+                        Insignias
+                        {hasNewAchievements && <strong className="flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">!</strong>}
+                    </span>
                 </Link>
 
                 <Link href="/configuracion" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/configuracion" ? "text-indigo-400 bg-white/5" : "text-slate-400"}`}>

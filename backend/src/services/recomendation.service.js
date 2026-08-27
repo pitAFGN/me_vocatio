@@ -157,9 +157,9 @@ const evaluarTest = async (testId, userId, respuestas = []) => {
     [evaluation.rows[0].id, testId]
   );
   await achievementService.incrementarProgreso(userId, "diagnostics_completed");
-  await achievementService.evaluarLogros(userId);
+  const unlocked = await achievementService.evaluarLogros(userId);
 
-  return { evaluation_id: evaluation.rows[0].id, nivel, puntaje, total_preguntas: answerKey.length };
+  return { evaluation_id: evaluation.rows[0].id, nivel, puntaje, total_preguntas: answerKey.length, unlocked };
 };
 
 // 3. Generar y guardar bloques de recursos (IA)
