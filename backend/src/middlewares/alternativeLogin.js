@@ -11,17 +11,15 @@ const verificarTokenSupabase = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log("❌ No llegó el header Authorization o no tiene Bearer");
       return res.status(401).json({ message: 'Token de acceso no proporcionado.' });
     }
 
     const token = authHeader.split(' ')[1];
-    console.log("🔍 Token recibido en el back:", token.substring(0, 20) + "...");
 
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      console.log("❌ ERROR DEVUELTO POR SUPABASE:", error); // <-- ¡MIRA ESTE LOG EN TU TERMINAL!
+      console.error("Error al validar token con Supabase:", error?.message || "Usuario no encontrado");
       return res.status(401).json({ message: 'Token de Supabase inválido o expirado.' });
     }
 

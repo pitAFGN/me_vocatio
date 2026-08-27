@@ -6,10 +6,10 @@
   justify-content: center;
   align-items: flex-start;
   
-  /* Gradiente animado suave con transiciones fluidas de colores elegantes */
   background: linear-gradient(135deg, #0f172a, #020f27, #000000, #111827);
-  background-size: 400% 400%;
-  animation: backgroundAnimation 18s ease infinite;
+  background-size: 200% 200%;
+  will-change: background-position;
+  animation: backgroundAnimation 30s ease infinite;
 }
 
 @keyframes backgroundAnimation {

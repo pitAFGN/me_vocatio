@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Compass, Award, Settings, Code2, LogOut } from "lucide-react";
+import { LayoutDashboard, Compass, Bookmark, Award, Settings, Code2, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -28,6 +28,11 @@ export default function SidebarNav({ logout }) {
                         <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname.startsWith("/recomendacion") ? "bg-white/10 border border-white/10 text-white shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}>
                             <Compass className={`w-5 h-5 ${pathname.startsWith("/recomendacion") ? "text-indigo-400" : ""}`} />
                             <span>RUTAS DE APRENDIZAJE</span>
+                        </Link>
+
+                        <Link href="/favoritos" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/favoritos" ? "bg-white/10 border border-white/10 text-white shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}>
+                            <Bookmark className={`w-5 h-5 ${pathname === "/favoritos" ? "text-indigo-400" : ""}`} />
+                            <span>FAVORITOS</span>
                         </Link>
 
                         <Link href="/insignias" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/insignias" ? "bg-white/10 border border-white/10 text-white shadow-lg" : "text-slate-400 hover:text-white hover:bg-white/5"}`}>
@@ -66,6 +71,11 @@ export default function SidebarNav({ logout }) {
                     <span className="text-[9px] font-medium">Rutas</span>
                 </Link>
 
+                <Link href="/favoritos" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/favoritos" ? "text-indigo-400 bg-white/5" : "text-slate-400"}`}>
+                    <Bookmark className="w-5 h-5" />
+                    <span className="text-[9px] font-medium">Favoritos</span>
+                </Link>
+
                 <Link href="/insignias" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/insignias" ? "text-indigo-400 bg-white/5" : "text-slate-400"}`}>
                     <Award className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Insignias</span>
@@ -76,7 +86,7 @@ export default function SidebarNav({ logout }) {
                     <span className="text-[9px] font-medium">Ajustes</span>
                 </Link>
 
-                <button onClick={logout} className="p-2 rounded-xl flex flex-col items-center gap-1 text-red-400">
+                <button onClick={logout} className="p-2 rounded-xl flex flex-col items-center gap-1 text-red-400 cursor-pointer">
                     <LogOut className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Salir</span>
                 </button>
