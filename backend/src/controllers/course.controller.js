@@ -1,4 +1,5 @@
 const courseService = require("../services/course.service");
+const achievementService = require("../services/achievement.service");
 
 /* ─────────────────────────────────────────
    CREAR CURSO
@@ -6,6 +7,8 @@ const courseService = require("../services/course.service");
 const crear = async (req, res) => {
   try {
     const curso = await courseService.crearCurso(req.user.id, req.body);
+    await achievementService.incrementarProgreso(req.user.id, "resources_created");
+    await achievementService.evaluarLogros(req.user.id);
     res.status(201).json(curso);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al crear el curso" });

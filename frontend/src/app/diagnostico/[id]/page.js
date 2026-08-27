@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { getProfessionById } from '@/app/data/professions';
+import { API_URL } from '@/lib/constants';
 
 export default function DiagnosticoPage() {
   const router = useRouter();
+  const params = useParams();
+  const profession = getProfessionById(params?.id);
   const [preguntas, setPreguntas] = useState([]);
+  const [testId, setTestId] = useState(null);
   const [respuestasUsuario, setRespuestasUsuario] = useState({});
   const [cargandoTest, setCargandoTest] = useState(true);
   const [cargandoEnvio, setCargandoEnvio] = useState(false);
@@ -14,25 +19,44 @@ export default function DiagnosticoPage() {
   // --- 1. EFECTO AL CARGAR: Generar el test con Groq ---
   useEffect(() => {
     const generarTest = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
       try {
-        const response = await fetch('http://localhost:3001/api/generar', {
+        const response = await fetch(`${API_URL}/api/generar`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
           body: JSON.stringify({
-            professionTitle: "Ingeniería de Software",
-            professionArea: "Tecnología"
+            profesion_title: profession?.title,
+            profesion_area: profession?.area
           })
         });
 
         const data = await response.json();
 
-        if (data.exito && data.data && data.data.preguntas) {
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('token');
+            router.push('/login');
+            return;
+          }
+          throw new Error(data.error || data.message || `Error del servidor (${response.status})`);
+        }
+
+        if (data.exito && data.data?.test_id && data.data.preguntas) {
+          setTestId(data.data.test_id);
           setPreguntas(data.data.preguntas);
         } else {
-          setError("No se pudieron generar las preguntas. Intenta más tarde.");
+          setError(data.error || "El servidor no devolvió un test válido.");
         }
       } catch (err) {
-        setError("Error de conexión al generar el test.");
+        setError(err.message || "Error de conexión al generar el test.");
         console.error(err);
       } finally {
         setCargandoTest(false);
@@ -40,7 +64,7 @@ export default function DiagnosticoPage() {
     };
 
     generarTest();
-  }, []);
+  }, [profession?.area, profession?.title, router]);
 
   // --- 2. MANEJADOR DE RESPUESTAS ---
   const manejarCambioRespuesta = (preguntaId, opcionIndex) => {
@@ -67,18 +91,26 @@ export default function DiagnosticoPage() {
       return;
     }
 
+    if (!testId) {
+      alert("No se encontró un test válido. Recarga la página e inténtalo de nuevo.");
+      return;
+    }
+
     setCargandoEnvio(true);
     try {
       // Enviamos la petición con el token en los headers de autorización (Bearer Token)
-      const response = await fetch('http://localhost:3001/api/evaluar', {
+      const response = await fetch(`${API_URL}/api/evaluar`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
-          profesion_title: "Ingeniería de Software",
-          level: "Intermedio"
+          test_id: testId,
+          respuestas: Object.entries(respuestasUsuario).map(([pregunta_id, opcion_idx]) => ({
+            pregunta_id,
+            opcion_idx
+          }))
         })
       });
 
@@ -86,7 +118,7 @@ export default function DiagnosticoPage() {
 
       if (data.exito && data.evaluation_id) {
         router.push(
-          `/recomendacion?profesion=Ingeniería%20de%20Software&nivel=Intermedio&evaluation_id=${data.evaluation_id}`
+          `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&evaluation_id=${data.evaluation_id}`
         );
       } else {
         alert("Hubo un error al registrar la evaluación: " + (data.error || data.mensaje || "Error desconocido"));
@@ -100,6 +132,10 @@ export default function DiagnosticoPage() {
   };
 
   // --- RENDERIZADO ---
+  if (!profession) {
+    return <div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>Vocación no encontrada.</div>;
+  }
+
   if (cargandoTest) {
     return <div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>Cargando preguntas del test...</div>;
   }
@@ -110,7 +146,7 @@ export default function DiagnosticoPage() {
 
   return (
     <div style={{ padding: '2rem', color: '#fff', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h1>Cuestionario de Diagnóstico: Ingeniería de Software</h1>
+      <h1>Cuestionario de Diagnóstico: {profession.title}</h1>
       <p style={{ marginBottom: '2rem' }}>Responde las siguientes preguntas para evaluar tu nivel técnico.</p>
 
       {/* LISTADO DE PREGUNTAS */}

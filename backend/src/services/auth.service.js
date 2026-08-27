@@ -210,7 +210,7 @@ const verifyEmail = async (token) => {
     [user.id]
   );
 
-  return { email: user.email };
+  return { userId: user.id, email: user.email };
 };
 
 /* ─────────────────────────────────────────

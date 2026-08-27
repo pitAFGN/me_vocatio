@@ -11,6 +11,9 @@ const authenticateToken = (req, res, next) => {
 
   try {
     const decoded = verifyAccessToken(token);
+    if (!decoded.id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(decoded.id))) {
+      return res.status(401).json({ message: 'Sesión antigua o inválida. Inicia sesión nuevamente.' });
+    }
     req.user = decoded; // Guardamos los datos del usuario en req.user
     next(); // Permite el paso al controlador correspondiente
   } catch (error) {

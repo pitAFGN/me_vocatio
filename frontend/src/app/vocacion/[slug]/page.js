@@ -65,6 +65,13 @@ export default function VocationDetail({ params }) {
                         {profession.desc}
                     </p>
 
+                    <button
+                        onClick={() => router.push(`/diagnostico/${profession.slug}`)}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/30 cursor-pointer"
+                    >
+                        Comenzar diagnóstico con IA
+                    </button>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-indigo-900/40">
                         <div className="flex items-start gap-3 bg-slate-900/40 p-4 rounded-2xl border border-indigo-950">
                             <div className="p-2.5 bg-indigo-600/20 text-indigo-400 rounded-xl">

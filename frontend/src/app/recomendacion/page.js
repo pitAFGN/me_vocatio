@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { API_URL } from '@/lib/constants';
 import './RecomendacionPage.css';
 
 function RecomendacionContent() {
@@ -35,9 +36,12 @@ function RecomendacionContent() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/recomendar', {
+      const response = await fetch(`${API_URL}/api/recomendar`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
           evaluation_id: evaluationIdURL, // Clave para guardar en resource_blocks
           vocation: vocacionQuery,
