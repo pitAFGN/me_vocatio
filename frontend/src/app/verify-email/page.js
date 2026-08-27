@@ -39,12 +39,12 @@ function VerifyEmailContent() {
   }, [token]);
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center bg-[#1e293b] relative overflow-hidden p-6">
+    <main className="min-h-screen w-full flex items-center justify-center bg-slate-100 dark:bg-[#1e293b] relative overflow-hidden p-6 transition-colors duration-300">
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none z-0">
-        <div className="w-[50rem] h-[50rem] border-[70px] border-white rotate-45 shadow-2xl"></div>
+        <div className="w-[50rem] h-[50rem] border-[70px] border-slate-300 dark:border-white rotate-45 shadow-2xl"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-sm bg-white p-10 rounded-3xl shadow-2xl border border-slate-200 animate-in zoom-in-50 duration-500 mx-4 text-center">
+      <div className="relative z-10 w-full max-w-sm bg-white dark:bg-white p-10 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-200 animate-in zoom-in-50 duration-500 mx-4 text-center">
         {status === "loading" && (
           <>
             <Loader2 className="w-14 h-14 text-slate-900 mx-auto mb-6 animate-spin" />
@@ -68,7 +68,7 @@ function VerifyEmailContent() {
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full py-4 bg-[#1e293b] text-white font-black rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase text-[11px] tracking-[0.3em] active:scale-95 mt-8 border border-slate-700"
+              className="w-full py-4 bg-slate-900 dark:bg-[#1e293b] text-white font-black rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase text-[11px] tracking-[0.3em] active:scale-95 mt-8 border border-slate-700"
             >
               Ir a Iniciar Sesión
             </button>
@@ -86,7 +86,7 @@ function VerifyEmailContent() {
             <button
               type="button"
               onClick={() => router.push("/login")}
-              className="w-full py-4 bg-[#1e293b] text-white font-black rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase text-[11px] tracking-[0.3em] active:scale-95 mt-8 border border-slate-700"
+              className="w-full py-4 bg-slate-900 dark:bg-[#1e293b] text-white font-black rounded-xl shadow-lg hover:bg-slate-800 transition-all uppercase text-[11px] tracking-[0.3em] active:scale-95 mt-8 border border-slate-700"
             >
               Volver al Inicio de Sesión
             </button>
@@ -101,7 +101,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#1e293b] flex items-center justify-center text-white font-black italic uppercase tracking-widest text-xs">
+        <div className="min-h-screen bg-slate-100 dark:bg-[#1e293b] flex items-center justify-center text-slate-900 dark:text-white font-black italic uppercase tracking-widest text-xs transition-colors duration-300">
           Cargando Portal...
         </div>
       }

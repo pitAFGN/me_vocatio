@@ -330,7 +330,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
               aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               tabIndex={-1}
             >
-              {mostrarPassword ? "👁️‍🗨️" : "👁️"}
+              {mostrarPassword ? "🔓" : "🔒"}
             </button>
           </div>
           <CampoError mensaje={errores.password} />
