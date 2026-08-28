@@ -23,13 +23,12 @@ export default function Insignias() {
     localStorage.removeItem("mevocatio_new_achievements");
     if (loading) return;
     fetch(`${API_URL}/api/achievements`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      credentials: "include",
     })
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem("token");
             window.dispatchEvent(new Event("local-storage-update"));
           }
           throw new Error(data.message || data.error || "No se pudieron cargar las insignias");

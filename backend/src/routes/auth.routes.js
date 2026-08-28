@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
+const authenticateToken = require("../middlewares/authMiddleware");
 const { googleSyncController } = require("../controllers/alternativeLogin.controller");
 const { verificarTokenSupabase } = require("../middlewares/alternativeLogin");
 const {
@@ -69,6 +70,10 @@ router.post("/register", registerLimiter, reglasRegister, verificarCaptcha, auth
  *       429: { description: Demasiados intentos, intenta en 15 minutos }
  */
 router.post("/login", loginLimiter, reglasLogin, authController.login);
+
+router.get("/me", authenticateToken, authController.me);
+router.post("/refresh", authController.refreshToken);
+router.post("/logout", authController.logout);
 
 
 /**
