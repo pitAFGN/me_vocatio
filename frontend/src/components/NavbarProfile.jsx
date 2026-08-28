@@ -37,7 +37,11 @@ export default function NavbarProfile() {
         };
         checkAuth();
         window.addEventListener('storage', checkAuth);
-        return () => window.removeEventListener('storage', checkAuth);
+        window.addEventListener('local-storage-update', checkAuth);
+        return () => {
+            window.removeEventListener('storage', checkAuth);
+            window.removeEventListener('local-storage-update', checkAuth);
+        };
     }, []);
 
     useEffect(() => {

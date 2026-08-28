@@ -16,7 +16,11 @@ export default function SidebarNav({ logout }) {
 
         updateIndicator();
         window.addEventListener("storage", updateIndicator);
-        return () => window.removeEventListener("storage", updateIndicator);
+        window.addEventListener("local-storage-update", updateIndicator);
+        return () => {
+            window.removeEventListener("storage", updateIndicator);
+            window.removeEventListener("local-storage-update", updateIndicator);
+        };
     }, []);
 
     return (
