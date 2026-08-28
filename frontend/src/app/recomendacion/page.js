@@ -51,9 +51,9 @@ function RecomendacionContent() {
     try {
       const response = await fetch(`${API_URL}/api/recomendar`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           evaluation_id: evaluationIdURL, // Clave para guardar en resource_blocks

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import NavbarProfile from "../components/NavbarProfile";
+import { authService } from "@/services/auth.service";
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -23,9 +24,15 @@ export default function RootLayout({ children }) {
 
   // Verificar la sesión para saber si pintar ACCESO
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+    localStorage.removeItem("token");
+
+    const checkAuth = async () => {
+      try {
+        await authService.me();
+        setIsLoggedIn(true);
+      } catch {
+        setIsLoggedIn(false);
+      }
     };
     checkAuth();
     window.addEventListener("storage", checkAuth);

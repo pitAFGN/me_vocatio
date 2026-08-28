@@ -137,6 +137,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         "Usuario";
 
       await googleLogin(user.email, nombreGoogle, session.access_token);
+      await supabase.auth.signOut({ scope: "local" });
       procesandoOAuth.current = false;
       setGoogleEnviando(false);
 
@@ -166,6 +167,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     const procesarSesion = async () => {
       const { data } = await supabase.auth.getSession();
       if (active && data.session && !procesandoOAuth.current) {
+        window.history.replaceState({}, document.title, window.location.pathname);
         googleHandlerRef.current(data.session);
       }
     };

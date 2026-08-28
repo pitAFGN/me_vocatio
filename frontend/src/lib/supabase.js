@@ -5,5 +5,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/constants";
 export const isGoogleLoginEnabled = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 export const supabase = isGoogleLoginEnabled
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { flowType: "pkce" },
+    })
   : null;

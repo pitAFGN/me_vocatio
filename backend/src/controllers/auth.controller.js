@@ -1,6 +1,7 @@
 const authService = require("../services/auth.service");
 const { verifyRefreshToken, generateAccessToken } = require("../utils/jwt");
 const achievementService = require("../services/achievement.service");
+const { setAuthCookies, clearAuthCookies, getAuthCookies, REFRESH_COOKIE } = require("../utils/authCookies");
 
 /* ─────────────────────────────────────────
    REGISTER
@@ -28,7 +29,8 @@ const login = async (req, res) => {
 
   try {
     const resultado = await authService.login(email, password);
-    res.json(resultado);
+    setAuthCookies(res, resultado.accessToken, resultado.refreshToken);
+    res.json({ user: resultado.user });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
   }
@@ -38,7 +40,7 @@ const login = async (req, res) => {
    REFRESH TOKEN
 ───────────────────────────────────────── */
 const refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
+  const { [REFRESH_COOKIE]: refreshToken } = getAuthCookies(req);
 
   if (!refreshToken) {
     return res.status(400).json({ error: "El campo refreshToken es obligatorio" });
@@ -54,10 +56,20 @@ const refreshToken = async (req, res) => {
     // 3. Generamos un nuevo Access Token fresco de 15 min
     const newAccessToken = generateAccessToken({ id: decoded.id, email: decoded.email, role: decoded.role });
 
-    res.json({ accessToken: newAccessToken });
+    setAuthCookies(res, newAccessToken, refreshToken);
+    res.json({ message: "Sesión renovada" });
   } catch (error) {
     res.status(403).json({ error: "Refresh Token inválido o expirado" });
   }
+};
+
+const me = (req, res) => {
+  res.json({ user: req.user });
+};
+
+const logout = (req, res) => {
+  clearAuthCookies(res);
+  res.json({ message: "Sesión cerrada" });
 };
 
 /* ─────────────────────────────────────────
@@ -144,4 +156,6 @@ module.exports = {
   resetPassword,
   verifyEmail,
   resendVerification,
+  me,
+  logout,
 };
