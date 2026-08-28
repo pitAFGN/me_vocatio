@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 
-const BackgroundStars = dynamic(() => import("@/components/BackgroundStars"), {
-  ssr: false,
-});
+const BackgroundStars = dynamic(
+  () => import("@/components/ThreeScene").then((m) => m.BackgroundStars),
+  { ssr: false }
+);
 
 export default function AuthBanner({ esRegistro }) {
   const [showStars, setShowStars] = useState(false);
