@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePublicRoute } from "@/hooks/useRouteGuard";
@@ -19,6 +20,25 @@ const DiamanteCanvas = dynamic(() => import("@/components/DiamanteCanvas"), {
 const BackgroundStars = dynamic(() => import("@/components/BackgroundStars"), {
   ssr: false,
 });
+
+// 3. Diferir las estrellas de fondo para priorizar el primer pintado del contenido
+//    (mismo patrón que usa el login en AuthBanner). El 3D se mantiene intacto;
+//    solo se retrasan ~700ms su montaje para no competir con el texto/diamante inicial.
+function BackgroundStarsDiferidas() {
+  const [mostrar, setMostrar] = useState(false);
+
+  useEffect(() => {
+    // Prefetch: descarga el chunk de Three.js (estrellas) en paralelo al HTML
+    // sin montar todavía el canvas. Así, cuando se activan las estrellas, el
+    // bundle ya está cacheado y aparecen casi al instante.
+    import("@/components/BackgroundStars").catch(() => {});
+
+    const timer = setTimeout(() => setMostrar(true), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return mostrar ? <BackgroundStars /> : null;
+}
 
 const FEATURES = [
   {
@@ -42,21 +62,15 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
-  const { loading } = usePublicRoute();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground italic font-black uppercase tracking-[0.3em]">
-        Cargando MeVocatio...
-      </div>
-    );
-  }
+  // La ruta pública ya no bloquea el render: pinta el hero 3D de inmediato y
+  // solo redirige al dashboard si hay una sesión válida.
+  usePublicRoute();
 
   return (
     <main className="relative min-h-screen bg-gradient-to-b from-slate-100 via-slate-200 to-white dark:from-[#0b1329] dark:via-[#0f172a] dark:to-[#080d1a] text-slate-900 dark:text-slate-100 flex flex-col items-center justify-between px-4 sm:px-6 py-6 md:py-8 overflow-x-hidden transition-colors duration-300">
 
-      {/* BRILLITOS / ESTRELLITAS EN TODO EL FONDO (Z-0) - Se ocultan o adaptan sutilmente si quieres */}
-      <BackgroundStars />
+      {/* BRILLITOS / ESTRELLITAS EN TODO EL FONDO (Z-0) - Se montan de forma diferida para no competir con el primer paint */}
+      <BackgroundStarsDiferidas />
 
       {/* SECCIÓN HERO COMPACTA (Z-10) */}
       <div className="z-10 flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-2 mt-4">

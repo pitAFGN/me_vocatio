@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const opiniones = [
     { id: 1, texto: "Me encantó, excelente acompañamiento" },
@@ -32,29 +32,31 @@ export default function OpinionesCarrusel() {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+    const siguiente = useCallback(() => {
+        setIndex((actual) => {
+            if (actual + cardsVisibles >= opiniones.length) {
+                return 0;
+            }
+            return actual + 1;
+        });
+    }, [cardsVisibles]);
+
+    const anterior = useCallback(() => {
+        setIndex((actual) => {
+            if (actual > 0) {
+                return actual - 1;
+            }
+            return opiniones.length - cardsVisibles;
+        });
+    }, [cardsVisibles]);
+
     useEffect(() => {
         const intervalo = setInterval(() => {
             siguiente();
         }, 3500);
 
         return () => clearInterval(intervalo);
-    }, [index, cardsVisibles]);
-
-    const siguiente = () => {
-        if (index + cardsVisibles >= opiniones.length) {
-            setIndex(0);
-        } else {
-            setIndex(index + 1);
-        }
-    };
-
-    const anterior = () => {
-        if (index > 0) {
-            setIndex(index - 1);
-        } else {
-            setIndex(opiniones.length - cardsVisibles);
-        }
-    };
+    }, [siguiente]);
 
     const offset = -(index * (100 / cardsVisibles));
 
@@ -69,6 +71,7 @@ export default function OpinionesCarrusel() {
 
                 <div className="flex-1 overflow-hidden h-20 flex items-center">
                     <div
+                        data-testid="carrusel-track"
                         className="flex gap-3 w-full"
                         style={{
                             transform: `translateX(${offset}%)`,

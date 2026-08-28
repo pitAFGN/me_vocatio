@@ -8,21 +8,15 @@ import AuthBanner from "@/components/auth/AuthBanner";
 import AuthForm from "@/components/auth/AuthForm";
 
 function AuthContent() {
-  const { loading } = usePublicRoute();
+  // La ruta pública ya no bloquea el render: muestra el formulario de inmediato
+  // y solo redirige al dashboard si ya hay una sesión válida.
+  usePublicRoute();
   const searchParams = useSearchParams();
   const [esRegistro, setEsRegistro] = useState(false);
 
   useEffect(() => {
     setEsRegistro(searchParams.get("mode") === "signup");
   }, [searchParams]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-[#0b1329] text-slate-900 dark:text-white italic font-black uppercase tracking-[0.3em] transition-colors duration-300">
-        Verificando...
-      </div>
-    );
-  }
 
   return (
     <main className="min-h-screen flex flex-col lg:flex-row bg-slate-100 dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 overflow-hidden transition-colors duration-300">

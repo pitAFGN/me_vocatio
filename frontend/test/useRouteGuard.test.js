@@ -35,12 +35,13 @@ describe("usePublicRoute", () => {
     useRouter.mockReturnValue({ replace, push: vi.fn() });
   });
 
-  it("redirige a /dashboard y mantiene loading=true si hay token", async () => {
+  it("redirige a /dashboard sin bloquear el render (loading=false) si hay token", async () => {
     localStorage.setItem("token", "abc123");
     const { result } = renderHook(() => usePublicRoute());
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/dashboard"));
-    expect(result.current.loading).toBe(true);
+    // Las rutas públicas nunca bloquean el render para acelerar el primer pintado.
+    expect(result.current.loading).toBe(false);
   });
 
   it("no redirige y pone loading=false si no hay token", async () => {

@@ -49,12 +49,13 @@ describe("useAuth", () => {
     authService.register.mockResolvedValue({ id: 1 });
     const { result } = renderHook(() => useAuth());
 
-    await result.current.register("Juan", "juan@test.com", "pass1234");
+    await result.current.register("Juan", "juan@test.com", "pass1234", "captcha-token");
 
     expect(authService.register).toHaveBeenCalledWith(
       "Juan",
       "juan@test.com",
-      "pass1234"
+      "pass1234",
+      "captcha-token"
     );
   });
 

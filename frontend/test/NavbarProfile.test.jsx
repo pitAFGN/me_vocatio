@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { useRouter, usePathname } from "next/navigation";
 import NavbarProfile from "@/components/NavbarProfile";
+
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ logout: vi.fn() }),
+}));
 
 describe("NavbarProfile", () => {
   let replace, push;
@@ -25,66 +29,29 @@ describe("NavbarProfile", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renderiza la burbuja de perfil si hay token y la ruta es /dashboard", () => {
+  it("muestra el botón de crear recurso si hay token y la ruta es /dashboard", () => {
     localStorage.setItem("token", "abc123");
     usePathname.mockReturnValue("/dashboard");
     render(<NavbarProfile />);
-    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Crear recurso" })
+    ).toBeInTheDocument();
   });
 
-  it("renderiza la burbuja de perfil si la ruta empieza con /vocacion", () => {
+  it("no muestra el botón de crear recurso en /vocacion (solo /dashboard)", () => {
     localStorage.setItem("token", "abc123");
     usePathname.mockReturnValue("/vocacion/123");
     render(<NavbarProfile />);
-    expect(screen.getByRole("button")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it("abre el menú con el nombre y rol del usuario al hacer click en la burbuja", () => {
+  it("navega a /creacion_recursos al hacer click en 'Crear recurso'", () => {
     localStorage.setItem("token", "abc123");
     usePathname.mockReturnValue("/dashboard");
     render(<NavbarProfile />);
 
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button", { name: "Crear recurso" }));
 
-    expect(screen.getByText("Samuel Moreno")).toBeInTheDocument();
-    expect(screen.getByText("Estudiante ADSO")).toBeInTheDocument();
-  });
-
-  it("'Mis Recursos' navega a /dashboard y cierra el menú", () => {
-    localStorage.setItem("token", "abc123");
-    usePathname.mockReturnValue("/dashboard");
-    render(<NavbarProfile />);
-
-    fireEvent.click(screen.getByRole("button"));
-    fireEvent.click(screen.getByText(/Mis Recursos/i));
-
-    expect(push).toHaveBeenCalledWith("/dashboard");
-    expect(screen.queryByText("Samuel Moreno")).not.toBeInTheDocument();
-  });
-
-  it("'Salir' elimina el token, cierra el menú y redirige a /login", () => {
-    localStorage.setItem("token", "abc123");
-    usePathname.mockReturnValue("/dashboard");
-    render(<NavbarProfile />);
-
-    fireEvent.click(screen.getByRole("button"));
-    fireEvent.click(screen.getByText(/Salir/i));
-
-    expect(localStorage.getItem("token")).toBeNull();
-    expect(replace).toHaveBeenCalledWith("/login");
-    expect(screen.queryByText("Samuel Moreno")).not.toBeInTheDocument();
-  });
-
-  it("cierra el menú al hacer click fuera de él", () => {
-    localStorage.setItem("token", "abc123");
-    usePathname.mockReturnValue("/dashboard");
-    render(<NavbarProfile />);
-
-    fireEvent.click(screen.getByRole("button"));
-    expect(screen.getByText("Samuel Moreno")).toBeInTheDocument();
-
-    fireEvent.mouseDown(document.body);
-
-    expect(screen.queryByText("Samuel Moreno")).not.toBeInTheDocument();
+    expect(push).toHaveBeenCalledWith("/creacion_recursos");
   });
 });

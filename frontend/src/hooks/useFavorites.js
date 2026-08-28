@@ -38,7 +38,14 @@ export function useFavorites() {
   const toggleSave = useCallback((vocation) => {
     if (!vocation?.id) return;
 
-    const current = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    let current = [];
+    try {
+      current = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      if (!Array.isArray(current)) current = [];
+    } catch {
+      current = [];
+    }
+
     const exists = current.some((fav) => fav.id === vocation.id);
 
     const updated = exists
