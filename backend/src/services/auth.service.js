@@ -253,9 +253,15 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
     user = nuevoUsuario.rows[0];
   }
 
-  const token = jwt.sign({ id: user.id }, SECRET, { expiresIn: "1h" });
+  const payload = { id: user.id, email: user.email, name: user.name };
+  const accessToken = generateAccessToken(payload);
+  const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
 
-  return { token };
+  return {
+    accessToken,
+    refreshToken,
+    user: { id: user.id, name: user.name, email: user.email },
+  };
 };
 
 // Exportamos todas las funciones juntas de manera correcta

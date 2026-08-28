@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, FolderHeart, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/auth.service';
 
 export default function NavbarProfile() {
     const router = useRouter();
@@ -26,9 +27,13 @@ export default function NavbarProfile() {
         pathname.startsWith('/creacion_recursos');
 
     useEffect(() => {
-        const checkAuth = () => {
-            const token = localStorage.getItem('token');
-            setIsLoggedIn(!!token);
+        const checkAuth = async () => {
+            try {
+                await authService.me();
+                setIsLoggedIn(true);
+            } catch {
+                setIsLoggedIn(false);
+            }
         };
         checkAuth();
         window.addEventListener('storage', checkAuth);

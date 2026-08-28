@@ -139,6 +139,8 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         "Usuario";
 
       await googleLogin(user.email, nombreGoogle, session.access_token);
+      const sb = await getSupabase();
+      if (sb) await sb.auth.signOut({ scope: "local" });
       procesandoOAuth.current = false;
       setGoogleEnviando(false);
     } catch (err) {
@@ -168,6 +170,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       if (!sb || !active) return;
       const { data } = await sb.auth.getSession();
       if (active && data.session && !procesandoOAuth.current) {
+        window.history.replaceState({}, document.title, window.location.pathname);
         googleHandlerRef.current(data.session);
       }
     };

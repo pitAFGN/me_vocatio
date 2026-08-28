@@ -23,18 +23,12 @@ export default function DiagnosticoPage() {
     peticionInicialRealizada.current = true;
 
     const generarTest = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/login');
-        return;
-      }
-
       try {
         const response = await fetch(`${API_URL}/api/generar`, {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
           },
           body: JSON.stringify({
             profesion_title: profession?.title,
@@ -46,7 +40,6 @@ export default function DiagnosticoPage() {
 
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
-            localStorage.removeItem('token');
             router.push('/login');
             return;
           }
@@ -86,14 +79,6 @@ export default function DiagnosticoPage() {
       if (!confirmed) return;
     }
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      alert("No se encontró una sesión activa. Por favor, inicia sesión de nuevo.");
-      router.push('/login');
-      return;
-    }
-
     if (!testId) {
       alert("No se encontró un test válido. Recarga la página e inténtalo de nuevo.");
       return;
@@ -103,9 +88,9 @@ export default function DiagnosticoPage() {
     try {
       const response = await fetch(`${API_URL}/api/evaluar`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           test_id: testId,

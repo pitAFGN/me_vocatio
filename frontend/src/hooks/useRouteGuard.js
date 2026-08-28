@@ -2,17 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { sessionExpirada } from "@/hooks/useAuth";
-
-/**
- * Comprueba si existe una sesión válida leyendo el token de localStorage.
- * Es seguro llamarla solo desde el cliente (guarda contra el SSR).
- */
-function haySesionValida() {
-  if (typeof window === "undefined") return false;
-  const token = localStorage.getItem("token");
-  return Boolean(token && !sessionExpirada());
-}
+import { authService } from "@/services/auth.service";
 
 /**
  * Estado reactivo de la sesión.
@@ -28,15 +18,32 @@ function useSesionValida() {
   const [sesionValida, setSesionValida] = useState(null);
 
   useEffect(() => {
-    setSesionValida(haySesionValida());
+    let activo = true;
+    const comprobarSesion = async () => {
+      try {
+        await authService.me();
+        if (activo) setSesionValida(true);
+      } catch {
+        try {
+          await authService.refresh();
+          await authService.me();
+          if (activo) setSesionValida(true);
+        } catch {
+          if (activo) setSesionValida(false);
+        }
+      }
+    };
+    comprobarSesion();
 
-    const actualizarSesion = () => setSesionValida(haySesionValida());
+    // Escuchar cambios de storage (entre pestañas y eventos manuales)
+    const actualizarSesion = () => comprobarSesion();
     window.addEventListener("storage", actualizarSesion);
     window.addEventListener("local-storage-update", actualizarSesion);
 
     return () => {
       window.removeEventListener("storage", actualizarSesion);
       window.removeEventListener("local-storage-update", actualizarSesion);
+      activo = false;
     };
   }, []);
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { authService } from "@/services/auth.service";
@@ -8,8 +8,12 @@ vi.mock("@/services/auth.service", () => ({
   authService: {
     login: vi.fn(),
     register: vi.fn(),
+    logout: vi.fn(),
+    googleSync: vi.fn(),
     forgotPassword: vi.fn(),
     resetPassword: vi.fn(),
+    verifyEmail: vi.fn(),
+    me: vi.fn(),
   },
 }));
 
@@ -22,18 +26,17 @@ describe("useAuth", () => {
     useRouter.mockReturnValue({ push, replace });
   });
 
-  it("login: guarda el token en localStorage y redirige a /dashboard", async () => {
-    authService.login.mockResolvedValue({ token: "jwt-token-123" });
+  it("login: delega en authService.login y redirige a /dashboard", async () => {
+    authService.login.mockResolvedValue({ id: 1, name: "Juan", email: "user@test.com" });
     const { result } = renderHook(() => useAuth());
 
     await result.current.login("user@test.com", "pass1234");
 
     expect(authService.login).toHaveBeenCalledWith("user@test.com", "pass1234");
-    expect(localStorage.getItem("token")).toBe("jwt-token-123");
     expect(push).toHaveBeenCalledWith("/dashboard");
   });
 
-  it("login: no guarda token ni redirige si el servicio falla", async () => {
+  it("login: no redirige si el servicio falla", async () => {
     authService.login.mockRejectedValue(new Error("Credenciales inválidas"));
     const { result } = renderHook(() => useAuth());
 
@@ -41,7 +44,6 @@ describe("useAuth", () => {
       result.current.login("user@test.com", "wrong")
     ).rejects.toThrow("Credenciales inválidas");
 
-    expect(localStorage.getItem("token")).toBeNull();
     expect(push).not.toHaveBeenCalled();
   });
 
@@ -59,13 +61,13 @@ describe("useAuth", () => {
     );
   });
 
-  it("logout: elimina el token de localStorage y redirige a /login", async () => {
-    localStorage.setItem("token", "jwt-token-123");
+  it("logout: cierra la sesión y redirige a /login", async () => {
+    authService.logout.mockResolvedValue({ ok: true });
     const { result } = renderHook(() => useAuth());
 
     await result.current.logout();
 
-    expect(localStorage.getItem("token")).toBeNull();
+    expect(authService.logout).toHaveBeenCalled();
     expect(replace).toHaveBeenCalledWith("/login");
   });
 
@@ -91,14 +93,13 @@ describe("useAuth", () => {
     expect(push).toHaveBeenCalledWith("/login");
   });
 
-  it("getToken: retorna null si no hay token en localStorage", () => {
+  it("googleLogin: delega en authService.googleSync y redirige a /dashboard", async () => {
+    authService.googleSync.mockResolvedValue({ id: 1 });
     const { result } = renderHook(() => useAuth());
-    expect(result.current.getToken()).toBeNull();
-  });
 
-  it("getToken: retorna el token almacenado en localStorage", () => {
-    localStorage.setItem("token", "abc-123");
-    const { result } = renderHook(() => useAuth());
-    expect(result.current.getToken()).toBe("abc-123");
+    await result.current.googleLogin("juan@test.com", "Juan", "google-token");
+
+    expect(authService.googleSync).toHaveBeenCalledWith("juan@test.com", "Juan", "google-token");
+    expect(replace).toHaveBeenCalledWith("/dashboard");
   });
 });

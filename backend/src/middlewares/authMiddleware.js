@@ -1,9 +1,10 @@
 const { verifyAccessToken } = require('../utils/jwt');
+const { getAuthCookies, ACCESS_COOKIE } = require('../utils/authCookies');
 
 const authenticateToken = (req, res, next) => {
   // El token viene desde el frontend en el header: "Authorization: Bearer <TOKEN>"
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = (authHeader && authHeader.split(' ')[1]) || getAuthCookies(req)[ACCESS_COOKIE];
 
   if (!token) {
     return res.status(401).json({ message: 'Acceso denegado. Token no proporcionado.' });

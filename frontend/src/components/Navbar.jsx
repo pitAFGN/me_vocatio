@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 import NavbarProfile from "./NavbarProfile";
+import { authService } from "@/services/auth.service";
 import { Sun, Moon } from "lucide-react";
 
 export default function Navbar() {
@@ -18,13 +19,23 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+    let activo = true;
+    const checkAuth = async () => {
+      try {
+        await authService.me();
+        if (activo) setIsLoggedIn(true);
+      } catch {
+        if (activo) setIsLoggedIn(false);
+      }
     };
     checkAuth();
     window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
+    window.addEventListener("local-storage-update", checkAuth);
+    return () => {
+      window.removeEventListener("storage", checkAuth);
+      window.removeEventListener("local-storage-update", checkAuth);
+      activo = false;
+    };
   }, [pathname]);
 
   const getButtonStyle = (path) => {
