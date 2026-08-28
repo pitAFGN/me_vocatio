@@ -1,15 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
     CheckCircle2,
     Briefcase,
     Sparkles,
     ArrowLeft,
     ArrowRight,
-    Search,
-    Bookmark,
-    ExternalLink
+    Search
 } from "lucide-react";
+import ProfessionCard from "@/components/ProfessionCard";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -19,11 +19,10 @@ export default function DashboardHome({
     setSearchQuery,
     page,
     setPage,
-    filteredProfessions,
-    savedIds,
-    toggleSave,
-    router
+    filteredProfessions
 }) {
+    const router = useRouter();
+
     const currentProfessions = filteredProfessions.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
     return (
@@ -123,43 +122,9 @@ export default function DashboardHome({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {currentProfessions.map((job) => {
-                        const isSaved = savedIds.includes(job.id);
-                        return (
-                            <div
-                                key={job.id}
-                                className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-6 group hover:-translate-y-1.5 hover:bg-[#0a0b14] hover:border-purple-500/80 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300 flex flex-col justify-between shadow-xl relative"
-                            >
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); toggleSave(job); }}
-                                    className={`absolute top-6 right-6 p-2 rounded-xl border transition-all cursor-pointer ${isSaved ? "bg-indigo-600 border-indigo-500 text-white" : "bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10"}`}
-                                    title={isSaved ? "Quitar de guardados" : "Guardar profesión"}
-                                >
-                                    <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-                                </button>
-
-                                <div>
-                                    <div className="flex justify-between items-start mb-6 pr-10">
-                                        <span className="px-3 py-1 rounded-full bg-indigo-950/60 border border-indigo-800/40 text-[11px] font-semibold text-indigo-300 uppercase tracking-wide">
-                                            {job.area}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="text-lg font-bold text-white mb-2">{job.title}</h3>
-                                    <p className="text-xs text-slate-400 mb-6 line-clamp-3 leading-relaxed">
-                                        {job.desc}
-                                    </p>
-                                </div>
-
-                                <button
-                                    onClick={() => router.push(`/vocacion/${job.slug}`)}
-                                    className="w-full py-2.5 px-4 rounded-xl text-slate-300 hover:text-white text-xs font-semibold bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-500 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-sm"
-                                >
-                                    Ver Módulo / Ruta <ExternalLink className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                        );
-                    })}
+                    {currentProfessions.map((job) => (
+                        <ProfessionCard key={job.id} profession={job} />
+                    ))}
                 </div>
             </section>
         </>

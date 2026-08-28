@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
+import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Configuracion() {
   const router = useRouter();
@@ -19,11 +20,7 @@ export default function Configuracion() {
   const [guardado, setGuardado] = useState(false);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0b14] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
-        Verificando acceso...
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   const handleGuardar = (e) => {

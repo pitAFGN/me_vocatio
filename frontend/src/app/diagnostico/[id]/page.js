@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getProfessionById } from '@/app/data/professions';
 import { API_URL } from '@/lib/constants';
-import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import LoadingScreen from '@/components/LoadingScreen';
+import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function DiagnosticoPage() {
   const router = useRouter();
@@ -127,20 +128,22 @@ export default function DiagnosticoPage() {
 
   if (cargandoTest) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
-          <p className="text-sm font-semibold">Cargando preguntas del test...</p>
-        </div>
-      </div>
+      <LoadingScreen
+        mensaje="Cargando preguntas del test..."
+        claseFondo="bg-slate-50 dark:bg-[#0f172a]"
+        claseTexto="text-slate-900 dark:text-white"
+        spinner
+      />
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-red-500 dark:text-red-400 transition-colors duration-300">
-        <p className="text-sm font-semibold">Error: {error}</p>
-      </div>
+      <LoadingScreen
+        mensaje={`Error: ${error}`}
+        claseFondo="bg-slate-50 dark:bg-[#0f172a]"
+        claseTexto="text-red-500 dark:text-red-400"
+      />
     );
   }
 
