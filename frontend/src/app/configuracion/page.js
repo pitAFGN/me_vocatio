@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings, User, Mail, Lock, Bell, LogOut, Save, ShieldCheck, ArrowLeft
@@ -12,12 +12,20 @@ import LoadingScreen from "@/components/LoadingScreen";
 export default function Configuracion() {
   const router = useRouter();
   const { logout } = useAuth();
-  const { loading } = useProtectedRoute();
+  const { loading, user } = useProtectedRoute();
 
-  const [nombre, setNombre] = useState("Samuel Moreno");
-  const [email, setEmail] = useState("samuel.moreno@mevocatio.com");
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
   const [notificaciones, setNotificaciones] = useState(true);
   const [guardado, setGuardado] = useState(false);
+
+  // Precargar los datos reales del usuario autenticado (sin pisar lo que ya se editó)
+  useEffect(() => {
+    if (user) {
+      setNombre((n) => n || user.name || "");
+      setEmail((e) => e || user.email || "");
+    }
+  }, [user]);
 
   if (loading) {
     return <LoadingScreen />;

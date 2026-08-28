@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -13,17 +13,22 @@ import DashboardHome from "@/components/DashboardHome";
 
 export default function ExecutiveDashboard() {
   const { logout } = useAuth();
-  const { loading } = useProtectedRoute();
+  const { loading, user } = useProtectedRoute();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
-
-  // Datos del perfil
-  const [profileData] = useState({
-    name: "Samuel Moreno",
-    tier: "Full Stack Developer",
-    location: "Medellín, Colombia"
+  const [profileData, setProfileData] = useState({
+    name: "",
+    location: "Colombia",
+    tier: "Legacy Builder",
   });
+
+  // Datos reales del usuario autenticado (name viene de /me)
+  useEffect(() => {
+    if (user?.name) {
+      setProfileData((prev) => ({ ...prev, name: user.name }));
+    }
+  }, [user]);
 
   // Filtrado de profesiones según la barra de búsqueda
   const filteredProfessions = PROFESSIONS.filter((job) =>
