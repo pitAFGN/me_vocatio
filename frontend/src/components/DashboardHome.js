@@ -131,7 +131,7 @@ export default function DashboardHome({
                                 className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-6 group hover:-translate-y-1.5 hover:bg-[#0a0b14] hover:border-purple-500/80 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all duration-300 flex flex-col justify-between shadow-xl relative"
                             >
                                 <button
-                                    onClick={(e) => toggleSave(job.id, e)}
+                                    onClick={(e) => { e.stopPropagation(); toggleSave(job); }}
                                     className={`absolute top-6 right-6 p-2 rounded-xl border transition-all cursor-pointer ${isSaved ? "bg-indigo-600 border-indigo-500 text-white" : "bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10"}`}
                                     title={isSaved ? "Quitar de guardados" : "Guardar profesión"}
                                 >

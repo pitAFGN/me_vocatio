@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePublicRoute } from "@/hooks/useRouteGuard";
@@ -19,6 +20,25 @@ const DiamanteCanvas = dynamic(() => import("@/components/DiamanteCanvas"), {
 const BackgroundStars = dynamic(() => import("@/components/BackgroundStars"), {
   ssr: false,
 });
+
+// 3. Diferir las estrellas de fondo para priorizar el primer pintado del contenido
+//    (mismo patrón que usa el login en AuthBanner). El 3D se mantiene intacto;
+//    solo se retrasan ~700ms su montaje para no competir con el texto/diamante inicial.
+function BackgroundStarsDiferidas() {
+  const [mostrar, setMostrar] = useState(false);
+
+  useEffect(() => {
+    // Prefetch: descarga el chunk de Three.js (estrellas) en paralelo al HTML
+    // sin montar todavía el canvas. Así, cuando se activan las estrellas, el
+    // bundle ya está cacheado y aparecen casi al instante.
+    import("@/components/BackgroundStars").catch(() => {});
+
+    const timer = setTimeout(() => setMostrar(true), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return mostrar ? <BackgroundStars /> : null;
+}
 
 const FEATURES = [
   {
@@ -42,46 +62,40 @@ const FEATURES = [
 ];
 
 export default function LandingPage() {
-  const { loading } = usePublicRoute();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0b1329] text-white italic font-black uppercase tracking-[0.3em]">
-        Cargando MeVocatio...
-      </div>
-    );
-  }
+  // La ruta pública ya no bloquea el render: pinta el hero 3D de inmediato y
+  // solo redirige al dashboard si hay una sesión válida.
+  usePublicRoute();
 
   return (
-    <main className="relative min-h-screen bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] text-slate-100 flex flex-col items-center justify-between px-4 sm:px-6 py-6 md:py-8 overflow-x-hidden">
+    <main className="relative min-h-screen bg-gradient-to-b from-slate-100 via-slate-200 to-white dark:from-[#0b1329] dark:via-[#0f172a] dark:to-[#080d1a] text-slate-900 dark:text-slate-100 flex flex-col items-center justify-between px-4 sm:px-6 py-6 md:py-8 overflow-x-hidden transition-colors duration-300">
 
-      {/* BRILLITOS / ESTRELLITAS EN TODO EL FONDO (Z-0) */}
-      <BackgroundStars />
+      {/* BRILLITOS / ESTRELLITAS EN TODO EL FONDO (Z-0) - Se montan de forma diferida para no competir con el primer paint */}
+      <BackgroundStarsDiferidas />
 
       {/* SECCIÓN HERO COMPACTA (Z-10) */}
       <div className="z-10 flex flex-col items-center justify-center text-center max-w-3xl mx-auto space-y-2 mt-4">
 
         {/* 1. TÍTULO PRINCIPAL */}
-        <h1 className="text-3xl sm:text-5xl font-normal tracking-tight leading-[1.12] text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+        <h1 className="text-3xl sm:text-5xl font-normal tracking-tight leading-[1.12] text-slate-900 dark:text-white drop-shadow-sm">
           Pulimos tu{" "}
-          <span className="italic font-serif font-light text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+          <span className="italic font-serif font-light text-purple-700 dark:text-white dark:drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
             potencial
           </span>{" "}
           <br />
-          <span className="italic font-serif font-light text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+          <span className="italic font-serif font-light text-purple-700 dark:text-white dark:drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
             profesional
           </span>
         </h1>
 
         {/* 2. DIAMANTE 3D */}
         <div className="relative w-[220px] h-[220px] sm:w-[260px] sm:h-[260px] md:w-[290px] md:h-[290px] flex items-center justify-center pointer-events-none -my-2">
-          {/* Halo difuso violeta/índigo de fondo */}
+          {/* Halo difuso de fondo */}
           <div className="absolute w-[80%] h-[80%] bg-gradient-to-tr from-purple-600/20 via-indigo-500/15 to-blue-500/10 rounded-full blur-[90px] -z-10 animate-pulse" />
           <DiamanteCanvas />
         </div>
 
         {/* 3. TEXTO DESCRIPTIVO */}
-        <p className="text-slate-200 text-xs sm:text-sm md:text-base max-w-xl leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] bg-slate-950/30 backdrop-blur-sm py-2 px-5 rounded-xl border border-white/5">
+        <p className="text-slate-700 dark:text-slate-200 text-xs sm:text-sm md:text-base max-w-xl leading-relaxed bg-white/70 dark:bg-slate-950/30 backdrop-blur-sm py-2 px-5 rounded-xl border border-slate-300 dark:border-white/5 shadow-sm">
           Un entorno de alta precisión diseñado para líderes visionarios. Descubre la estrategia definitiva para escalar tu carrera hacia el nivel de élite global.
         </p>
 
@@ -89,7 +103,7 @@ export default function LandingPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
           <Link
             href="/login"
-            className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-full font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(168,85,247,0.5)] hover:shadow-[0_0_40px_rgba(168,85,247,0.7)] hover:scale-[1.02] active:scale-95 border border-purple-400/40"
+            className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-full font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] hover:scale-[1.02] active:scale-95 border border-purple-400/40"
           >
             EMPIEZA A PULIR TU FUTURO
             <ArrowRight className="w-4 h-4" />
@@ -102,15 +116,15 @@ export default function LandingPage() {
         {FEATURES.map(({ icon: Icon, title, description }) => (
           <div
             key={title}
-            className="p-5 rounded-2xl bg-slate-900/80 border border-slate-700/60 backdrop-blur-md hover:border-purple-500/50 transition-all group shadow-2xl hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]"
+            className="p-5 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/60 backdrop-blur-md hover:border-purple-500/50 transition-all group shadow-lg dark:shadow-2xl hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]"
           >
-            <div className="p-2.5 w-fit rounded-xl bg-purple-950/60 border border-purple-500/40 mb-3 text-purple-300 group-hover:text-white group-hover:bg-purple-900/80 group-hover:border-purple-400 transition-all shadow-inner">
+            <div className="p-2.5 w-fit rounded-xl bg-purple-100 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-500/40 mb-3 text-purple-700 dark:text-purple-300 group-hover:text-white group-hover:bg-purple-600 dark:group-hover:bg-purple-900/80 group-hover:border-purple-400 transition-all shadow-inner">
               <Icon className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-serif font-medium text-white mb-1">
+            <h3 className="text-base font-serif font-medium text-slate-900 dark:text-white mb-1">
               {title}
             </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               {description}
             </p>
           </div>
@@ -119,7 +133,7 @@ export default function LandingPage() {
 
       {/* 6. FOOTER (Z-10) */}
       <footer className="w-full pt-6 pb-2 z-10">
-        <p className="text-center text-slate-400 text-[11px] sm:text-xs">
+        <p className="text-center text-slate-500 dark:text-slate-400 text-[11px] sm:text-xs">
           © 2026 MeVocatio. Elite Professional Development. Transformando el potencial en legado.
         </p>
       </footer>

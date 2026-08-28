@@ -3,7 +3,9 @@
 import React, { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { API_URL } from '@/lib/constants';
 import './RecomendacionPage.css';
+import AchievementToast from '@/components/AchievementToast';
 
 function RecomendacionContent() {
   const router = useRouter();
@@ -17,10 +19,22 @@ function RecomendacionContent() {
 
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
+  const [newAchievements, setNewAchievements] = useState([]);
 
   const [paginasRecursos, setPaginasRecursos] = useState([]);
   const [urlsVistas, setUrlsVistas] = useState([]);
   const [paginaActualIndex, setPaginaActualIndex] = useState(0);
+
+  useEffect(() => {
+    const savedAchievements = localStorage.getItem("mevocatio_new_achievements");
+    if (!savedAchievements) return;
+
+    try {
+      setNewAchievements(JSON.parse(savedAchievements));
+    } catch {
+      localStorage.removeItem("mevocatio_new_achievements");
+    }
+  }, []);
 
   const obtenerImagenFondo = (url, titulo) => {
     const palabraClave = encodeURIComponent(titulo.split(' ')[0] || 'study');
@@ -35,9 +49,12 @@ function RecomendacionContent() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/recomendar', {
+      const response = await fetch(`${API_URL}/api/recomendar`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
           evaluation_id: evaluationIdURL, // Clave para guardar en resource_blocks
           vocation: vocacionQuery,
@@ -85,12 +102,16 @@ function RecomendacionContent() {
 
   return (
     <div className="rec-page-container">
+      <AchievementToast
+        achievementCodes={newAchievements}
+        onClose={() => setNewAchievements([])}
+      />
       <div className="rec-content-wrapper">
 
         {/* Botón de retorno al Dashboard */}
         <button
           onClick={() => router.push("/dashboard")}
-          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
+          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" /> Volver
         </button>
@@ -106,22 +127,16 @@ function RecomendacionContent() {
         {error && <div className="error-message-box">⚠️ {error}</div>}
 
         {paginasRecursos.length > 0 && (
-          <div className="pagination-bar" style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
             {paginasRecursos.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setPaginaActualIndex(idx)}
-                style={{
-                  background: paginaActualIndex === idx ? '#38bdf8' : 'rgba(30, 41, 59, 0.8)',
-                  color: paginaActualIndex === idx ? '#0f172a' : '#94a3b8',
-                  border: '1px solid rgba(56, 189, 248, 0.3)',
-                  padding: '0.4rem 0.9rem',
-                  borderRadius: '8px',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
+                className={`rounded-lg font-semibold text-sm cursor-pointer transition-all px-3.5 py-1.5 border ${
+                  paginaActualIndex === idx
+                    ? 'bg-sky-400 text-slate-900 border-sky-400/30'
+                    : 'bg-slate-200 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-sky-400/30'
+                }`}
               >
                 Página {idx + 1}
               </button>
@@ -164,12 +179,12 @@ function RecomendacionContent() {
         )}
 
         {cargando && (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#38bdf8' }}>
+          <div className="text-center py-8 text-sky-500 dark:text-sky-400">
             <p>🔄 Buscando y estructurando nuevos recursos con IA...</p>
           </div>
         )}
 
-        <div style={{ textAlign: 'center', marginTop: '2.5rem', marginBottom: '1rem' }}>
+        <div className="text-center mt-10 mb-4">
           <button
             onClick={manejarCargarMas}
             className="rec-submit-btn"
@@ -187,7 +202,7 @@ function RecomendacionContent() {
 
 export default function RecomendacionPage() {
   return (
-    <Suspense fallback={<div style={{ color: '#fff', padding: '2rem' }}>Cargando página...</div>}>
+    <Suspense fallback={<div className="text-slate-900 dark:text-white py-8">Cargando página...</div>}>
       <RecomendacionContent />
     </Suspense>
   );

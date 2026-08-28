@@ -4,43 +4,54 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { sessionExpirada } from "@/hooks/useAuth";
 
-// Función auxiliar para comprobar token directamente
-function comprobarSesion() {
+/**
+ * Comprueba si existe una sesión válida leyendo el token de localStorage.
+ * Es seguro llamarla solo desde el cliente (guarda contra el SSR).
+ */
+function haySesionValida() {
   if (typeof window === "undefined") return false;
   const token = localStorage.getItem("token");
   return Boolean(token && !sessionExpirada());
 }
 
 /**
- * Hook para obtener el estado actual de la sesión de forma segura en cliente
+ * Estado reactivo de la sesión.
+ *
+ * - `null`: aún sin verificar (SSR o primer render del cliente)
+ * - `true` / `false`: resultado tras comprobar en el cliente
+ *
+ * Escucha cambios de localStorage para mantenerse sincronizado tanto
+ * entre pestañas (`storage`) como ante eventos propios de la app
+ * (`local-storage-update`, p. ej. tras login o logout).
  */
-function useEstadoSesion() {
-  const [esValida, setEsValida] = useState(null); // null = cargando/SSR
+function useSesionValida() {
+  const [sesionValida, setSesionValida] = useState(null);
 
   useEffect(() => {
-    // Verificar al montar en el cliente
-    setEsValida(comprobarSesion());
+    setSesionValida(haySesionValida());
 
-    // Escuchar cambios de storage (entre pestañas y eventos manuales)
-    const ManejarCambio = () => setEsValida(comprobarSesion());
-    window.addEventListener("storage", ManejarCambio);
-    window.addEventListener("local-storage-update", ManejarCambio);
+    const actualizarSesion = () => setSesionValida(haySesionValida());
+    window.addEventListener("storage", actualizarSesion);
+    window.addEventListener("local-storage-update", actualizarSesion);
 
     return () => {
-      window.removeEventListener("storage", ManejarCambio);
-      window.removeEventListener("local-storage-update", ManejarCambio);
+      window.removeEventListener("storage", actualizarSesion);
+      window.removeEventListener("local-storage-update", actualizarSesion);
     };
   }, []);
 
-  return esValida;
+  return sesionValida;
 }
 
 /**
- * Protege rutas privadas (ej. /dashboard)
+ * Protege rutas privadas (ej. /dashboard).
+ * Bloquea el render hasta confirmar la sesión y redirige a /login cuando el
+ * usuario no está autenticado, evitando mostrar contenido privado a visitantes
+ * sin sesión activa.
  */
 export function useProtectedRoute() {
   const router = useRouter();
-  const sesionValida = useEstadoSesion();
+  const sesionValida = useSesionValida();
 
   useEffect(() => {
     if (sesionValida === false) {
@@ -48,16 +59,21 @@ export function useProtectedRoute() {
     }
   }, [sesionValida, router]);
 
-  return { loading: sesionValida === null };
+  // Bloquea el render (loading=true) mientras la sesión no esté confirmada
+  // (aún verificando `null` o inválida `false`), de modo que las páginas
+  // protegidas no muestren su contenido privado antes de redirigir.
+  return { loading: sesionValida !== true };
 }
 
 /**
- * Protege rutas de autenticación (SÓLO /login o /registro)
- * Si ya tiene sesión, lo manda al dashboard.
+ * Protege rutas públicas (landing `/` y `/login`).
+ * No bloquea el render: pinta el contenido de inmediato y solo redirige al
+ * dashboard cuando ya existe una sesión válida. Así se elimina el parpadeo de
+ * "Cargando/Verificando..." y se acelera el primer pintado sin tocar los 3D.
  */
 export function usePublicRoute() {
   const router = useRouter();
-  const sesionValida = useEstadoSesion();
+  const sesionValida = useSesionValida();
 
   useEffect(() => {
     if (sesionValida === true) {
@@ -65,5 +81,5 @@ export function usePublicRoute() {
     }
   }, [sesionValida, router]);
 
-  return { loading: sesionValida === null };
+  return { loading: false };
 }

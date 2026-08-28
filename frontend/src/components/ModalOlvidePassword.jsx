@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Swal from "sweetalert2";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ModalOlvidePassword({ onClose }) {
@@ -14,6 +13,7 @@ export default function ModalOlvidePassword({ onClose }) {
     setLoading(true);
     try {
       await forgotPassword(email);
+      const { default: Swal } = await import("sweetalert2");
       await Swal.fire({
         icon: "success",
         title: "¡Correo enviado!",
@@ -21,6 +21,7 @@ export default function ModalOlvidePassword({ onClose }) {
       });
       onClose();
     } catch (err) {
+      const { default: Swal } = await import("sweetalert2");
       await Swal.fire({
         icon: "error",
         title: "Error",

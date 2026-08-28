@@ -1,20 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import OpinionesCarrusel from "@/components/OpinionesCarrusel";
 
-// framer-motion no funciona en jsdom sin config extra; mockeamos motion.div
-// como un div normal para poder testear la lógica del carrusel.
-vi.mock("framer-motion", () => ({
-  motion: {
-    div: ({ children, animate, ...rest }) =>
-      // Convertimos `animate` a data-attr para inspeccionarlo en tests
-      require("react").createElement(
-        "div",
-        { ...rest, "data-animate": JSON.stringify(animate) },
-        children
-      ),
-  },
-}));
+const getTrack = () =>
+  document.querySelector('[data-testid="carrusel-track"]');
 
 describe("OpinionesCarrusel", () => {
   beforeEach(() => {
@@ -25,80 +14,68 @@ describe("OpinionesCarrusel", () => {
     vi.useRealTimers();
   });
 
-  it("muestra todas las opiniones en el DOM", () => {
+  it("muestra las opiniones en el DOM", () => {
     render(<OpinionesCarrusel />);
     expect(
-      screen.getByText(/"Me encantó, excelente acompañamiento"/i)
+      screen.getByText(/Me encantó, excelente acompañamiento/)
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/"Muy intuitiva la plataforma, 10\/10"/i)
+      screen.getByText(/Muy intuitiva la plataforma, 10\/10/)
     ).toBeInTheDocument();
   });
 
   it("avanza al siguiente grupo al hacer click en →", () => {
     render(<OpinionesCarrusel />);
-    const animContainer = document.querySelector("[data-animate]");
-    const xInicial = JSON.parse(animContainer.getAttribute("data-animate")).x;
+    const xInicial = getTrack().style.transform;
 
     fireEvent.click(screen.getByText("→"));
 
-    const xDespues = JSON.parse(animContainer.getAttribute("data-animate")).x;
+    const xDespues = getTrack().style.transform;
     expect(xDespues).not.toBe(xInicial);
   });
 
   it("retrocede al grupo anterior al hacer click en ←", () => {
     render(<OpinionesCarrusel />);
-    // Avanzamos primero para poder retroceder
     fireEvent.click(screen.getByText("→"));
-    const animContainer = document.querySelector("[data-animate]");
-    const xTrasAvanzar = JSON.parse(animContainer.getAttribute("data-animate")).x;
+    const xTrasAvanzar = getTrack().style.transform;
 
     fireEvent.click(screen.getByText("←"));
 
-    const xTrasRetroceder = JSON.parse(
-      animContainer.getAttribute("data-animate")
-    ).x;
+    const xTrasRetroceder = getTrack().style.transform;
     expect(xTrasRetroceder).not.toBe(xTrasAvanzar);
   });
 
   it("al hacer ← desde el inicio, salta al final del carrusel", () => {
     render(<OpinionesCarrusel />);
-    const animContainer = document.querySelector("[data-animate]");
-    const xInicial = JSON.parse(animContainer.getAttribute("data-animate")).x;
+    const xInicial = getTrack().style.transform;
 
     fireEvent.click(screen.getByText("←"));
 
-    const xDespues = JSON.parse(animContainer.getAttribute("data-animate")).x;
-    // Salta al final: x debe ser mayor (más desplazamiento)
+    const xDespues = getTrack().style.transform;
     expect(xDespues).not.toBe(xInicial);
   });
 
-  it("avanza automáticamente cada 3 segundos", () => {
+  it("avanza automáticamente cada 3.5 segundos", () => {
     render(<OpinionesCarrusel />);
-    const animContainer = document.querySelector("[data-animate]");
-    const xAntes = JSON.parse(animContainer.getAttribute("data-animate")).x;
+    const xAntes = getTrack().style.transform;
 
     act(() => {
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(3500);
     });
 
-    const xDespues = JSON.parse(animContainer.getAttribute("data-animate")).x;
+    const xDespues = getTrack().style.transform;
     expect(xDespues).not.toBe(xAntes);
   });
 
   it("vuelve al índice 0 cuando llega al último grupo en el avance automático", () => {
     render(<OpinionesCarrusel />);
-    const animContainer = document.querySelector("[data-animate]");
 
-    // Avanzamos manualmente hasta el final (8 opiniones, 4 visibles → 4 pasos)
+    // 8 opiniones, 4 visibles → 4 pasos llegan al final; el siguiente vuelve a 0.
     for (let i = 0; i < 4; i++) {
       fireEvent.click(screen.getByText("→"));
     }
-    // Ahora estamos al final (index + cardsVisibles >= opiniones.length)
     fireEvent.click(screen.getByText("→"));
 
-    const xAlFinal = JSON.parse(animContainer.getAttribute("data-animate")).x;
-    // Debe haber vuelto a x: "-0%" (índice 0)
-    expect(xAlFinal).toBe("-0%");
+    expect(getTrack().style.transform).toBe("translateX(0%)");
   });
 });

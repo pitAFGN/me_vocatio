@@ -13,8 +13,6 @@ export default function NavbarProfile() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
-    const userName = 'Samuel Moreno';
-    const userRole = 'Estudiante ADSO';
     const isCreatePage = pathname.startsWith('/creacion_recursos');
     const showCreateButton = pathname.startsWith('/dashboard') && !isCreatePage;
 

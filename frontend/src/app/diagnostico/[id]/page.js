@@ -1,38 +1,62 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { getProfessionById } from '@/app/data/professions';
+import { API_URL } from '@/lib/constants';
+import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function DiagnosticoPage() {
   const router = useRouter();
+  const params = useParams();
+  const profession = getProfessionById(params?.id);
   const [preguntas, setPreguntas] = useState([]);
+  const [testId, setTestId] = useState(null);
   const [respuestasUsuario, setRespuestasUsuario] = useState({});
   const [cargandoTest, setCargandoTest] = useState(true);
   const [cargandoEnvio, setCargandoEnvio] = useState(false);
   const [error, setError] = useState(null);
 
-  // --- 1. EFECTO AL CARGAR: Generar el test con Groq ---
   useEffect(() => {
     const generarTest = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
       try {
-        const response = await fetch('http://localhost:3001/api/generar', {
+        const response = await fetch(`${API_URL}/api/generar`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
           body: JSON.stringify({
-            professionTitle: "Ingeniería de Software",
-            professionArea: "Tecnología"
+            profesion_title: profession?.title,
+            profesion_area: profession?.area
           })
         });
 
         const data = await response.json();
 
-        if (data.exito && data.data && data.data.preguntas) {
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('token');
+            router.push('/login');
+            return;
+          }
+          throw new Error(data.error || data.message || `Error del servidor (${response.status})`);
+        }
+
+        if (data.exito && data.data?.test_id && data.data.preguntas) {
+          setTestId(data.data.test_id);
           setPreguntas(data.data.preguntas);
         } else {
-          setError("No se pudieron generar las preguntas. Intenta más tarde.");
+          setError(data.error || "El servidor no devolvió un test válido.");
         }
       } catch (err) {
-        setError("Error de conexión al generar el test.");
+        setError(err.message || "Error de conexión al generar el test.");
         console.error(err);
       } finally {
         setCargandoTest(false);
@@ -40,9 +64,8 @@ export default function DiagnosticoPage() {
     };
 
     generarTest();
-  }, []);
+  }, [profession?.area, profession?.title, router]);
 
-  // --- 2. MANEJADOR DE RESPUESTAS ---
   const manejarCambioRespuesta = (preguntaId, opcionIndex) => {
     setRespuestasUsuario(prev => ({
       ...prev,
@@ -50,15 +73,15 @@ export default function DiagnosticoPage() {
     }));
   };
 
-  // --- 3. FINALIZAR Y GUARDAR ---
   const finalizarDiagnostico = async () => {
-    if (Object.keys(respuestasUsuario).length < preguntas.length) {
-      if (!confirm("Aún no has respondido todas las preguntas. ¿Deseas finalizar de todas formas?")) {
-        return;
-      }
+    const totalRespondidas = Object.keys(respuestasUsuario).length;
+    if (totalRespondidas < preguntas.length) {
+      const confirmed = window.confirm(
+        `Has respondido ${totalRespondidas} de ${preguntas.length} preguntas. ¿Deseas finalizar de todas formas?`
+      );
+      if (!confirmed) return;
     }
 
-    // Obtenemos el token JWT guardado en el navegador al iniciar sesión
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -67,26 +90,36 @@ export default function DiagnosticoPage() {
       return;
     }
 
+    if (!testId) {
+      alert("No se encontró un test válido. Recarga la página e inténtalo de nuevo.");
+      return;
+    }
+
     setCargandoEnvio(true);
     try {
-      // Enviamos la petición con el token en los headers de autorización (Bearer Token)
-      const response = await fetch('http://localhost:3001/api/evaluar', {
+      const response = await fetch(`${API_URL}/api/evaluar`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          profesion_title: "Ingeniería de Software",
-          level: "Intermedio"
+          test_id: testId,
+          respuestas: Object.entries(respuestasUsuario).map(([pregunta_id, opcion_idx]) => ({
+            pregunta_id,
+            opcion_idx
+          }))
         })
       });
 
       const data = await response.json();
 
       if (data.exito && data.evaluation_id) {
+        if (Array.isArray(data.unlocked) && data.unlocked.length > 0) {
+          localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.unlocked));
+        }
         router.push(
-          `/recomendacion?profesion=Ingeniería%20de%20Software&nivel=Intermedio&evaluation_id=${data.evaluation_id}`
+          `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&evaluation_id=${data.evaluation_id}`
         );
       } else {
         alert("Hubo un error al registrar la evaluación: " + (data.error || data.mensaje || "Error desconocido"));
@@ -99,40 +132,72 @@ export default function DiagnosticoPage() {
     }
   };
 
-  // --- RENDERIZADO ---
+  if (!profession) {
+    return <div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>Vocación no encontrada.</div>;
+  }
+
   if (cargandoTest) {
-    return <div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>Cargando preguntas del test...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
+          <p className="text-sm font-semibold">Cargando preguntas del test...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div style={{ padding: '2rem', color: '#ff6b6b', textAlign: 'center' }}>Error: {error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-red-500 dark:text-red-400 transition-colors duration-300">
+        <p className="text-sm font-semibold">Error: {error}</p>
+      </div>
+    );
   }
 
-  return (
-    <div style={{ padding: '2rem', color: '#fff', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h1>Cuestionario de Diagnóstico: Ingeniería de Software</h1>
-      <p style={{ marginBottom: '2rem' }}>Responde las siguientes preguntas para evaluar tu nivel técnico.</p>
+  const respondidas = Object.keys(respuestasUsuario).length;
+  const total = preguntas.length;
 
-      {/* LISTADO DE PREGUNTAS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white p-6 pt-24 max-w-3xl mx-auto font-sans transition-colors duration-300">
+      <button
+        onClick={() => router.push("/dashboard")}
+        className="flex items-center gap-2 px-4 py-2.5 mb-8 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-indigo-950 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
+      >
+        <ArrowLeft className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+        Volver al Dashboard
+      </button>
+
+      <h1 className="text-2xl font-bold mb-2">Cuestionario de Diagnóstico</h1>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">Responde las siguientes preguntas para evaluar tu nivel técnico.</p>
+      <p className="text-indigo-500 dark:text-indigo-400 text-xs font-semibold mb-8">{respondidas} / {total} respondidas</p>
+
+      <div className="flex flex-col gap-6">
         {preguntas.map((pregunta, index) => (
-          <div key={pregunta.id} style={{ background: '#1e293b', padding: '1.5rem', borderRadius: '8px' }}>
-            <p style={{ fontWeight: 'bold', marginBottom: '1rem' }}>
+          <div key={pregunta.id} className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50 p-5 rounded-2xl">
+            <p className="font-bold mb-4 text-sm">
               {index + 1}. {pregunta.enunciado}
             </p>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+
+            <div className="flex flex-col gap-2">
               {pregunta.opciones.map((opcion, opcionIndex) => (
-                <label key={opcionIndex} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <label
+                  key={opcionIndex}
+                  className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                    respuestasUsuario[pregunta.id] === opcionIndex
+                      ? "bg-indigo-50 dark:bg-indigo-600/20 border-indigo-300 dark:border-indigo-500/50 text-slate-900 dark:text-white"
+                      : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
+                  }`}
+                >
                   <input
                     type="radio"
                     name={`pregunta_${pregunta.id}`}
                     value={opcionIndex}
                     checked={respuestasUsuario[pregunta.id] === opcionIndex}
                     onChange={() => manejarCambioRespuesta(pregunta.id, opcionIndex)}
-                    style={{ accentColor: '#38bdf8' }}
+                    className="accent-indigo-500"
                   />
-                  {opcion}
+                  <span className="text-sm">{opcion}</span>
                 </label>
               ))}
             </div>
@@ -140,24 +205,27 @@ export default function DiagnosticoPage() {
         ))}
       </div>
 
-      {/* BOTÓN FINALIZAR */}
-      <div style={{ textAlign: 'center', marginTop: '3rem', marginBottom: '2rem' }}>
-        <button 
+      <div className="text-center mt-10 mb-8">
+        <button
           onClick={finalizarDiagnostico}
           disabled={cargandoEnvio}
-          style={{
-            background: '#38bdf8', 
-            color: '#0f172a', 
-            border: 'none', 
-            padding: '1rem 2rem', 
-            fontWeight: 'bold', 
-            borderRadius: '8px', 
-            cursor: 'pointer',
-            fontSize: '1.1rem',
-            opacity: cargandoEnvio ? 0.7 : 1
-          }}
+          className={`inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl transition-all text-sm ${
+            cargandoEnvio
+              ? "bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-400 cursor-not-allowed"
+              : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 cursor-pointer"
+          }`}
         >
-          {cargandoEnvio ? 'Guardando Evaluación...' : 'Finalizar y Ver Recursos Personalizados'}
+          {cargandoEnvio ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Guardando Evaluación...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-4 h-4" />
+              Finalizar y Ver Recursos Personalizados
+            </>
+          )}
         </button>
       </div>
     </div>
