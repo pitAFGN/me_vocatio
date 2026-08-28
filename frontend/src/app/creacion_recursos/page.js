@@ -8,13 +8,10 @@ import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
 import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCustomizationPanel";
 import ResourceStructurePanel from "@/components/creacion_recursos/ResourceStructurePanel";
 import AnalyticsPanel from "@/components/creacion_recursos/AnalyticsPanel";
-<<<<<<< HEAD
-import { usePayment } from "@/hooks/usePayment";
-=======
 import PlanSelectionModal from "@/components/PlanSelectionModal";
+import usePayment from "@/hooks/usePayment";
 
 const FREE_RESOURCE_LIMIT = 3;
->>>>>>> origin/dev
 
 const metricCards = [
   { label: "Estudiantes totales", value: "2.4K", delta: "+12.4%" },
@@ -80,26 +77,15 @@ export default function CreacionRecursosPage() {
 
   const isPremium = plan === "premium";
 
-<<<<<<< HEAD
   const handlePublicarYPagar = () => {
     setMensaje(null);
-    pagarCurso(
-      {
-        title: curso.nombre,
-        description: curso.descripcion,
-        category: curso.category,
-        level: curso.level,
-        modality: curso.modality,
-        duration_hours: curso.duration_hours ? Number(curso.duration_hours) : undefined,
-        price: Number(curso.price),
-      },
-      {
-        onExito: () => setMensaje({ tipo: "ok", texto: "¡Pago aprobado! Tu curso quedó activo." }),
-        onError: (msg) => setMensaje({ tipo: "error", texto: msg }),
-        onCerrado: () => setMensaje({ tipo: "info", texto: "Cerraste la ventana de pago sin terminar." }),
-      }
-    );
-=======
+    pagarCurso(curso, {
+      onExito: (transaccion) => setMensaje({ tipo: "ok", texto: "Pago procesado exitosamente." }),
+      onError: (err) => setMensaje({ tipo: "error", texto: err }),
+      onCerrado: () => setMensaje({ tipo: "info", texto: "Se cerró el widget de pago." })
+    });
+  };
+
   const cambiarPlan = (nextPlan) => {
     setPlan(nextPlan);
     window.localStorage.setItem("mevocatio_plan", nextPlan);
@@ -119,7 +105,6 @@ export default function CreacionRecursosPage() {
         type: "Video + guía práctica",
       },
     ]);
->>>>>>> origin/dev
   };
 
   const toggleBadge = (badge) => {

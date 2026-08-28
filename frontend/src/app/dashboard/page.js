@@ -11,15 +11,31 @@ import { PROFESSIONS } from "@/app/data/professions";
 
 import SidebarNav from "@/components/SidebarNav";
 import DashboardHome from "@/components/DashboardHome";
+import PlanSelectionModal from "@/components/PlanSelectionModal";
 
 export default function ExecutiveDashboard() {
   const router = useRouter();
   const { logout } = useAuth();
   const { loading } = useProtectedRoute();
 
+  const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const { savedIds, toggleSave } = useFavorites();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const plan = localStorage.getItem("mevocatio_plan");
+      if (!plan) {
+        setMostrarPlanModal(true);
+      }
+    }
+  }, []);
+
+  const handlePlanSelect = (plan) => {
+    localStorage.setItem("mevocatio_plan", plan);
+    setMostrarPlanModal(false);
+  };
 
   // Datos del perfil
   const [profileData] = useState({
@@ -82,6 +98,10 @@ export default function ExecutiveDashboard() {
 
         </div>
       </main>
+
+      {mostrarPlanModal && (
+        <PlanSelectionModal onSelect={handlePlanSelect} />
+      )}
     </div>
   );
 }
