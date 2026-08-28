@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getProfessionById } from '@/app/data/professions';
 import { API_URL } from '@/lib/constants';
@@ -16,8 +16,12 @@ export default function DiagnosticoPage() {
   const [cargandoTest, setCargandoTest] = useState(true);
   const [cargandoEnvio, setCargandoEnvio] = useState(false);
   const [error, setError] = useState(null);
+  const peticionInicialRealizada = useRef(false);
 
   useEffect(() => {
+    if (peticionInicialRealizada.current) return;
+    peticionInicialRealizada.current = true;
+
     const generarTest = async () => {
       const token = localStorage.getItem('token');
       if (!token) {

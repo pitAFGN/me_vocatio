@@ -20,7 +20,6 @@ export default function Insignias() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    localStorage.removeItem("mevocatio_new_achievements");
     if (loading) return;
     fetch(`${API_URL}/api/achievements`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -35,6 +34,7 @@ export default function Insignias() {
           throw new Error(data.message || data.error || "No se pudieron cargar las insignias");
         }
         setInsignias(data);
+        localStorage.removeItem("mevocatio_new_achievements");
       })
       .catch((requestError) => setError(requestError.message));
   }, [loading]);

@@ -59,11 +59,11 @@ describe("useAuth", () => {
     );
   });
 
-  it("logout: elimina el token de localStorage y redirige a /login", () => {
+  it("logout: elimina el token de localStorage y redirige a /login", async () => {
     localStorage.setItem("token", "jwt-token-123");
     const { result } = renderHook(() => useAuth());
 
-    result.current.logout();
+    await result.current.logout();
 
     expect(localStorage.getItem("token")).toBeNull();
     expect(replace).toHaveBeenCalledWith("/login");

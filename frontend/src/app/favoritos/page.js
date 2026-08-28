@@ -6,10 +6,20 @@ import { Bookmark, Compass, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useAuth } from "@/hooks/useAuth";
+import { useProtectedRoute } from "@/hooks/useRouteGuard";
 
 export default function FavoritosPage() {
     const { favorites } = useFavorites();
     const { logout } = useAuth();
+    const { loading } = useProtectedRoute();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0b14] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
+                Verificando acceso...
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 flex transition-colors duration-300">

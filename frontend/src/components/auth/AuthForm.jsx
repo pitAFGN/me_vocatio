@@ -9,7 +9,7 @@ const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), {
   loading: () => <div className="h-[78px]" />,
 });
 import { RECAPTCHA_SITE_KEY } from "@/lib/constants";
-import { supabase, isGoogleLoginEnabled } from "@/lib/supabase";
+import { getSupabase, isGoogleLoginEnabled } from "@/lib/supabase";
 import { validarCamposLogin, validarCamposRegistro } from "@/lib/validations/auth";
 import ModalOlvidePassword from "@/components/ModalOlvidePassword";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
@@ -109,7 +109,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         setMostrarPlan(true);
       } else {
         await login(formData.email, formData.password);
-        window.location.href = "/dashboard";
       }
     } catch (err) {
       const msg = err.message || "";
@@ -142,8 +141,6 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       await googleLogin(user.email, nombreGoogle, session.access_token);
       procesandoOAuth.current = false;
       setGoogleEnviando(false);
-
-      window.location.href = "/dashboard";
     } catch (err) {
       setErrorGeneral(err.message || "No se pudo completar el inicio de sesión con Google.");
       procesandoOAuth.current = false;
@@ -156,8 +153,9 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
   });
 
   useEffect(() => {
-    if (!supabase) return;
     let active = true;
+    let subscription = null;
+    let intervalo = null;
 
     const esRetornoOAuth =
       window.location.search.includes("code=") ||
@@ -166,35 +164,51 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     if (!esRetornoOAuth) return;
 
     const procesarSesion = async () => {
-      const { data } = await supabase.auth.getSession();
+      const sb = await getSupabase();
+      if (!sb || !active) return;
+      const { data } = await sb.auth.getSession();
       if (active && data.session && !procesandoOAuth.current) {
         googleHandlerRef.current(data.session);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (active && event === "SIGNED_IN" && session) {
-        googleHandlerRef.current(session);
-      }
-    });
+    const init = async () => {
+      const sb = await getSupabase();
+      if (!sb || !active) return;
 
-    procesarSesion();
-    const intervalo = setInterval(procesarSesion, 300);
-    setTimeout(() => clearInterval(intervalo), 6000);
+      const { data: { subscription: sub } } = sb.auth.onAuthStateChange((event, session) => {
+        if (active && event === "SIGNED_IN" && session) {
+          googleHandlerRef.current(session);
+        }
+      });
+      subscription = sub;
+
+      procesarSesion();
+      intervalo = setInterval(procesarSesion, 300);
+      setTimeout(() => clearInterval(intervalo), 6000);
+    };
+
+    init();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
-      clearInterval(intervalo);
+      if (subscription) subscription.unsubscribe();
+      if (intervalo) clearInterval(intervalo);
     };
   }, []);
 
   const handleGoogleLogin = async () => {
-    if (!supabase || googleEnviando) return;
+    if (googleEnviando) return;
     setErrorGeneral("");
 
+    const sb = await getSupabase();
+    if (!sb) {
+      setErrorGeneral("El inicio de sesión con Google no está disponible.");
+      return;
+    }
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error } = await sb.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/login`,

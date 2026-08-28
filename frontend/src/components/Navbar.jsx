@@ -39,14 +39,17 @@ export default function Navbar() {
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-3 flex justify-between items-center border-b shadow-2xl backdrop-blur-md bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-slate-800/80 transition-colors duration-300">
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center border rounded-xl relative overflow-hidden bg-slate-900/90 border-slate-700/70 shadow-lg shrink-0">
-              <Image
-                src="/layout3.png"
-                alt="Me Vocatio Diamond"
-                width={120}
-                height={120}
-                className="object-contain scale-[2.3] translate-y-[0.5px]"
-              />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center border rounded-xl relative overflow-hidden bg-slate-900/90 border-slate-700/70 shadow-lg shrink-0">
+              <div className="absolute inset-0 scale-[1.8]">
+                <Image
+                  src="/layout3.png"
+                  alt="Me Vocatio Diamond"
+                  fill
+                  sizes="64px"
+                  priority
+                  className="object-cover"
+                />
+              </div>
             </div>
             <span className="text-base sm:text-lg md:text-xl font-bold tracking-tight bg-clip-text bg-gradient-to-r text-transparent from-white via-slate-100 to-slate-300 transition-colors truncate">
               MeVocatio
@@ -68,19 +71,22 @@ export default function Navbar() {
       <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
           <div
-            className={`w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center border rounded-xl relative overflow-hidden transition-all group-hover:scale-105 active:scale-95 shadow-lg shrink-0 ${
+            className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center border rounded-xl relative overflow-hidden transition-all group-hover:scale-105 active:scale-95 shadow-lg shrink-0 ${
               isDarkMode
                 ? "bg-slate-900/90 border-slate-700/70 group-hover:border-purple-500/50"
                 : "bg-white border-slate-300 group-hover:border-purple-500"
             }`}
           >
-            <Image
-              src="/layout3.png"
-              alt="Me Vocatio Diamond"
-              width={120}
-              height={120}
-              className="object-contain scale-[2.3] transition-transform group-hover:scale-[2.4] translate-y-[0.5px]"
-            />
+            <div className="absolute inset-0 scale-[1.8]">
+              <Image
+                src="/layout3.png"
+                alt="Me Vocatio Diamond"
+                fill
+                sizes="64px"
+                priority
+                className="object-cover"
+              />
+            </div>
           </div>
 
           <span

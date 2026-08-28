@@ -48,13 +48,13 @@ export default function ExecutiveDashboard() {
       <SidebarNav logout={logout} />
 
       {/* Contenedor principal adaptado para celulares y escritorios */}
-      <main className="md:pl-64 pt-6 sm:pt-8 px-4 sm:px-6 md:px-10 pb-16 relative z-10">
+      <main className="md:pl-64 pt-8 sm:pt-10 md:pt-12 px-4 sm:px-6 md:px-10 pb-16 relative z-10">
         <div className="max-w-7xl mx-auto">
 
           {/* Header con respiro y protección contra desbordamiento */}
-          <header className="flex justify-between items-start gap-4 mb-8 sm:mb-10">
+          <header className="flex justify-between items-start gap-4 mb-10 sm:mb-12">
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
                 Welcome,
               </h1>
               <p className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 dark:from-indigo-200 dark:via-purple-300 dark:to-indigo-400 bg-clip-text text-transparent truncate">

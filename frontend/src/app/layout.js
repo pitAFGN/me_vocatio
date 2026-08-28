@@ -30,7 +30,7 @@ export default function RootLayout({ children }) {
     <html lang="es" suppressHydrationWarning>
       <ThemeProvider>
         <Navbar />
-        <main className="mt-[72px] min-h-[calc(100vh-72px)]">
+        <main className="mt-[88px] min-h-[calc(100vh-88px)]">
           {children}
         </main>
       </ThemeProvider>

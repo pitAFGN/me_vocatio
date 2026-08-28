@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import PlanSelector from "@/components/creacion_recursos/PlanSelector";
@@ -44,12 +44,15 @@ const backgroundOptions = [
 const badgeOptions = ["Elite", "Top 10%", "Nuevo", "Bestseller", "En tendencia"];
 
 export default function CreacionRecursosPage() {
-  const [plan, setPlan] = useState(() => {
-    if (typeof window === "undefined") return "free";
-    const savedPlan = window.localStorage.getItem("mevocatio_plan");
-    return savedPlan === "premium" ? "premium" : "free";
-  });
+  const [plan, setPlan] = useState("free");
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
+
+  useEffect(() => {
+    const savedPlan = window.localStorage.getItem("mevocatio_plan");
+    if (savedPlan === "premium") {
+      setPlan("premium");
+    }
+  }, []);
   const [recursos, setRecursos] = useState([
     { id: 1, title: "Introducción al diseño UX", type: "Video + guía práctica" },
     { id: 2, title: "Investigación de usuarios", type: "Video + guía práctica" },

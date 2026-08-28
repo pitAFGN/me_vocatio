@@ -76,7 +76,7 @@ export default function DashboardHome({
                     <h4 className="text-lg font-bold text-white mb-2">Profile Analytics</h4>
                     <p className="text-sm text-slate-400 mb-6">Tu workspace cuenta con acceso ilimitado a las rutas de desarrollo.</p>
                     <button
-                        onClick={() => router.push("/vocacion/analisis-y-desarrollo-de-software")}
+                        onClick={() => router.push("/vocacion/desarrollador-de-software")}
                         className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-indigo-600/30"
                     >
                         Ver Carrera Principal
