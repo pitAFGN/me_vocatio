@@ -1,5 +1,6 @@
 const authService = require("../services/auth.service");
 const { setAuthCookies } = require("../utils/authCookies");
+const { storeRefreshToken } = require("../utils/sessionStore");
 
 const googleSyncController = async (req, res) => {
   try {
@@ -13,9 +14,9 @@ const googleSyncController = async (req, res) => {
       email?.split("@")[0] ||
       "Usuario";
 
-    // Llamamos al servicio para encontrar o registrar al usuario y obtener su JWT
     const { accessToken, refreshToken, user } = await authService.encontrarOCrearUsuarioGoogle(email, nombre);
-    setAuthCookies(res, accessToken, refreshToken);
+    const sessionId = setAuthCookies(res, accessToken);
+    await storeRefreshToken(sessionId, refreshToken);
 
     return res.status(200).json({
       message: "Sincronización con Google exitosa",
