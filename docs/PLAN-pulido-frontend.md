@@ -19,6 +19,21 @@ No toca `DiamanteCanvas` (3D/glb), `BackgroundStars` (estrellas) ni el hero de `
 - [x] **Perf — Sesión no bloqueante:** `auth.service.js` con `fetchConTimeout` (6 s, AbortController)
   en `me`/`refresh` y dedupe de `me()` (un solo request en vuelo compartido por Navbar + guards).
   Evita que el dashboard se quede en "Verificando acceso..." si el backend cuelga.
+- [x] **Perf — Dedupe three.js:** `ThreeScene.jsx` unifica `DiamanteCanvas` + `BackgroundStars` en un
+  solo loadable → la landing descarga UN chunk de three (~0.94 MB) en vez de dos (~1.75 MB), lazy.
+- [x] **Layout dashboard:** contenedor en bloque (sin `flex`) para que `max-w-7xl mx-auto` centre el
+  contenido; `flex` solo en favoritos/insignias vía `containerClassName`.
+
+### Medición de carga (local)
+
+| Caso | HTML | Chunk diamante (944 KB) |
+|---|---|---|
+| Dev frío (1.ª visita) | ~5 s | ~15-20 s (compila three.js on-demand) |
+| Dev caliente | ~80 ms | instantáneo (cacheado) |
+| Producción (`npm start`) | ~60 ms | ~400 ms |
+
+La "bolita" de 15-20 s es la compilación dev del chunk 3D en el primer vistazo tras
+arrancar el servidor; no existe en producción. Probar con `npm run review`.
 
 ## A1 — LoadingScreen único
 
