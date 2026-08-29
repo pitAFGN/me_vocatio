@@ -46,6 +46,7 @@ export default function Insignias() {
   return (
     <DashboardLayout
       logout={logout}
+      containerClassName="flex"
       mainClassName="md:pl-64 max-w-5xl mx-auto w-full p-6 md:p-10 pt-12"
       fondoClassName="bg-slate-50 dark:bg-[#0a0b14]"
     >

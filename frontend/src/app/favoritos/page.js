@@ -19,7 +19,7 @@ export default function FavoritosPage() {
     }
 
     return (
-        <DashboardLayout logout={logout}>
+        <DashboardLayout logout={logout} containerClassName="flex">
             {/* Cabecera de la Sección con Botón de Regreso */}
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
