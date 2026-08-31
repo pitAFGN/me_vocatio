@@ -10,6 +10,8 @@ import { PROFESSIONS } from "@/app/data/professions";
 
 import SidebarNav from "@/components/SidebarNav";
 import DashboardHome from "@/components/DashboardHome";
+import LevelUpModal from "@/components/LevelUpModal";
+import AchievementToast from "@/components/AchievementToast";
 
 export default function ExecutiveDashboard() {
   const router = useRouter();
@@ -20,12 +22,75 @@ export default function ExecutiveDashboard() {
   const [page, setPage] = useState(0);
   const [savedIds, setSavedIds] = useState([]);
 
-  // Datos del perfil
-  const [profileData] = useState({
-    name: "Samuel Moreno",
-    tier: "Full Stack Developer",
-    location: "Medellín, Colombia"
+  const [profileData, setProfileData] = useState({
+    name: "Cargando...",
+    tier: "Full Stack Developer", // Dummy por ahora
+    location: "Medellín, Colombia",
+    xp: 0,
+    level: 1,
+    current_streak: 0
   });
+
+  const fetchUser = async () => {
+    try {
+      const { authService } = require("@/services/auth.service");
+      const userData = await authService.me();
+      if (userData && userData.user) {
+        setProfileData(prev => ({
+          ...prev,
+          name: userData.user.name,
+          xp: userData.user.xp || 0,
+          level: userData.user.level || 1,
+          current_streak: userData.user.current_streak || 0
+        }));
+      }
+    } catch (err) {
+      console.error("Error fetching user data", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading) fetchUser();
+  }, [loading]);
+
+  const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false);
+  const [levelUpData, setLevelUpData] = useState(1);
+  const [newAchievements, setNewAchievements] = useState([]);
+
+  const handleAddXp = async () => {
+    try {
+      const { API_URL } = require("@/lib/constants");
+      
+      const res = await fetch(`${API_URL}/api/users/add-xp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({ xpToAdd: 500 })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setProfileData(prev => ({
+          ...prev,
+          xp: data.xp,
+          level: data.level
+        }));
+
+        if (data.leveledUp) {
+          setLevelUpData(data.level);
+          setIsLevelUpModalOpen(true);
+        }
+
+        if (data.unlockedAchievements && data.unlockedAchievements.length > 0) {
+          setNewAchievements(data.unlockedAchievements);
+        }
+      }
+    } catch (err) {
+      console.error("Error adding XP", err);
+    }
+  };
 
   // Filtrado de profesiones según la barra de búsqueda
   const filteredProfessions = PROFESSIONS.filter((job) =>
@@ -84,6 +149,18 @@ export default function ExecutiveDashboard() {
             savedIds={savedIds}
             toggleSave={toggleSave}
             router={router}
+            handleAddXp={handleAddXp}
+          />
+
+          <LevelUpModal 
+            isOpen={isLevelUpModalOpen} 
+            level={levelUpData} 
+            onClose={() => setIsLevelUpModalOpen(false)} 
+          />
+
+          <AchievementToast 
+            achievementCodes={newAchievements} 
+            onClose={() => setNewAchievements([])} 
           />
 
         </div>

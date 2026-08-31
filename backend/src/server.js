@@ -29,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", recomendationRoutes); // <--- Corregido y unificado aquí (maneja /generar, /evaluar y /recomendar)
 app.use("/api/courses", courseRoutes);
 app.use("/api/achievements", achievementRoutes);
+app.use("/api/users", require("./routes/user.routes"));
 
 /* ─── Ruta no encontrada ─── */
 app.use((req, res) => {

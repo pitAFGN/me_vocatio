@@ -8,8 +8,10 @@ import {
     ArrowRight,
     Search,
     Bookmark,
-    ExternalLink
+    ExternalLink,
+    Flame
 } from "lucide-react";
+import XpLevelCard from "./XpLevelCard";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -22,7 +24,8 @@ export default function DashboardHome({
     filteredProfessions,
     savedIds,
     toggleSave,
-    router
+    router,
+    handleAddXp
 }) {
     const currentProfessions = filteredProfessions.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
@@ -35,51 +38,40 @@ export default function DashboardHome({
                 <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-8 lg:col-span-2 flex flex-col justify-between relative overflow-hidden shadow-xl">
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-full bg-indigo-950/80 flex items-center justify-center border border-indigo-500/30 text-indigo-400">
-                                <CheckCircle2 className="w-5 h-5" />
+                            <div className="w-10 h-10 rounded-full bg-cyan-950/80 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                                <Sparkles className="w-5 h-5" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white">{profileData.tier}</h3>
-                                <p className="text-xs text-slate-400">Ubicación: {profileData.location}</p>
+                                <h3 className="text-lg font-bold text-white tracking-wide">Progresión Global</h3>
+                                <p className="text-xs text-slate-400">Tu avance y experiencia en la plataforma</p>
                             </div>
                         </div>
 
-                        <div className="mt-8">
-                            <div className="flex justify-between items-end mb-3">
-                                <span className="text-xs text-slate-400 tracking-wider font-semibold uppercase">Roadmap Progress</span>
-                                <span className="text-lg text-indigo-400 font-bold">85%</span>
-                            </div>
-
-                            {/* Barra con puntos/checkpoints estáticos limpios */}
-                            <div className="relative h-2 w-full bg-slate-800 rounded-full overflow-visible mb-6">
-                                <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-600 to-purple-500 rounded-full w-[85%] shadow-lg"></div>
-
-                                <div className="absolute inset-0 flex justify-between items-center px-1">
-                                    <div className="w-3 h-3 rounded-full bg-indigo-400 border-2 border-[#0a0b14] z-10 shadow-md"></div>
-                                    <div className="w-3 h-3 rounded-full bg-indigo-400 border-2 border-[#0a0b14] z-10 shadow-md"></div>
-                                    <div className="w-3 h-3 rounded-full bg-indigo-400 border-2 border-[#0a0b14] z-10 shadow-md"></div>
-                                    <div className="w-3 h-3 rounded-full bg-indigo-400 border-2 border-[#0a0b14] z-10 shadow-md"></div>
-                                    <div className="w-3 h-3 rounded-full bg-slate-600 border-2 border-[#0a0b14] z-10 shadow-md"></div>
-                                </div>
-                            </div>
-
-                            <p className="text-xs text-slate-400">15% restante para completar los hitos actuales de la plataforma.</p>
-                        </div>
+                        <XpLevelCard xp={profileData.xp} level={profileData.level} />
                     </div>
                 </div>
 
-                {/* Action Card */}
-                <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-8 flex flex-col justify-center items-center text-center shadow-xl">
-                    <div className="w-16 h-16 rounded-full bg-purple-950/40 flex items-center justify-center mb-6 border border-purple-500/30 text-purple-400">
-                        <Briefcase className="w-8 h-8" />
+                {/* Action Card / Analytics */}
+                <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-8 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl"></div>
+                    <div className="w-16 h-16 rounded-full bg-orange-950/40 flex items-center justify-center mb-6 border border-orange-500/30 text-orange-400 z-10">
+                        <Flame className="w-8 h-8" />
                     </div>
-                    <h4 className="text-lg font-bold text-white mb-2">Profile Analytics</h4>
-                    <p className="text-sm text-slate-400 mb-6">Tu workspace cuenta con acceso ilimitado a las rutas de desarrollo.</p>
+                    <h4 className="text-lg font-bold text-white mb-2 z-10">Racha de {profileData.current_streak} Días</h4>
+                    <p className="text-sm text-slate-400 mb-6 z-10">
+                        ¡Mantén tu racha activa ingresando todos los días! Próxima meta a alcanzar nivel {profileData.level + 1}.
+                    </p>
                     <button
                         onClick={() => router.push("/vocacion/analisis-y-desarrollo-de-software")}
-                        className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-indigo-600/30"
+                        className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
                     >
-                        Ver Carrera Principal
+                        Continuar Carrera
+                    </button>
+                    <button
+                        onClick={handleAddXp}
+                        className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-700 z-10"
+                    >
+                        [TEST] Sumar 500 XP
                     </button>
                 </div>
 

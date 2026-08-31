@@ -114,6 +114,9 @@ const login = async (email, password) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      xp: user.xp || 0,
+      level: user.level || 1,
+      current_streak: user.current_streak || 0
     },
   };
 };
@@ -260,7 +263,14 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
   return {
     accessToken,
     refreshToken,
-    user: { id: user.id, name: user.name, email: user.email },
+    user: { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email,
+      xp: user.xp || 0,
+      level: user.level || 1,
+      current_streak: user.current_streak || 0
+    },
   };
 };
 

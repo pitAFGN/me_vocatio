@@ -10,6 +10,10 @@ const achievementNames = {
   email_verified: "Primer Paso",
   premium_member: "Impulso Premium",
   focused: "Enfoque Total",
+  level_5: "Iniciado Vocacional (Nvl 5)",
+  level_10: "Explorador Dedicado (Nvl 10)",
+  level_25: "Estratega de Carrera (Nvl 25)",
+  level_50: "Maestro de Vocación (Nvl 50)",
 };
 
 export default function AchievementToast({ achievementCodes, onClose, duration = 4500 }) {
