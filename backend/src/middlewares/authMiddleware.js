@@ -22,4 +22,24 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
-module.exports = authenticateToken;   
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = (authHeader && authHeader.split(' ')[1]) || getAuthCookies(req)[ACCESS_COOKIE];
+
+  if (token) {
+    try {
+      const decoded = verifyAccessToken(token);
+      if (decoded && decoded.id) {
+        req.user = decoded;
+      }
+    } catch {
+      // Ignora error si el token expiró o es inválido en modo opcional
+    }
+  }
+  next();
+};
+
+authenticateToken.authenticateToken = authenticateToken;
+authenticateToken.optionalAuth = optionalAuth;
+
+module.exports = authenticateToken;

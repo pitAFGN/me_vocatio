@@ -16,7 +16,13 @@ export default function SidebarNav({ logout }) {
 
         updateIndicator();
         window.addEventListener("storage", updateIndicator);
-        return () => window.removeEventListener("storage", updateIndicator);
+        window.addEventListener("local-storage-update", updateIndicator);
+        window.addEventListener("focus", updateIndicator);
+        return () => {
+            window.removeEventListener("storage", updateIndicator);
+            window.removeEventListener("local-storage-update", updateIndicator);
+            window.removeEventListener("focus", updateIndicator);
+        };
     }, []);
 
     return (
@@ -49,9 +55,13 @@ export default function SidebarNav({ logout }) {
 
                         <Link href="/insignias" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/insignias" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
                             <Award className="w-5 h-5" />
-                            <span className="flex items-center gap-2">
-                                INSIGNIAS
-                                {hasNewAchievements && <strong className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] text-white">!</strong>}
+                            <span className="flex items-center justify-between w-full">
+                                <span>INSIGNIAS</span>
+                                {hasNewAchievements && (
+                                    <strong className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-black text-white shadow-lg shadow-red-500/50 animate-pulse">
+                                        !
+                                    </strong>
+                                )}
                             </span>
                         </Link>
 
