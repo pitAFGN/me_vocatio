@@ -38,11 +38,31 @@ export default function ExecutiveDashboard() {
   };
 
   // Datos del perfil
-  const [profileData] = useState({
-    name: "Samuel Moreno",
+  const [profileData, setProfileData] = useState({
+    name: "",
     tier: "Full Stack Developer",
     location: "Medellín, Colombia"
   });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { authService } = await import("@/services/auth.service");
+        const res = await authService.me();
+        if (res?.user) {
+          setProfileData(prev => ({
+            ...prev,
+            name: res.user.name || ""
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching user for dashboard:", error);
+      }
+    };
+    if (!loading) {
+      fetchUser();
+    }
+  }, [loading]);
 
   // Filtrado de profesiones según la barra de búsqueda
   const filteredProfessions = PROFESSIONS.filter((job) =>
