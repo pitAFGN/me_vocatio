@@ -50,8 +50,37 @@ const recomendar = async (req, res) => {
   }
 };
 
+const analizarRecurso = async (req, res) => {
+  const { titulo, tipo, plataforma, url, descripcion, vocation, nivel, pregunta_usuario } = req.body;
+
+  if (!titulo) {
+    return res.status(400).json({ error: "El título del recurso es obligatorio" });
+  }
+
+  try {
+    const analisis = await recomendationService.analizarRecursoConIA({
+      titulo,
+      tipo,
+      plataforma,
+      url,
+      descripcion,
+      vocation,
+      nivel,
+      pregunta_usuario
+    });
+    res.json({
+      exito: true,
+      data: analisis
+    });
+  } catch (error) {
+    console.error("Error al analizar recurso con IA:", error);
+    res.status(500).json({ error: "Error al generar análisis con IA" });
+  }
+};
+
 module.exports = {
   generarTest,
   evaluar,
-  recomendar
+  recomendar,
+  analizarRecurso
 };
