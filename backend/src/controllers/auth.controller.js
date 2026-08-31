@@ -1,7 +1,8 @@
 const authService = require("../services/auth.service");
 const { verifyRefreshToken, generateAccessToken } = require("../utils/jwt");
 const achievementService = require("../services/achievement.service");
-const { setAuthCookies, clearAuthCookies, getAuthCookies, REFRESH_COOKIE } = require("../utils/authCookies");
+const { setAuthCookies, clearAuthCookies, getAuthCookies, SESSION_COOKIE } = require("../utils/authCookies");
+const { getRefreshToken, storeRefreshToken, deleteRefreshToken } = require("../utils/sessionStore");
 
 /* ─────────────────────────────────────────
    REGISTER
@@ -29,7 +30,8 @@ const login = async (req, res) => {
 
   try {
     const resultado = await authService.login(email, password);
-    setAuthCookies(res, resultado.accessToken, resultado.refreshToken);
+    const sessionId = setAuthCookies(res, resultado.accessToken);
+    await storeRefreshToken(sessionId, resultado.refreshToken);
     res.json({ user: resultado.user });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
@@ -40,25 +42,21 @@ const login = async (req, res) => {
    REFRESH TOKEN
 ───────────────────────────────────────── */
 const refreshToken = async (req, res) => {
-  const { [REFRESH_COOKIE]: refreshToken } = getAuthCookies(req);
+  const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
+  const refreshToken = sessionId ? await getRefreshToken(sessionId) : null;
 
-  if (!refreshToken) {
-    return res.status(400).json({ error: "El campo refreshToken es obligatorio" });
+  if (!refreshToken || !sessionId) {
+    return res.status(400).json({ error: "La sesión no tiene refresh token válido" });
   }
 
   try {
-    // 1. Verificamos la firma y expiración del Refresh Token
     const decoded = verifyRefreshToken(refreshToken);
-
-    // 2. Opcional: Podrías validar en el servicio que el usuario siga existiendo o esté activo
-    // await authService.validateUserActive(decoded.id);
-
-    // 3. Generamos un nuevo Access Token fresco de 15 min
     const newAccessToken = generateAccessToken({ id: decoded.id, email: decoded.email, role: decoded.role });
 
-    setAuthCookies(res, newAccessToken, refreshToken);
+    setAuthCookies(res, newAccessToken, sessionId);
     res.json({ message: "Sesión renovada" });
   } catch (error) {
+    await deleteRefreshToken(sessionId);
     res.status(403).json({ error: "Refresh Token inválido o expirado" });
   }
 };
@@ -67,7 +65,13 @@ const me = (req, res) => {
   res.json({ user: req.user });
 };
 
-const logout = (req, res) => {
+const logout = async (req, res) => {
+  const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
+
+  if (sessionId) {
+    await deleteRefreshToken(sessionId);
+  }
+
   clearAuthCookies(res);
   res.json({ message: "Sesión cerrada" });
 };
