@@ -1,3 +1,4 @@
+const { parse, serialize } = require("cookie");
 const { parseCookie, stringifySetCookie } = require("cookie");
 const { randomUUID } = require("crypto");
 
@@ -16,6 +17,8 @@ const setAuthCookies = (res, accessToken, sessionId) => {
   const resolvedSessionId = sessionId || randomUUID();
 
   res.setHeader("Set-Cookie", [
+    serialize(ACCESS_COOKIE, accessToken, cookieOptions(15 * 60)),
+    serialize(REFRESH_COOKIE, refreshToken, cookieOptions(7 * 24 * 60 * 60)),
     stringifySetCookie({ name: ACCESS_COOKIE, value: accessToken, ...cookieOptions(15 * 60) }),
     stringifySetCookie({ name: SESSION_COOKIE, value: resolvedSessionId, ...cookieOptions(7 * 24 * 60 * 60) }),
   ]);
@@ -25,12 +28,14 @@ const setAuthCookies = (res, accessToken, sessionId) => {
 
 const clearAuthCookies = (res) => {
   res.setHeader("Set-Cookie", [
+    serialize(ACCESS_COOKIE, "", { ...cookieOptions(0), expires: new Date(0) }),
+    serialize(REFRESH_COOKIE, "", { ...cookieOptions(0), expires: new Date(0) }),
     stringifySetCookie({ name: ACCESS_COOKIE, value: "", ...cookieOptions(0), expires: new Date(0) }),
     stringifySetCookie({ name: SESSION_COOKIE, value: "", ...cookieOptions(0), expires: new Date(0) }),
   ]);
 };
 
-const getAuthCookies = (req) => parseCookie(req.headers.cookie || "");
+const getAuthCookies = (req) => parse(req.headers.cookie || "");
 
 module.exports = {
   ACCESS_COOKIE,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings, User, Mail, Lock, Bell, LogOut, Save, ShieldCheck, ArrowLeft
@@ -13,15 +13,36 @@ export default function Configuracion() {
   const { logout } = useAuth();
   const { loading } = useProtectedRoute();
 
-  const [nombre, setNombre] = useState("Samuel Moreno");
-  const [email, setEmail] = useState("samuel.moreno@mevocatio.com");
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
   const [notificaciones, setNotificaciones] = useState(true);
   const [guardado, setGuardado] = useState(false);
+  const [userLoaded, setUserLoaded] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const { authService } = await import("@/services/auth.service");
+        const res = await authService.me();
+        if (res?.user) {
+          setNombre(res.user.name || "");
+          setEmail(res.user.email || "");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setUserLoaded(true);
+      }
+    };
+    if (!loading) {
+      fetchUser();
+    }
+  }, [loading]);
+
+  if (loading || !userLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0b14] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
-        Verificando acceso...
+        Cargando perfil...
       </div>
     );
   }

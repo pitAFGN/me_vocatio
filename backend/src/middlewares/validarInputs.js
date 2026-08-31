@@ -212,6 +212,51 @@ const reglasActualizarCurso = [
   validar,
 ];
 
+const reglasCrearPago = [
+  body("title")
+    .exists().withMessage("El título es obligatorio.")
+    .bail()
+    .isString().trim()
+    .notEmpty().withMessage("El título es obligatorio.")
+    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres.")
+    .escape(),
+
+  body("description")
+    .exists().withMessage("La descripción es obligatoria.")
+    .bail()
+    .isString().trim()
+    .notEmpty().withMessage("La descripción es obligatoria.")
+    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres.")
+    .escape(),
+
+  body("category")
+    .exists().withMessage("La categoría es obligatoria.")
+    .bail()
+    .isString().trim()
+    .notEmpty().withMessage("La categoría es obligatoria.")
+    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres.")
+    .escape(),
+
+  body("level")
+    .optional()
+    .isIn(NIVELES_VALIDOS).withMessage(`El nivel debe ser uno de: ${NIVELES_VALIDOS.join(", ")}.`),
+
+  body("modality")
+    .optional()
+    .isIn(MODALIDADES_VALIDAS).withMessage(`La modalidad debe ser una de: ${MODALIDADES_VALIDAS.join(", ")}.`),
+
+  body("duration_hours")
+    .optional({ nullable: true })
+    .isInt({ min: 1, max: 1000 }).withMessage("La duración debe ser un número de horas entre 1 y 1000."),
+
+  body("price")
+    .exists().withMessage("El precio es obligatorio para un curso de pago.")
+    .bail()
+    .isFloat({ min: 0.5, max: 10000 }).withMessage("El precio debe ser un número entre 0.5 y 10000."),
+
+  validar,
+];
+
 module.exports = {
   reglasRegister,
   reglasLogin,
@@ -221,4 +266,5 @@ module.exports = {
   reglasResendVerification,
   reglasCrearCurso,
   reglasActualizarCurso,
+  reglasCrearPago,
 };

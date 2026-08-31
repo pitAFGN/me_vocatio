@@ -9,6 +9,7 @@ import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCusto
 import ResourceStructurePanel from "@/components/creacion_recursos/ResourceStructurePanel";
 import AnalyticsPanel from "@/components/creacion_recursos/AnalyticsPanel";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
+import usePayment from "@/hooks/usePayment";
 
 const FREE_RESOURCE_LIMIT = 3;
 
@@ -64,9 +65,26 @@ export default function CreacionRecursosPage() {
     nombre: "Curso de Diseño UX",
     url: "https://mevocatio.com/cursos/diseno-ux",
     descripcion: "Aprende a crear experiencias digitales claras, funcionales y estratégicas.",
+    category: "Diseño",
+    level: "Principiante",
+    modality: "Virtual",
+    duration_hours: "",
+    price: "",
   });
 
+  const { pagarCurso, cargando, error } = usePayment();
+  const [mensaje, setMensaje] = useState(null);
+
   const isPremium = plan === "premium";
+
+  const handlePublicarYPagar = () => {
+    setMensaje(null);
+    pagarCurso(curso, {
+      onExito: (transaccion) => setMensaje({ tipo: "ok", texto: "Pago procesado exitosamente." }),
+      onError: (err) => setMensaje({ tipo: "error", texto: err }),
+      onCerrado: () => setMensaje({ tipo: "info", texto: "Se cerró el widget de pago." })
+    });
+  };
 
   const cambiarPlan = (nextPlan) => {
     setPlan(nextPlan);
@@ -135,6 +153,32 @@ export default function CreacionRecursosPage() {
               isPremium={isPremium}
               onUpgrade={() => setMostrarPlanModal(true)}
             />
+
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-5">
+              <button
+                type="button"
+                onClick={handlePublicarYPagar}
+                disabled={cargando || !curso.price}
+                className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-3 text-sm font-black uppercase tracking-widest text-white transition disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {cargando ? "Abriendo pasarela de pago..." : "Publicar y pagar con Wompi"}
+              </button>
+
+              {mensaje && (
+                <p
+                  className={`mt-3 text-sm font-medium ${
+                    mensaje.tipo === "ok"
+                      ? "text-emerald-400"
+                      : mensaje.tipo === "error"
+                      ? "text-red-400"
+                      : "text-slate-400"
+                  }`}
+                >
+                  {mensaje.texto}
+                </p>
+              )}
+              {error && !mensaje && <p className="mt-3 text-sm font-medium text-red-400">{error}</p>}
+            </div>
 
             <CourseCustomizationPanel
               isPremium={isPremium}
