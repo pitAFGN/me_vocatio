@@ -50,16 +50,14 @@ export default function Navbar() {
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-3 flex justify-between items-center border-b shadow-2xl backdrop-blur-md bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-slate-800/80 transition-colors duration-300">
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-11 h-11 sm:w-14 sm:h-14 relative flex items-center justify-center shrink-0">
-              <Image
-                src="/Layout 4.png"
-                alt="Me Vocatio Diamond"
-                fill
-                sizes="56px"
-                priority
-                className="object-contain"
-              />
-            </div>
+            <Image
+              src="/Layout 4.png"
+              alt="Me Vocatio Diamond"
+              width={60}
+              height={40}
+              priority
+              className="w-auto h-10 sm:h-12 object-contain"
+            />
             <span className="text-base sm:text-lg md:text-xl font-bold tracking-tight bg-clip-text bg-gradient-to-r text-transparent from-white via-slate-100 to-slate-300 transition-colors truncate">
               MeVocatio
             </span>
@@ -79,15 +77,13 @@ export default function Navbar() {
     >
       <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
-          <div className="w-11 h-11 sm:w-14 sm:h-14 relative flex items-center justify-center transition-all group-hover:scale-110 active:scale-95 shrink-0">
-            <Image
-              src="/Layout 4.png"
-              alt="Me Vocatio Diamond"
-              fill
-              sizes="56px"
-              className="object-contain transition-transform"
-            />
-          </div>
+          <Image
+            src="/Layout 4.png"
+            alt="Me Vocatio Diamond"
+            width={60}
+            height={40}
+            className="w-auto h-10 sm:h-12 object-contain transition-transform group-hover:scale-105 active:scale-95"
+          />
 
           <span
             className={`text-base sm:text-lg md:text-xl font-bold tracking-tight bg-clip-text bg-gradient-to-r transition-colors truncate ${
