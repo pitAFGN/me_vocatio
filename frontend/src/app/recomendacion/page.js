@@ -49,11 +49,15 @@ function RecomendacionContent() {
   const evaluationIdURL = searchParams.get("evaluation_id") || null;
 
   // Estado del Plan (free vs premium)
-  const [plan, setPlan] = useState(() => {
-    if (typeof window === "undefined") return "free";
-    return window.localStorage.getItem("mevocatio_plan") === "premium" ? "premium" : "free";
-  });
+  const [plan, setPlan] = useState("free");
   const isPremium = plan === "premium";
+
+  useEffect(() => {
+    const savedPlan = window.localStorage.getItem("mevocatio_plan");
+    if (savedPlan === "premium") {
+      setPlan("premium");
+    }
+  }, []);
 
   const [cargando, setCargando] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
