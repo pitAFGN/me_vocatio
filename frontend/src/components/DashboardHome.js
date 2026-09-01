@@ -19,7 +19,9 @@ export default function DashboardHome({
     setSearchQuery,
     page,
     setPage,
-    filteredProfessions
+    filteredProfessions,
+    savedIds = [],
+    onToggleSave
 }) {
     const router = useRouter();
 
@@ -123,7 +125,7 @@ export default function DashboardHome({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {currentProfessions.map((job) => (
-                        <ProfessionCard key={job.id} profession={job} />
+                        <ProfessionCard key={job.id} profession={job} savedIds={savedIds} onToggleSave={onToggleSave} />
                     ))}
                 </div>
             </section>

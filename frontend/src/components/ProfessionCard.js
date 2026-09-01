@@ -1,13 +1,11 @@
 "use client";
 
 import { Bookmark, ExternalLink, Sparkles } from "lucide-react";
-import { useFavorites } from "@/hooks/useFavorites";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function ProfessionCard({ profession, showTest = false }) {
+export default function ProfessionCard({ profession, showTest = false, savedIds = [], onToggleSave }) {
   const router = useRouter();
-  const { savedIds, toggleSave } = useFavorites();
 
   const id = profession?.id;
   const title = profession?.title || profession?.nombre || "Vocación";
@@ -35,7 +33,7 @@ export default function ProfessionCard({ profession, showTest = false }) {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              toggleSave(profession);
+              onToggleSave?.(profession);
             }}
             className={`p-2.5 rounded-xl border transition-all active:scale-95 cursor-pointer ${isFavorite
                 ? "bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/30"

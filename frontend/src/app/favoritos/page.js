@@ -10,7 +10,7 @@ import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import LoadingScreen from "@/components/LoadingScreen";
 
 export default function FavoritosPage() {
-    const { favorites } = useFavorites();
+    const { favorites, savedIds, toggleSave } = useFavorites();
     const { logout } = useAuth();
     const { loading } = useProtectedRoute();
 
@@ -51,7 +51,7 @@ export default function FavoritosPage() {
                 {favorites.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {favorites.map((vocacion) => (
-                            <ProfessionCard key={vocacion.id} profession={vocacion} showTest />
+                            <ProfessionCard key={vocacion.id} profession={vocacion} showTest savedIds={savedIds} onToggleSave={toggleSave} />
                         ))}
                     </div>
                 ) : (

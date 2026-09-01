@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Bell } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +13,11 @@ import { PROFESSIONS } from "@/app/data/professions";
 import LoadingScreen from "@/components/LoadingScreen";
 import SidebarNav from "@/components/SidebarNav";
 import DashboardHome from "@/components/DashboardHome";
-import PlanSelectionModal from "@/components/PlanSelectionModal";
+
+const PlanSelectionModal = dynamic(
+  () => import("@/components/PlanSelectionModal"),
+  { ssr: false }
+);
 
 export default function ExecutiveDashboard() {
   const router = useRouter();
@@ -104,7 +109,7 @@ export default function ExecutiveDashboard() {
             setPage={setPage}
             filteredProfessions={filteredProfessions}
             savedIds={savedIds}
-            toggleSave={toggleSave}
+            onToggleSave={toggleSave}
             router={router}
           />
 
