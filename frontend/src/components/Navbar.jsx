@@ -50,12 +50,13 @@ export default function Navbar() {
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-3 flex justify-between items-center border-b shadow-2xl backdrop-blur-md bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-slate-800/80 transition-colors duration-300">
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 sm:w-14 sm:h-14 relative flex items-center justify-center shrink-0">
               <Image
                 src="/Layout 4.png"
                 alt="Me Vocatio Diamond"
-                width={70}
-                height={70}
+                fill
+                sizes="56px"
+                priority
                 className="object-contain"
               />
             </div>
@@ -78,12 +79,12 @@ export default function Navbar() {
     >
       <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group">
-          <div className="w-11 h-11 sm:w-14 sm:h-14 flex items-center justify-center transition-all group-hover:scale-110 active:scale-95 shrink-0">
+          <div className="w-11 h-11 sm:w-14 sm:h-14 relative flex items-center justify-center transition-all group-hover:scale-110 active:scale-95 shrink-0">
             <Image
               src="/Layout 4.png"
               alt="Me Vocatio Diamond"
-              width={56}
-              height={56}
+              fill
+              sizes="56px"
               className="object-contain transition-transform"
             />
           </div>
