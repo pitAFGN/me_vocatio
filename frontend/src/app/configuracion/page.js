@@ -7,28 +7,44 @@ import {
 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
-import LoadingScreen from "@/components/LoadingScreen";
 
 export default function Configuracion() {
   const router = useRouter();
   const { logout } = useAuth();
-  const { loading, user } = useProtectedRoute();
+  const { loading } = useProtectedRoute();
 
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [notificaciones, setNotificaciones] = useState(true);
   const [guardado, setGuardado] = useState(false);
+  const [userLoaded, setUserLoaded] = useState(false);
 
-  // Precargar los datos reales del usuario autenticado (sin pisar lo que ya se editó)
   useEffect(() => {
-    if (user) {
-      setNombre((n) => n || user.name || "");
-      setEmail((e) => e || user.email || "");
+    const fetchUser = async () => {
+      try {
+        const { authService } = await import("@/services/auth.service");
+        const res = await authService.me();
+        if (res?.user) {
+          setNombre(res.user.name || "");
+          setEmail(res.user.email || "");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setUserLoaded(true);
+      }
+    };
+    if (!loading) {
+      fetchUser();
     }
-  }, [user]);
+  }, [loading]);
 
-  if (loading) {
-    return <LoadingScreen />;
+  if (loading || !userLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0b14] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
+        Cargando perfil...
+      </div>
+    );
   }
 
   const handleGuardar = (e) => {

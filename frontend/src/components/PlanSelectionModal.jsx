@@ -1,21 +1,58 @@
 "use client";
 
+import { useState } from "react";
+import usePayment from "@/hooks/usePayment";
+import Swal from "sweetalert2";
+
 const plans = [
   {
     id: "free",
     name: "Plan Gratuito",
+    price: "Gratis",
     description: "Explora una vocación con hasta 3 recursos.",
     features: ["Hasta 3 recursos por vocación", "Datos básicos del curso"],
   },
   {
     id: "premium",
     name: "Plan Premium",
+    price: "$49.000 COP",
     description: "Crea y consulta todos tus recursos sin límites.",
     features: ["Recursos ilimitados", "Personalización y analíticas"],
   },
 ];
 
 export default function PlanSelectionModal({ onSelect }) {
+  const { pagarCurso, cargando } = usePayment();
+
+  const handleSelect = (planId) => {
+    if (planId === "premium") {
+      pagarCurso(
+        { nombre: "Plan Premium MeVocatio", price: 49000 },
+        {
+          onExito: () => {
+            Swal.fire({
+              title: "¡Pago exitoso!",
+              text: "Has adquirido el Plan Premium.",
+              icon: "success",
+              confirmButtonColor: "#8b5cf6",
+            });
+            onSelect("premium");
+          },
+          onError: (err) => {
+            Swal.fire({
+              title: "Error",
+              text: err,
+              icon: "error",
+              confirmButtonColor: "#8b5cf6",
+            });
+          },
+        }
+      );
+    } else {
+      onSelect("free");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" />
@@ -43,8 +80,11 @@ export default function PlanSelectionModal({ onSelect }) {
             <button
               key={plan.id}
               type="button"
-              onClick={() => onSelect(plan.id)}
-              className={`rounded-2xl border p-5 text-left transition-all hover:-translate-y-0.5 ${
+              disabled={cargando}
+              onClick={() => handleSelect(plan.id)}
+              className={`rounded-2xl border p-5 text-left transition-all ${
+                !cargando ? "hover:-translate-y-0.5" : "opacity-75 cursor-wait"
+              } ${
                 plan.id === "premium"
                   ? "border-violet-400/60 bg-violet-500/10 hover:bg-violet-500/20"
                   : "border-slate-700 bg-slate-950/60 hover:border-slate-500"
@@ -58,6 +98,7 @@ export default function PlanSelectionModal({ onSelect }) {
                   </span>
                 )}
               </div>
+              <p className="mt-2 text-lg font-black text-violet-300">{plan.price}</p>
               <p className="mt-3 text-sm text-slate-300">{plan.description}</p>
               <ul className="mt-4 space-y-2 text-xs text-slate-400">
                 {plan.features.map((feature) => (
@@ -65,12 +106,11 @@ export default function PlanSelectionModal({ onSelect }) {
                 ))}
               </ul>
               <span className="mt-5 block text-[10px] font-black uppercase tracking-[0.2em] text-violet-200">
-                {plan.id === "premium" ? "Elegir Premium" : "Continuar gratis"}
+                {cargando && plan.id === "premium" ? "Abriendo Wompi..." : plan.id === "premium" ? "Pagar Premium" : "Continuar gratis"}
               </span>
             </button>
           ))}
         </div>
-
       </section>
     </div>
   );

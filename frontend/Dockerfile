@@ -59,9 +59,9 @@ ENV HOSTNAME=0.0.0.0
 # genera un servidor Node.js mínimo con solo los node_modules
 # realmente usados. Esto evita copiar el node_modules completo
 # (cientos de MB) a la imagen final.
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --chown=node:node --from=builder /app/public ./public
+COPY --chown=node:node --from=builder /app/.next/standalone ./
+COPY --chown=node:node --from=builder /app/.next/static ./.next/static
 
 # Usuario no root incluido por defecto en las imágenes oficiales de Node.
 USER node

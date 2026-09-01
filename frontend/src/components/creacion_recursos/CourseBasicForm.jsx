@@ -81,6 +81,79 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
             placeholder="Describe el curso de manera clara y atractiva..."
           />
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+              Categoría
+            </label>
+            <input
+              value={curso.category}
+              onChange={(e) => setCurso({ ...curso, category: e.target.value })}
+              className={inputClass}
+              placeholder="Ej: Diseño"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+              Nivel
+            </label>
+            <select
+              value={curso.level}
+              onChange={(e) => setCurso({ ...curso, level: e.target.value })}
+              className={inputClass}
+            >
+              <option value="Principiante">Principiante</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+              Modalidad
+            </label>
+            <select
+              value={curso.modality}
+              onChange={(e) => setCurso({ ...curso, modality: e.target.value })}
+              className={inputClass}
+            >
+              <option value="Virtual">Virtual</option>
+              <option value="Presencial">Presencial</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+              Duración (horas)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              value={curso.duration_hours}
+              onChange={(e) => setCurso({ ...curso, duration_hours: e.target.value })}
+              className={inputClass}
+              placeholder="Ej: 20"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+            Precio (COP)
+          </label>
+          <input
+            type="number"
+            min="0.5"
+            step="0.01"
+            value={curso.price}
+            onChange={(e) => setCurso({ ...curso, price: e.target.value })}
+            className={inputClass}
+            placeholder="Ej: 50000"
+          />
+        </div>
       </div>
     </section>
   );
