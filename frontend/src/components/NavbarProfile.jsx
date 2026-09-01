@@ -10,21 +10,13 @@ export default function NavbarProfile() {
     const router = useRouter();
     const pathname = usePathname();
     const { logout } = useAuth();
+    const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
     const isCreatePage = pathname.startsWith('/creacion_recursos');
     const showCreateButton = pathname.startsWith('/dashboard') && !isCreatePage;
-
-    const isPrivateZone =
-        pathname.startsWith('/dashboard') ||
-        pathname.startsWith('/vocacion') ||
-        pathname.startsWith('/diagnostico') ||
-        pathname.startsWith('/configuracion') ||
-        pathname.startsWith('/insignias') ||
-        pathname.startsWith('/recomendacion') ||
-        pathname.startsWith('/creacion_recursos');
 
     useEffect(() => {
         const checkAuth = async () => {
