@@ -11,6 +11,7 @@ export default function NavbarProfile() {
     const pathname = usePathname();
     const { logout } = useAuth();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
