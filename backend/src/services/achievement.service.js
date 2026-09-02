@@ -70,10 +70,28 @@ const listarLogrosDelUsuario = async (userId) => {
 const registrarVerificacionCorreo = async (userId) => registrarLogro(userId, "email_verified");
 const registrarCompraPremium = async (userId) => registrarLogro(userId, "premium_member");
 
+const evaluarLogrosDeNivel = async (userId, level) => {
+  const unlocked = [];
+  const levelRules = [
+    ["level_5", level >= 5],
+    ["level_10", level >= 10],
+    ["level_25", level >= 25],
+    ["level_50", level >= 50],
+  ];
+
+  for (const [code, condition] of levelRules) {
+    if (condition && (await registrarLogro(userId, code))) {
+      unlocked.push(code);
+    }
+  }
+  return unlocked;
+};
+
 module.exports = {
   registrarLogro,
   incrementarProgreso,
   evaluarLogros,
+  evaluarLogrosDeNivel,
   listarLogrosDelUsuario,
   registrarVerificacionCorreo,
   registrarCompraPremium,
