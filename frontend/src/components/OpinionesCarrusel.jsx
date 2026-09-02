@@ -61,7 +61,7 @@ export default function OpinionesCarrusel() {
     const offset = -(index * (100 / cardsVisibles));
 
     return (
-        <div className="z-10 w-full max-w-4xl mx-auto absolute left-0 right-0 bottom-16 sm:bottom-20 px-4 sm:px-6 drop-shadow-xl">
+        <div className="z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 drop-shadow-xl">
 
             <div className="bg-slate-800/90 backdrop-blur-md p-3 sm:p-4 rounded-2xl flex items-center gap-2 sm:gap-4 shadow-2xl border border-white/10 overflow-hidden">
 

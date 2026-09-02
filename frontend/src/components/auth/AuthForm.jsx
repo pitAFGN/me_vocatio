@@ -222,13 +222,16 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
     }
 
     try {
-      const { error } = await sb.auth.signInWithOAuth({
+      const { data, error } = await sb.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/login`,
         },
       });
       if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     } catch {
       setErrorGeneral("No se pudo iniciar sesión con Google.");
     }

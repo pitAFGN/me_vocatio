@@ -18,7 +18,7 @@ export default function AuthBanner({ esRegistro }) {
   }, []);
 
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] justify-center border-r border-slate-300 dark:border-white/10 pt-20 overflow-hidden transition-colors duration-300">
+    <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-b from-[#0b1329] via-[#0f172a] to-[#080d1a] justify-center border-r border-slate-300 dark:border-white/10 pt-[128px] overflow-hidden transition-colors duration-300">
       {showStars && <BackgroundStars />}
 
       <div className="absolute w-[80%] h-[80%] bg-gradient-to-tr from-purple-600/20 via-indigo-500/15 to-blue-500/10 rounded-full blur-[100px] pointer-events-none -z-0 animate-pulse" />
