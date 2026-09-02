@@ -16,20 +16,30 @@ import { authService } from "@/services/auth.service";
  */
 function useSesionValida() {
   const [sesionValida, setSesionValida] = useState(null);
+  const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
     let activo = true;
     const comprobarSesion = async () => {
       try {
-        await authService.me();
-        if (activo) setSesionValida(true);
+        const data = await authService.me();
+        if (activo) {
+          setUsuario(data?.user ?? null);
+          setSesionValida(true);
+        }
       } catch {
         try {
           await authService.refresh();
-          await authService.me();
-          if (activo) setSesionValida(true);
+          const data = await authService.me();
+          if (activo) {
+            setUsuario(data?.user ?? null);
+            setSesionValida(true);
+          }
         } catch {
-          if (activo) setSesionValida(false);
+          if (activo) {
+            setUsuario(null);
+            setSesionValida(false);
+          }
         }
       }
     };
@@ -47,7 +57,7 @@ function useSesionValida() {
     };
   }, []);
 
-  return sesionValida;
+  return { sesionValida, usuario };
 }
 
 /**
@@ -58,7 +68,7 @@ function useSesionValida() {
  */
 export function useProtectedRoute() {
   const router = useRouter();
-  const sesionValida = useSesionValida();
+  const { sesionValida, usuario } = useSesionValida();
 
   useEffect(() => {
     if (sesionValida === false) {
@@ -69,7 +79,7 @@ export function useProtectedRoute() {
   // Bloquea el render (loading=true) mientras la sesión no esté confirmada
   // (aún verificando `null` o inválida `false`), de modo que las páginas
   // protegidas no muestren su contenido privado antes de redirigir.
-  return { loading: sesionValida !== true };
+  return { loading: sesionValida !== true, user: usuario };
 }
 
 /**
@@ -80,7 +90,7 @@ export function useProtectedRoute() {
  */
 export function usePublicRoute() {
   const router = useRouter();
-  const sesionValida = useSesionValida();
+  const { sesionValida } = useSesionValida();
 
   useEffect(() => {
     if (sesionValida === true) {

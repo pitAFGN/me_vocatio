@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import usePayment from "@/hooks/usePayment";
-import Swal from "sweetalert2";
 
 const plans = [
   {
@@ -24,27 +23,27 @@ const plans = [
 export default function PlanSelectionModal({ onSelect }) {
   const { pagarCurso, cargando } = usePayment();
 
+  const mostrarAlerta = async (titulo, texto, icono) => {
+    const { default: Swal } = await import("sweetalert2");
+    return Swal.fire({
+      title: titulo,
+      text: texto,
+      icon: icono,
+      confirmButtonColor: "#8b5cf6",
+    });
+  };
+
   const handleSelect = (planId) => {
     if (planId === "premium") {
       pagarCurso(
         { nombre: "Plan Premium MeVocatio", price: 49000 },
         {
           onExito: () => {
-            Swal.fire({
-              title: "¡Pago exitoso!",
-              text: "Has adquirido el Plan Premium.",
-              icon: "success",
-              confirmButtonColor: "#8b5cf6",
-            });
+            mostrarAlerta("¡Pago exitoso!", "Has adquirido el Plan Premium.", "success");
             onSelect("premium");
           },
           onError: (err) => {
-            Swal.fire({
-              title: "Error",
-              text: err,
-              icon: "error",
-              confirmButtonColor: "#8b5cf6",
-            });
+            mostrarAlerta("Error", err, "error");
           },
         }
       );

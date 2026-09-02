@@ -28,9 +28,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <link rel="preload" href="/diamante.glb" as="fetch" type="model/gltf-binary" crossOrigin="anonymous" />
       <ThemeProvider>
         <Navbar />
-        <main className="mt-[72px] min-h-[calc(100vh-72px)]">
+        <main className="mt-[88px] min-h-[calc(100vh-88px)]">
           {children}
         </main>
       </ThemeProvider>

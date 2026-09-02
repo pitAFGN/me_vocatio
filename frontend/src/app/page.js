@@ -7,19 +7,23 @@ import { usePublicRoute } from "@/hooks/useRouteGuard";
 import { Search, BarChart3, Award, ArrowRight } from "lucide-react";
 
 // 1. Carga dinámica del diamante
-const DiamanteCanvas = dynamic(() => import("@/components/DiamanteCanvas"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] flex items-center justify-center">
-      <div className="w-16 h-16 rounded-full bg-purple-500/15 animate-ping" />
-    </div>
-  ),
-});
+const DiamanteCanvas = dynamic(
+  () => import("@/components/ThreeScene").then((m) => m.DiamanteCanvas),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-purple-500/15 animate-ping" />
+      </div>
+    ),
+  }
+);
 
 // 2. Carga dinámica de los brillitos de fondo
-const BackgroundStars = dynamic(() => import("@/components/BackgroundStars"), {
-  ssr: false,
-});
+const BackgroundStars = dynamic(
+  () => import("@/components/ThreeScene").then((m) => m.BackgroundStars),
+  { ssr: false }
+);
 
 // 3. Diferir las estrellas de fondo para priorizar el primer pintado del contenido
 //    (mismo patrón que usa el login en AuthBanner). El 3D se mantiene intacto;
@@ -31,7 +35,7 @@ function BackgroundStarsDiferidas() {
     // Prefetch: descarga el chunk de Three.js (estrellas) en paralelo al HTML
     // sin montar todavía el canvas. Así, cuando se activan las estrellas, el
     // bundle ya está cacheado y aparecen casi al instante.
-    import("@/components/BackgroundStars").catch(() => {});
+    import("@/components/ThreeScene").catch(() => {});
 
     const timer = setTimeout(() => setMostrar(true), 700);
     return () => clearTimeout(timer);

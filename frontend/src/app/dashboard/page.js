@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Bell } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -9,10 +10,16 @@ import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useFavorites } from "@/hooks/useFavorites";
 import { PROFESSIONS } from "@/app/data/professions";
 
+import LoadingScreen from "@/components/LoadingScreen";
 import SidebarNav from "@/components/SidebarNav";
 import DashboardHome from "@/components/DashboardHome";
 import LevelUpModal from "@/components/LevelUpModal";
 import AchievementToast from "@/components/AchievementToast";
+
+const PlanSelectionModal = dynamic(
+  () => import("@/components/PlanSelectionModal"),
+  { ssr: false }
+);
 
 export default function ExecutiveDashboard() {
   const router = useRouter();
@@ -115,23 +122,15 @@ export default function ExecutiveDashboard() {
     job.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) return null;
+  if (loading) return <LoadingScreen />;
 
   return (
-    <div className="bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 min-h-screen relative overflow-x-hidden transition-colors duration-300">
-
-      {/* Elementos decorativos de luz ambiental (Glow effects) de fondo */}
-      <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 bg-purple-500/10 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
-
-      {/* Barra lateral fija */}
+    <>
       <SidebarNav logout={logout} />
 
-      {/* Contenedor principal adaptado para celulares y escritorios */}
       <main className="md:pl-64 pt-6 sm:pt-8 px-4 sm:px-6 md:px-10 pb-16 relative z-10">
         <div className="max-w-7xl mx-auto">
 
-          {/* Header con respiro y protección contra desbordamiento */}
           <header className="flex justify-between items-start gap-4 mb-8 sm:mb-10">
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">
@@ -147,7 +146,6 @@ export default function ExecutiveDashboard() {
             </button>
           </header>
 
-          {/* Componente principal del Dashboard */}
           <DashboardHome
             profileData={profileData}
             searchQuery={searchQuery}
@@ -156,7 +154,7 @@ export default function ExecutiveDashboard() {
             setPage={setPage}
             filteredProfessions={filteredProfessions}
             savedIds={savedIds}
-            toggleSave={toggleSave}
+            onToggleSave={toggleSave}
             router={router}
             handleAddXp={handleAddXp}
           />
@@ -178,6 +176,6 @@ export default function ExecutiveDashboard() {
       {mostrarPlanModal && (
         <PlanSelectionModal onSelect={handlePlanSelect} />
       )}
-    </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { authService } from "../services/auth.service";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 export function sessionExpirada() {
   return false;
@@ -46,12 +46,13 @@ export function useAuth() {
     // Notificar limpieza de sesión
     window.dispatchEvent(new Event("local-storage-update"));
 
-    if (supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        // Si falla la sesión de Supabase, el token local ya fue limpiado.
+    try {
+      const sb = await getSupabase();
+      if (sb) {
+        await sb.auth.signOut();
       }
+    } catch {
+      // Si falla la sesión de Supabase, el token local ya fue limpiado.
     }
     router.replace("/login");
   };
