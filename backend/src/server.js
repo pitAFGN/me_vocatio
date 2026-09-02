@@ -38,6 +38,7 @@ app.use("/api/pagos", paymentRoutes);
    ruta puede ir después de express.json() sin problema. */
 app.post("/api/wompi/eventos", paymentController.evento);
 app.use("/api/achievements", achievementRoutes);
+app.use("/api/users", require("./routes/user.routes"));
 
 /* ─── Ruta no encontrada ─── */
 app.use((req, res) => {
