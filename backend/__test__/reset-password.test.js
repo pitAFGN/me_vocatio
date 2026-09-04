@@ -20,7 +20,7 @@ describe("POST /api/auth/reset-password", () => {
     const response = await request(app)
       .post("/api/auth/reset-password")
       .send({
-        token: "token-valido",
+        token: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
         newPassword: "NuevaPasswordSegura123!"
       });
 

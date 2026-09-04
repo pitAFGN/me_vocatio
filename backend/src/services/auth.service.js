@@ -126,15 +126,26 @@ const login = async (email, password) => {
    FORGOT PASSWORD
 ───────────────────────────────────────── */
 const forgotPassword = async (email) => {
-  const resultado = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+  const resultado = await pool.query("SELECT id, name FROM users WHERE email = $1", [email]);
 
   if (resultado.rows.length === 0) {
     throw { status: 404, message: "El correo no está registrado" };
   }
 
-  const token = jwt.sign({ id: resultado.rows[0].id }, SECRET, { expiresIn: "15m" });
+  const user = resultado.rows[0];
+  const rawToken = generarTokenSeguro();
+  const tokenHash = hashearToken(rawToken);
+  // Expiración en 15 minutos
+  const expires = new Date(Date.now() + 15 * 60 * 1000);
 
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+  await pool.query(
+    `UPDATE users 
+     SET reset_password_token_hash = $1, reset_password_token_expires = $2 
+     WHERE id = $3`,
+    [tokenHash, expires, user.id]
+  );
+
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
   await transporter.sendMail({
     from: `"MeVocatio" <${process.env.EMAIL_USER}>`,
@@ -143,11 +154,12 @@ const forgotPassword = async (email) => {
     html: `
       <div style="font-family:sans-serif;">
         <h2>Recuperar contraseña</h2>
-        <p>Haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos.</p>
+        <p>Hola${user.name ? ` ${user.name}` : ""}, haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos y solo puede ser usado una vez.</p>
         <a href="${resetLink}"
            style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
            Cambiar contraseña
         </a>
+        <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
       </div>
     `,
   });
@@ -157,19 +169,44 @@ const forgotPassword = async (email) => {
    RESET PASSWORD
 ───────────────────────────────────────── */
 const resetPassword = async (token, newPassword) => {
-  let decoded;
-  try {
-    decoded = jwt.verify(token, SECRET);
-  } catch {
-    throw { status: 400, message: "Token inválido o expirado" };
+  if (!token) {
+    throw { status: 400, message: "Token no proporcionado" };
+  }
+
+  const tokenHash = hashearToken(token);
+
+  const resultado = await pool.query(
+    `SELECT id, email, reset_password_token_expires 
+     FROM users 
+     WHERE reset_password_token_hash = $1`,
+    [tokenHash]
+  );
+
+  if (resultado.rows.length === 0) {
+    throw { status: 400, message: "El enlace de recuperación es inválido o ya fue utilizado." };
+  }
+
+  const user = resultado.rows[0];
+
+  if (new Date(user.reset_password_token_expires) < new Date()) {
+    await pool.query(
+      `UPDATE users 
+       SET reset_password_token_hash = NULL, reset_password_token_expires = NULL 
+       WHERE id = $1`,
+      [user.id]
+    );
+    throw { status: 400, message: "El enlace de recuperación ha expirado. Solicita uno nuevo." };
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  await pool.query("UPDATE users SET password_hash = $1 WHERE id = $2", [
-    hashedPassword,
-    decoded.id,
-  ]);
+  // Actualizamos contraseña e INVALIDAMOS el token de un solo uso inmediatamente
+  await pool.query(
+    `UPDATE users 
+     SET password_hash = $1, reset_password_token_hash = NULL, reset_password_token_expires = NULL 
+     WHERE id = $2`,
+    [hashedPassword, user.id]
+  );
 };
 
 /* ─────────────────────────────────────────
@@ -248,9 +285,16 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
 
   if (resultado.rows.length > 0) {
     user = resultado.rows[0];
+    if (!user.email_verified) {
+      await pool.query(
+        "UPDATE users SET email_verified = true, email_verified_at = NOW() WHERE id = $1",
+        [user.id]
+      );
+      user.email_verified = true;
+    }
   } else {
     const nuevoUsuario = await pool.query(
-      "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
+      "INSERT INTO users (name, email, password_hash, email_verified, email_verified_at) VALUES ($1, $2, $3, true, NOW()) RETURNING id, name, email, plan, xp, level, current_streak",
       [name, email, ""]
     );
     user = nuevoUsuario.rows[0];
@@ -267,6 +311,7 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
       id: user.id, 
       name: user.name, 
       email: user.email,
+      plan: user.plan || "free",
       xp: user.xp || 0,
       level: user.level || 1,
       current_streak: user.current_streak || 0

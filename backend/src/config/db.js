@@ -6,4 +6,8 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
+pool.on("error", (err) => {
+  console.error("⚠️ Error inesperado en un cliente inactivo del pool de PostgreSQL:", err.message);
+});
+
 module.exports = pool;

@@ -100,7 +100,9 @@ const reglasResetPassword = [
     .isString().withMessage("El token debe ser texto.")
     .bail()
     .trim()
-    .notEmpty().withMessage("El token es obligatorio."),
+    .notEmpty().withMessage("El token es obligatorio.")
+    .isHexadecimal().withMessage("El token no tiene un formato válido.")
+    .isLength({ min: 64, max: 64 }).withMessage("El token no tiene un formato válido."),
 
   reglasPasswordFuerte("newPassword", "La nueva contraseña es obligatoria."),
 

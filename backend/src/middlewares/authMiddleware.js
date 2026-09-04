@@ -1,3 +1,4 @@
+const pool = require('../config/db');
 const { verifyAccessToken } = require('../utils/jwt');
 const { getAuthCookies, ACCESS_COOKIE } = require('../utils/authCookies');
 
@@ -39,7 +40,35 @@ const optionalAuth = (req, res, next) => {
   next();
 };
 
+const requirePremium = async (req, res, next) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: 'Autenticación requerida.' });
+  }
+
+  try {
+    const result = await pool.query('SELECT plan FROM users WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    const userPlan = (result.rows[0].plan || 'free').toLowerCase();
+    if (userPlan !== 'premium') {
+      return res.status(403).json({ 
+        message: 'Esta función es exclusiva para usuarios con suscripción al Plan Premium.',
+        code: 'PREMIUM_REQUIRED'
+      });
+    }
+
+    req.user.plan = 'premium';
+    next();
+  } catch (error) {
+    console.error('Error al verificar plan de usuario:', error);
+    return res.status(500).json({ message: 'Error al verificar permisos de suscripción.' });
+  }
+};
+
 authenticateToken.authenticateToken = authenticateToken;
 authenticateToken.optionalAuth = optionalAuth;
+authenticateToken.requirePremium = requirePremium;
 
 module.exports = authenticateToken;

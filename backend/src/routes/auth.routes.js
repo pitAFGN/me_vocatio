@@ -141,7 +141,7 @@ router.post("/forgot-password", forgotPasswordLimiter, reglasForgotPassword, aut
  *       200: { description: Contraseña actualizada }
  *       400: { description: Token inválido, expirado o contraseña débil }
  */
-router.post("/reset-password", reglasResetPassword, authController.resetPassword);
+router.post("/reset-password", forgotPasswordLimiter, reglasResetPassword, authController.resetPassword);
 
 /**
  * @swagger

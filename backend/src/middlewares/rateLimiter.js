@@ -60,10 +60,46 @@ const resendVerificationLimiter = rateLimit({
   },
 });
 
+// AI Generation & Analysis: máximo 10 peticiones cada 5 minutos
+const aiLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Demasiadas consultas de Inteligencia Artificial. Por favor espera unos minutos.",
+  },
+});
+
+// Recomendaciones: máximo 15 peticiones cada 5 minutos
+const recommendationLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Has alcanzado el límite de recomendaciones por ahora. Intenta de nuevo en 5 minutos.",
+  },
+});
+
+// Acciones de XP: máximo 10 por 5 minutos
+const xpLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "Demasiadas solicitudes de experiencia. Por favor espera unos minutos.",
+  },
+});
+
 module.exports = {
   loginLimiter,
   registerLimiter,
   forgotPasswordLimiter,
   verifyEmailLimiter,
   resendVerificationLimiter,
+  aiLimiter,
+  recommendationLimiter,
+  xpLimiter,
 };

@@ -1,7 +1,12 @@
 const jwt = require('jsonwebtoken');
+const isProduction = process.env.NODE_ENV === 'production';
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'mevocatio_secret';
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'mevocatio_refresh_secret';
+if (isProduction && (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET)) {
+    throw new Error('FATAL: JWT_ACCESS_SECRET y JWT_REFRESH_SECRET deben estar configurados en producción.');
+}
+
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'mevocatio_dev_access_secret_only';
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'mevocatio_dev_refresh_secret_only';
 
 /**
  * Genera un Access Token de corta duración (15m)
