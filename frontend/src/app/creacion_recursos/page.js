@@ -9,6 +9,8 @@ import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCusto
 import ResourceStructurePanel from "@/components/creacion_recursos/ResourceStructurePanel";
 import AnalyticsPanel from "@/components/creacion_recursos/AnalyticsPanel";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
+import Toast from "@/components/Toast";
+import ResourceModal from "@/components/creacion_recursos/ResourceModal";
 
 const FREE_RESOURCE_LIMIT = 3;
 
@@ -49,21 +51,22 @@ export default function CreacionRecursosPage() {
     const savedPlan = window.localStorage.getItem("mevocatio_plan");
     return savedPlan === "premium" ? "premium" : "free";
   });
+  
+  // UI States
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
-  const [recursos, setRecursos] = useState([
-    { id: 1, title: "Introducción al diseño UX", type: "Video + guía práctica" },
-    { id: 2, title: "Investigación de usuarios", type: "Video + guía práctica" },
-    { id: 3, title: "Prototipado de soluciones", type: "Video + guía práctica" },
-    { id: 4, title: "Presentación del proyecto", type: "Video + guía práctica" },
-  ]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [toast, setToast] = useState({ message: "", type: "success" });
+
+  // Form States
+  const [recursos, setRecursos] = useState([]);
   const [selectedBackground, setSelectedBackground] = useState(
     "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950"
   );
   const [selectedBadges, setSelectedBadges] = useState(["Elite"]);
   const [curso, setCurso] = useState({
-    nombre: "Curso de Diseño UX",
-    url: "https://mevocatio.com/cursos/diseno-ux",
-    descripcion: "Aprende a crear experiencias digitales claras, funcionales y estratégicas.",
+    nombre: "",
+    url: "",
+    descripcion: "",
   });
 
   const isPremium = plan === "premium";
@@ -73,18 +76,21 @@ export default function CreacionRecursosPage() {
     window.localStorage.setItem("mevocatio_plan", nextPlan);
   };
 
-  const crearRecurso = () => {
-    if (!isPremium) {
+  const openResourceModal = () => {
+    if (!isPremium && recursos.length >= FREE_RESOURCE_LIMIT) {
       setMostrarPlanModal(true);
       return;
     }
+    setIsModalOpen(true);
+  };
 
+  const handleAddResource = (title, type) => {
     setRecursos((prev) => [
       ...prev,
       {
         id: prev.length + 1,
-        title: `Nuevo recurso ${prev.length + 1}`,
-        type: "Video + guía práctica",
+        title: title,
+        type: type || "Video",
       },
     ]);
   };
@@ -95,8 +101,62 @@ export default function CreacionRecursosPage() {
     );
   };
 
+  const handleGuardarCurso = async () => {
+    if (!curso.nombre || !curso.descripcion) {
+      setToast({ message: "Llena el nombre y descripción del curso.", type: "error" });
+      return;
+    }
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: curso.nombre,
+          description: curso.descripcion,
+          category: "Desarrollo", // Default fallback since validation requires it
+          background_style: selectedBackground,
+          badges: selectedBadges,
+          lessons_list: recursos,
+          status: "published"
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        console.error("Backend validation errors:", errData);
+        setToast({ message: `Error: ${errData.error || "Datos inválidos"}`, type: "error" });
+        return;
+      }
+      
+      setToast({ message: "¡Curso publicado exitosamente!", type: "success" });
+      
+    } catch (error) {
+      console.error("Fetch error:", error);
+      setToast({ message: "Hubo un error de conexión.", type: "error" });
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-[#070b17] text-slate-100">
+    <main className="min-h-screen bg-[#070b17] text-slate-100 relative">
+      {/* Toast Notification */}
+      <Toast 
+        message={toast.message} 
+        type={toast.type} 
+        onClose={() => setToast({ message: "", type: "success" })} 
+      />
+
+      {/* Resource Creation Modal */}
+      <ResourceModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAdd={handleAddResource}
+        lessonNumber={recursos.length + 1}
+      />
+
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between gap-4">
           <div>
@@ -117,9 +177,12 @@ export default function CreacionRecursosPage() {
               <span>Volver</span>
             </Link>
 
-            <div className="hidden rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.28em] text-violet-100 md:block">
-              Vista previa
-            </div>
+            <button 
+              onClick={handleGuardarCurso}
+              className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500 hover:shadow-violet-500/40 active:scale-95 transition-all"
+            >
+              Publicar Curso
+            </button>
           </div>
         </div>
 
@@ -149,7 +212,7 @@ export default function CreacionRecursosPage() {
               isPremium={isPremium}
               resources={recursos}
               freeResourceLimit={FREE_RESOURCE_LIMIT}
-              onCreateResource={crearRecurso}
+              onCreateResource={openResourceModal}
               onUpgrade={() => setMostrarPlanModal(true)}
             />
           </div>

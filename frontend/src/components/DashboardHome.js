@@ -12,6 +12,7 @@ import {
     Flame
 } from "lucide-react";
 import XpLevelCard from "./XpLevelCard";
+import CommunityCourses from "./CommunityCourses";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -154,6 +155,8 @@ export default function DashboardHome({
                     })}
                 </div>
             </section>
+            
+            <CommunityCourses />
         </>
     );
 }

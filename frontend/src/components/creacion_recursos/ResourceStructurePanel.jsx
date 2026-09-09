@@ -21,6 +21,27 @@ export default function ResourceStructurePanel({
             Flujo del curso
           </p>
           <h2 className="mt-2 text-xl font-black text-white">Estructura de recursos</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <h2 className="text-xl font-black text-white">Estructura de recursos</h2>
+            
+            {/* Tooltip Icon */}
+            <div className="relative group cursor-help">
+              <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 text-slate-400 hover:text-violet-300 hover:border-violet-500 hover:bg-violet-500/20 transition-colors">
+                <span className="text-xs font-bold">?</span>
+              </div>
+              
+              {/* Tooltip Content (hidden by default, visible on hover) */}
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3 bg-slate-800 border border-slate-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  <strong className="text-white block mb-1">¿Qué es esto?</strong>
+                  Imagina que es como crear una lista de reproducción. Aquí defines el orden exacto (videos, guías, etc.) que tu estudiante seguirá paso a paso al tomar el curso.
+                </p>
+                {/* Flechita del tooltip */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800"></div>
+              </div>
+            </div>
+          </div>
+          
           <p className="mt-2 text-xs text-slate-400">
             {isPremium
               ? `${resources.length} recursos visibles · sin límite`

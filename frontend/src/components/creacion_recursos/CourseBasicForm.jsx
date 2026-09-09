@@ -45,6 +45,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
         <div>
           <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
             Nombre del curso
+            <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 5 caracteres)</span>
           </label>
           <input
             value={curso.nombre}
@@ -71,6 +72,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
         <div>
           <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
             Descripción breve
+            <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 20 caracteres)</span>
           </label>
           <textarea
             value={curso.descripcion}
