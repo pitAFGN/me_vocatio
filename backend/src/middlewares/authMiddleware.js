@@ -67,8 +67,21 @@ const requirePremium = async (req, res, next) => {
   }
 };
 
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Autenticación requerida.' });
+    }
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Acceso denegado. Permisos insuficientes.' });
+    }
+    next();
+  };
+};
+
 authenticateToken.authenticateToken = authenticateToken;
 authenticateToken.optionalAuth = optionalAuth;
 authenticateToken.requirePremium = requirePremium;
+authenticateToken.authorizeRoles = authorizeRoles;
 
 module.exports = authenticateToken;

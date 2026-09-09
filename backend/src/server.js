@@ -50,6 +50,7 @@ app.use("/api/pagos", paymentRoutes);
 app.post("/api/wompi/eventos", paymentController.evento);
 app.use("/api/achievements", achievementRoutes);
 app.use("/api/users", require("./routes/user.routes"));
+app.use("/api/admin", require("./routes/admin.routes"));
 
 /* ─── Ruta no encontrada ─── */
 app.use((req, res) => {

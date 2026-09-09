@@ -23,10 +23,10 @@ export default function ProfessionCard({ profession, showTest = false, savedIds 
   };
 
   return (
-    <div className="relative rounded-2xl border border-white/10 bg-[#0c1222] p-6 shadow-xl transition-all hover:-translate-y-1.5 hover:border-violet-500/80 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] flex flex-col justify-between backdrop-blur-xl">
+    <div className="relative rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222] p-6 shadow-xl transition-all hover:-translate-y-1.5 hover:border-violet-500/80 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] flex flex-col justify-between backdrop-blur-xl">
       <div>
         <div className="flex items-center justify-between mb-4">
-          <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300">
+          <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
             {area}
           </span>
 
@@ -37,7 +37,7 @@ export default function ProfessionCard({ profession, showTest = false, savedIds 
             }}
             className={`p-2.5 rounded-xl border transition-all active:scale-95 cursor-pointer ${isFavorite
                 ? "bg-violet-600 border-violet-500 text-white shadow-lg shadow-violet-500/30"
-                : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:text-white"
+                : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
               }`}
             title={isFavorite ? "Quitar de favoritos" : "Guardar en favoritos"}
           >
@@ -45,8 +45,8 @@ export default function ProfessionCard({ profession, showTest = false, savedIds 
           </button>
         </div>
 
-        <h3 className="text-lg font-bold text-white tracking-tight mb-2">{title}</h3>
-        <p className="text-xs text-slate-400 leading-relaxed mb-6 line-clamp-3">{desc}</p>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight mb-2">{title}</h3>
+        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">{desc}</p>
       </div>
 
       <div className="space-y-2.5">
@@ -62,10 +62,10 @@ export default function ProfessionCard({ profession, showTest = false, savedIds 
 
         <Link
           href={slug ? `/vocacion/${slug}` : "#"}
-          className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-slate-200 transition-all hover:bg-violet-600/20 hover:border-violet-500/60 hover:text-violet-100 hover:shadow-[0_0_20px_rgba(168,85,247,0.35)]"
+          className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-all hover:bg-violet-100 dark:hover:bg-violet-600/20 hover:border-violet-500/60 hover:text-violet-900 dark:hover:text-violet-100 dark:hover:shadow-[0_0_20px_rgba(168,85,247,0.35)]"
         >
           <span>Ver Módulo / Ruta</span>
-          <ExternalLink className="w-3.5 h-3.5 text-indigo-400" />
+          <ExternalLink className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
         </Link>
       </div>
     </div>

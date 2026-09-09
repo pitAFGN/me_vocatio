@@ -82,22 +82,22 @@ export default function Insignias() {
           <div
             key={ins.code}
             className={`p-6 rounded-2xl border backdrop-blur-xl transition-all shadow-xl flex flex-col justify-between ${ins.earned
-              ? "bg-white/5 border-white/10 hover:-translate-y-1 hover:border-indigo-500/40"
-              : "bg-white/[0.02] border-white/5 opacity-60"
+              ? "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 hover:-translate-y-1 hover:border-indigo-400 dark:hover:border-indigo-500/40"
+              : "bg-slate-50 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 opacity-60"
               }`}
           >
             <div>
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 border ${ins.earned
-                ? "bg-indigo-950/80 border-indigo-500/30 text-indigo-300"
-                : "bg-slate-900/50 border-slate-800 text-slate-600"
+                ? "bg-indigo-100 dark:bg-indigo-950/80 border-indigo-300 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300"
+                : "bg-slate-200 dark:bg-slate-900/50 border-slate-300 dark:border-slate-800 text-slate-500 dark:text-slate-600"
                 }`}>
-                {ins.earned ? <Icon className="w-6 h-6 text-indigo-400" /> : <Lock className="w-5 h-5" />}
+                {ins.earned ? <Icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" /> : <Lock className="w-5 h-5 text-slate-500 dark:text-slate-500" />}
               </div>
-              <h3 className="text-base font-bold text-white mb-1">{ins.name}</h3>
-              <p className="text-xs leading-relaxed text-slate-400 font-medium mb-6">{ins.description}</p>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">{ins.name}</h3>
+              <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-medium mb-6">{ins.description}</p>
             </div>
 
-            <div className={`text-[10px] font-bold uppercase tracking-wider ${ins.earned ? "text-indigo-400" : "text-slate-600"
+            <div className={`text-[10px] font-bold uppercase tracking-wider ${ins.earned ? "text-indigo-600 dark:text-indigo-400" : "text-slate-500 dark:text-slate-600"
               }`}>
               {ins.earned ? "Insignia Obtenida" : "Bloqueada"}
             </div>
