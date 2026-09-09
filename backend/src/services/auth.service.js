@@ -26,7 +26,7 @@ const register = async (name, email, password) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const resultado = await pool.query(
-    "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email",
+    "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, role",
     [name, email, hashedPassword]
   );
 
@@ -102,10 +102,10 @@ const login = async (email, password) => {
     };
   }
 
-  const payload = { id: user.id, email: user.email, name: user.name };
+  const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
 
   const accessToken = generateAccessToken(payload);
-  const refreshToken = generateRefreshToken({ id: user.id });
+  const refreshToken = generateRefreshToken({ id: user.id, role: user.role });
 
   return {
     accessToken,
@@ -114,6 +114,7 @@ const login = async (email, password) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      role: user.role,
       xp: user.xp || 0,
       level: user.level || 1,
       current_streak: user.current_streak || 0
@@ -294,15 +295,15 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
     }
   } else {
     const nuevoUsuario = await pool.query(
-      "INSERT INTO users (name, email, password_hash, email_verified, email_verified_at) VALUES ($1, $2, $3, true, NOW()) RETURNING id, name, email, plan, xp, level, current_streak",
+      "INSERT INTO users (name, email, password_hash, email_verified, email_verified_at) VALUES ($1, $2, $3, true, NOW()) RETURNING id, name, email, plan, xp, level, current_streak, role",
       [name, email, ""]
     );
     user = nuevoUsuario.rows[0];
   }
 
-  const payload = { id: user.id, email: user.email, name: user.name };
+  const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
   const accessToken = generateAccessToken(payload);
-  const refreshToken = generateRefreshToken({ id: user.id, email: user.email });
+  const refreshToken = generateRefreshToken({ id: user.id, email: user.email, role: user.role });
 
   return {
     accessToken,
@@ -311,6 +312,7 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
       id: user.id, 
       name: user.name, 
       email: user.email,
+      role: user.role,
       plan: user.plan || "free",
       xp: user.xp || 0,
       level: user.level || 1,

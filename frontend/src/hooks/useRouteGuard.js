@@ -100,3 +100,21 @@ export function usePublicRoute() {
 
   return { loading: false };
 }
+
+/**
+ * Protege rutas de administrador (ej. /admin).
+ */
+export function useAdminRoute() {
+  const router = useRouter();
+  const { sesionValida, usuario } = useSesionValida();
+
+  useEffect(() => {
+    if (sesionValida === false) {
+      router.replace("/login");
+    } else if (sesionValida === true && usuario?.role !== 'admin') {
+      router.replace("/dashboard");
+    }
+  }, [sesionValida, usuario, router]);
+
+  return { loading: sesionValida !== true || usuario?.role !== 'admin', user: usuario };
+}

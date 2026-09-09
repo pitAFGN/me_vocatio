@@ -8,13 +8,27 @@ import { useEffect, useState } from "react";
 export default function SidebarNav({ logout }) {
     const pathname = usePathname();
     const [hasNewAchievements, setHasNewAchievements] = useState(false);
+    const [userRole, setUserRole] = useState(null);
 
     useEffect(() => {
         const updateIndicator = () => {
             setHasNewAchievements(Boolean(localStorage.getItem("mevocatio_new_achievements")));
         };
 
+        const checkRole = async () => {
+            try {
+                const { authService } = require("@/services/auth.service");
+                const data = await authService.me();
+                if (data?.user?.role) {
+                    setUserRole(data.user.role);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
         updateIndicator();
+        checkRole();
         window.addEventListener("storage", updateIndicator);
         window.addEventListener("local-storage-update", updateIndicator);
         window.addEventListener("focus", updateIndicator);
@@ -69,6 +83,12 @@ export default function SidebarNav({ logout }) {
                             <Settings className="w-5 h-5" />
                             <span>CONFIGURACIÓN</span>
                         </Link>
+                        {userRole === 'admin' && (
+                            <Link href="/admin" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/admin" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                                <LayoutDashboard className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+                                <span>PANEL ADMIN</span>
+                            </Link>
+                        )}
                     </nav>
                 </div>
 
