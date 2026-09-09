@@ -4,14 +4,6 @@ import { useRouter } from "next/navigation";
 import { authService } from "../services/auth.service";
 import { getSupabase } from "@/lib/supabase";
 
-export function sessionExpirada() {
-  return false;
-}
-
-/**
- * Hook de autenticación.
- * Encapsula la lógica de login, registro, logout y recuperación de contraseña.
- */
 export function useAuth() {
   const router = useRouter();
 
@@ -43,9 +35,6 @@ export function useAuth() {
       // La redirección también evita dejar la interfaz en estado autenticado.
     }
 
-    // Notificar limpieza de sesión
-    window.dispatchEvent(new Event("local-storage-update"));
-
     try {
       const sb = await getSupabase();
       if (sb) {
@@ -54,6 +43,9 @@ export function useAuth() {
     } catch {
       // Si falla la sesión de Supabase, el token local ya fue limpiado.
     }
+
+    // Notificar limpieza de sesión
+    window.dispatchEvent(new Event("local-storage-update"));
     router.replace("/login");
   };
 

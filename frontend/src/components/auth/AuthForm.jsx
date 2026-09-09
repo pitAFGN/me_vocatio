@@ -12,7 +12,13 @@ import { RECAPTCHA_SITE_KEY } from "@/lib/constants";
 import { getSupabase, isGoogleLoginEnabled } from "@/lib/supabase";
 import { validarCamposLogin, validarCamposRegistro } from "@/lib/validations/auth";
 import ModalOlvidePassword from "@/components/ModalOlvidePassword";
-import Swal from "sweetalert2";
+
+// Carga lazy de sweetalert2 solo cuando se va a mostrar una alerta, para no
+// inflar el bundle inicial del login.
+async function mostrarAlerta(opciones) {
+  const Swal = (await import("sweetalert2")).default;
+  return Swal.fire(opciones);
+}
 
 function CampoError({ mensaje }) {
   if (!mensaje) return null;
@@ -105,7 +111,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
         await register(formData.nombre, formData.email, formData.password, captchaToken);
         limpiarFormulario();
         setEsRegistro(false);
-        Swal.fire({
+        mostrarAlerta({
           title: "¡Listo!",
           text: "Tu correo ya está en MeVocatio, solo necesitamos que confirmes tu correo para poder ingresar a ¡¡Pulir tu profesión!!",
           icon: "success",

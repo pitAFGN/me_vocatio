@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Bell,
   Sparkles,
   Compass,
   Layers,
@@ -14,19 +13,11 @@ import {
   Wrench,
   ExternalLink,
   Lock,
-  Zap,
-  CheckCircle2,
-  ArrowRight,
   Search,
   PlusCircle,
-  Clock,
-  Target,
   ShieldCheck,
-  Bot,
-  Filter,
   Flame,
-  Award,
-  ChevronRight
+  Award
 } from "lucide-react";
 import { API_URL } from "@/lib/constants";
 import { useAuth } from "@/hooks/useAuth";
@@ -223,8 +214,8 @@ function RecomendacionContent() {
   return (
     <div className="bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 min-h-screen relative overflow-x-hidden">
       {/* Ambient Glows a juego con el Dashboard */}
-      <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none glow-ambient-indigo" />
+      <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none glow-ambient-purple" />
 
       {/* Sidebar Nav Fijo del Dashboard */}
       <SidebarNav logout={logout} />
@@ -318,10 +309,10 @@ function RecomendacionContent() {
           </header>
 
           {/* Top Hero Banner: AI Mentor Capsule (Opción 2) */}
-          <div className="relative rounded-3xl border border-violet-200 dark:border-violet-500/30 bg-gradient-to-r from-white via-slate-50 to-white dark:from-[#0a0d22]/90 dark:via-[#0e122b]/90 dark:to-[#080a1a]/90 p-6 sm:p-7 shadow-xl dark:shadow-2xl backdrop-blur-2xl overflow-hidden">
+<div className="relative rounded-3xl border border-violet-200 dark:border-violet-500/30 bg-gradient-to-r from-white via-slate-50 to-white dark:from-[#0a0d22]/90 dark:via-[#0e122b]/90 dark:to-[#080a1a]/90 p-6 sm:p-7 shadow-xl dark:shadow-2xl overflow-hidden">
             {/* Glow Decorativo */}
-            <div className="absolute -top-20 -left-20 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-20 -left-20 w-48 h-48 rounded-full pointer-events-none glow-ambient-sky" />
+            <div className="absolute -bottom-20 -right-20 w-48 h-48 rounded-full pointer-events-none glow-ambient-violet" />
 
             <div className="relative z-10 space-y-4">
               {/* Fila 1: Título Vocación, Nivel y Botón de Copiloto */}
@@ -362,8 +353,8 @@ function RecomendacionContent() {
                     <Compass className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                     <span>Enfoque Pedagógico de Gemini:</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                    "{paginasRecursos[paginaActualIndex].resumen_enfoque}"
+<p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                    &ldquo;{paginasRecursos[paginaActualIndex].resumen_enfoque}&rdquo;
                   </p>
                 </div>
               )}

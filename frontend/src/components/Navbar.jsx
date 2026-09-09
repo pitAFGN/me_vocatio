@@ -20,8 +20,8 @@ export default function Navbar() {
   const getButtonStyle = (path) => {
     const isActive = path === "/login" ? isAccessActive : pathname === path;
     return isActive
-      ? "bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:via-indigo-500 dark:to-blue-500 text-white border border-transparent dark:border-purple-300/50 shadow-md dark:shadow-[0_0_20px_rgba(168,85,247,0.4)] font-medium scale-105"
-      : "bg-white dark:bg-gradient-to-r dark:from-slate-800/90 dark:via-[#1e293b]/80 dark:to-[#2e1065]/60 text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-purple-500/30 hover:border-purple-200 dark:hover:border-purple-400/70 hover:text-purple-700 dark:hover:text-white hover:bg-slate-50 dark:hover:from-slate-800 dark:hover:to-[#3b0764] transition-all duration-300 hover:scale-[1.03] shadow-sm dark:shadow-md hover:shadow-[0_8px_15px_-3px_rgba(109,40,217,0.08)] dark:hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]";
+      ? "bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-500 dark:via-indigo-500 dark:to-blue-500 text-white border border-purple-700 dark:border-purple-300 shadow-md dark:shadow-[0_0_20px_rgba(168,85,247,0.4)] font-medium scale-105"
+      : "bg-white dark:bg-gradient-to-r dark:from-slate-800 dark:via-[#1e293b] dark:to-[#2e1065] text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-purple-500 hover:border-purple-200 dark:hover:border-purple-400 hover:text-purple-700 dark:hover:text-white hover:bg-slate-50 dark:hover:from-slate-800 dark:hover:to-[#3b0764] transition-all duration-300 hover:scale-[1.03] shadow-sm dark:shadow-md hover:shadow-[0_8px_15px_-3px_rgba(109,40,217,0.08)] dark:hover:shadow-[0_0_15px_rgba(168,85,247,0.25)]";
   };
 
   useEffect(() => {

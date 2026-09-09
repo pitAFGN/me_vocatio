@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Briefcase, TrendingUp, Award, BookOpen, Sparkles } from "lucide-react";
-import { PROFESSIONS, getProfessionById } from "@/app/data/professions";
+import { getProfessionById } from "@/app/data/professions";
 
 export default function VocationDetail({ params }) {
     const resolvedParams = use(params);

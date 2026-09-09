@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useFavorites } from "@/hooks/useFavorites";
 import { PROFESSIONS } from "@/app/data/professions";
+import { API_URL } from "@/lib/constants";
+import { authService } from "@/services/auth.service";
 
 import LoadingScreen from "@/components/LoadingScreen";
 import SidebarNav from "@/components/SidebarNav";
@@ -56,7 +58,6 @@ export default function ExecutiveDashboard() {
 
   const fetchUser = async () => {
     try {
-      const { authService } = require("@/services/auth.service");
       const userData = await authService.me();
       if (userData && userData.user) {
         setProfileData(prev => ({
@@ -82,8 +83,6 @@ export default function ExecutiveDashboard() {
 
   const handleAddXp = async () => {
     try {
-      const { API_URL } = require("@/lib/constants");
-      
       const res = await fetch(`${API_URL}/api/users/add-xp`, {
         method: "POST",
         headers: {
