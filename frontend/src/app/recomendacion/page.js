@@ -221,7 +221,7 @@ function RecomendacionContent() {
   });
 
   return (
-    <div className="bg-[#040613] text-slate-100 min-h-screen relative overflow-x-hidden">
+    <div className="bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 min-h-screen relative overflow-x-hidden">
       {/* Ambient Glows a juego con el Dashboard */}
       <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -266,19 +266,19 @@ function RecomendacionContent() {
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-400">
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-500 dark:text-indigo-400">
                   Plan de Estudio Personalizado
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-[9px] font-bold text-indigo-300">
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-[9px] font-bold text-indigo-700 dark:text-indigo-300">
                   IA Curated
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Rutas de Aprendizaje
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
                 Recursos estratégicos y mentoría con Gemini para{" "}
-                <strong className="text-white">{profesionURL}</strong>
+                <strong className="text-slate-900 dark:text-white">{profesionURL}</strong>
               </p>
             </div>
 
@@ -298,18 +298,18 @@ function RecomendacionContent() {
                 onClick={() => setIsPlanModalOpen(true)}
                 className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all cursor-pointer shadow-md ${
                   isPremium
-                    ? "bg-gradient-to-r from-violet-600/30 to-indigo-600/30 border-violet-500/50 text-violet-200 hover:border-violet-400 hover:shadow-violet-500/20"
-                    : "bg-white/5 border-white/10 text-slate-300 hover:border-slate-400 hover:text-white"
+                    ? "bg-gradient-to-r from-violet-600/30 to-indigo-600/30 border-violet-500/50 text-violet-700 dark:text-violet-200 hover:border-violet-500 dark:hover:border-violet-400 shadow-violet-500/10 dark:hover:shadow-violet-500/20"
+                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-slate-300 hover:text-slate-900 dark:hover:border-slate-400 dark:hover:text-white"
                 }`}
               >
                 {isPremium ? (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-violet-400 animate-pulse" />
+                    <Sparkles className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400 animate-pulse" />
                     <span>PLAN PREMIUM ACTIVO</span>
                   </>
                 ) : (
                   <>
-                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <Lock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                     <span>PLAN GRATUITO (MEJORAR)</span>
                   </>
                 )}
@@ -318,7 +318,7 @@ function RecomendacionContent() {
           </header>
 
           {/* Top Hero Banner: AI Mentor Capsule (Opción 2) */}
-          <div className="relative rounded-3xl border border-violet-500/30 bg-gradient-to-r from-[#0a0d22]/90 via-[#0e122b]/90 to-[#080a1a]/90 p-6 sm:p-7 shadow-2xl backdrop-blur-2xl overflow-hidden">
+          <div className="relative rounded-3xl border border-violet-200 dark:border-violet-500/30 bg-gradient-to-r from-white via-slate-50 to-white dark:from-[#0a0d22]/90 dark:via-[#0e122b]/90 dark:to-[#080a1a]/90 p-6 sm:p-7 shadow-xl dark:shadow-2xl backdrop-blur-2xl overflow-hidden">
             {/* Glow Decorativo */}
             <div className="absolute -top-20 -left-20 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -328,14 +328,14 @@ function RecomendacionContent() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-sky-400">
+                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-sky-600 dark:text-sky-400">
                       Misión de Aprendizaje • Bloque {paginasRecursos.length > 0 ? paginaActualIndex + 1 : 1}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/40 text-[9px] font-bold text-violet-300 uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded-full bg-violet-500/10 dark:bg-violet-500/20 border border-violet-500/20 dark:border-violet-500/40 text-[9px] font-bold text-violet-700 dark:text-violet-300 uppercase tracking-wider">
                       Nivel {nivelURL}
                     </span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {profesionURL}
                   </h2>
                 </div>
@@ -357,21 +357,21 @@ function RecomendacionContent() {
 
               {/* Fila 2: Enfoque Pedagógico / Misión con comillas y estilo mentor */}
               {paginasRecursos.length > 0 && (
-                <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10">
-                  <div className="text-[10px] font-bold text-indigo-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                    <Compass className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10">
+                  <div className="text-[10px] font-bold text-indigo-600 dark:text-indigo-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                     <span>Enfoque Pedagógico de Gemini:</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
                     "{paginasRecursos[paginaActualIndex].resumen_enfoque}"
                   </p>
                 </div>
               )}
 
               {/* Fila 3: Inventario Dinámico de Recursos en este Bloque */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-white/5">
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
-                  <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-200 dark:border-white/5">
+                <div className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                  <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   <span>Inventario del Bloque:</span>
                 </div>
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
@@ -385,19 +385,19 @@ function RecomendacionContent() {
                     };
                     return (
                       <>
-                        <span className="px-3 py-1 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-xl bg-red-100 dark:bg-red-950/40 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
                           <Video className="w-3 h-3" /> {conteo.video || 1} Video
                         </span>
-                        <span className="px-3 py-1 rounded-xl bg-sky-950/40 border border-sky-500/30 text-sky-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-xl bg-sky-100 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
                           <GraduationCap className="w-3 h-3" /> {conteo.curso || 1} Curso
                         </span>
-                        <span className="px-3 py-1 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
                           <Terminal className="w-3 h-3" /> {conteo.doc || 1} Doc Oficial
                         </span>
-                        <span className="px-3 py-1 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
                           <BookOpen className="w-3 h-3" /> {conteo.libro || 1} Libro
                         </span>
-                        <span className="px-3 py-1 rounded-xl bg-purple-950/40 border border-purple-500/30 text-purple-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
+                        <span className="px-3 py-1 rounded-xl bg-purple-100 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300 text-[11px] font-bold shrink-0 flex items-center gap-1">
                           <Wrench className="w-3 h-3" /> {conteo.herramienta || 1} Lab/Herramienta
                         </span>
                       </>
@@ -412,10 +412,10 @@ function RecomendacionContent() {
           <div className="space-y-4 pt-2">
             
             {/* Fila 1: Píldoras de Bloques y Botón Generar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <span className="text-xs font-bold text-slate-400 mr-1 shrink-0 flex items-center gap-1.5">
-                  <Layers className="w-4 h-4 text-indigo-400" /> Bloques de Estudio:
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 mr-1 shrink-0 flex items-center gap-1.5">
+                  <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Bloques de Estudio:
                 </span>
                 {paginasRecursos.map((_, idx) => (
                   <button
@@ -424,7 +424,7 @@ function RecomendacionContent() {
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
                       paginaActualIndex === idx
                         ? "bg-gradient-to-r from-violet-600 to-indigo-600 border-violet-400/60 text-white shadow-lg shadow-violet-500/25"
-                        : "bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/20"
+                        : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20"
                     }`}
                   >
                     Bloque {idx + 1}
@@ -435,7 +435,7 @@ function RecomendacionContent() {
               <button
                 onClick={manejarCargarMas}
                 disabled={cargando}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-violet-600/20 border border-white/10 hover:border-violet-500/40 text-violet-300 hover:text-white text-xs font-bold transition-all cursor-pointer shrink-0 shadow-sm"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-violet-100 dark:hover:bg-violet-600/20 border border-slate-200 dark:border-white/10 hover:border-violet-300 dark:hover:border-violet-500/40 text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-white text-xs font-bold transition-all cursor-pointer shrink-0 shadow-sm"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
                 <span>{cargando ? "Generando..." : "Generar Siguiente Bloque (IA)"}</span>
@@ -459,8 +459,8 @@ function RecomendacionContent() {
                     onClick={() => setTipoFiltro(categoria.id)}
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer shrink-0 border ${
                       tipoFiltro === categoria.id
-                        ? "bg-indigo-600/30 border-indigo-400/60 text-white"
-                        : "bg-white/[0.03] border-white/5 text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                        ? "bg-indigo-600 text-white border-indigo-600 dark:bg-indigo-600/30 dark:border-indigo-400/60"
+                        : "bg-white dark:bg-white/[0.03] border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5"
                     }`}
                   >
                     {categoria.label}
@@ -476,7 +476,7 @@ function RecomendacionContent() {
                   value={filtroBusqueda}
                   onChange={(e) => setFiltroBusqueda(e.target.value)}
                   placeholder="Buscar en este bloque..."
-                  className="w-full pl-9 pr-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"
+                  className="w-full pl-9 pr-3.5 py-1.5 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-all"
                 />
               </div>
             </div>
@@ -555,7 +555,7 @@ function RecomendacionContent() {
                 {[1, 2, 3, 4, 5, 6].map((idx) => (
                   <div
                     key={idx}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4 overflow-hidden"
+                    className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-5 space-y-4 overflow-hidden"
                   >
                     <div className="h-28 rounded-xl rec-skeleton-shimmer" />
                     <div className="h-4 w-3/4 rounded rec-skeleton-shimmer" />
@@ -577,7 +577,7 @@ function RecomendacionContent() {
                 return (
                   <div
                     key={index}
-                    className="bg-white/[0.04] border border-white/10 hover:border-violet-500/40 hover:bg-white/[0.07] backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10 group"
+                    className="bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 hover:border-violet-400 dark:hover:border-violet-500/40 hover:bg-slate-50 dark:hover:bg-white/[0.07] backdrop-blur-xl rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-500/10 group"
                   >
                     {/* Banner Temático Superior */}
                     <div className={`h-24 p-3.5 flex items-start justify-between relative overflow-hidden rec-banner-${tipoKey}`}>
@@ -602,35 +602,35 @@ function RecomendacionContent() {
                     <div className="p-5 flex flex-col flex-1 justify-between gap-4">
                       <div className="space-y-2">
                         {material.plataforma && (
-                          <span className="text-[11px] font-bold text-sky-400 flex items-center gap-1">
+                          <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1">
                             📍 {material.plataforma}
                           </span>
                         )}
 
-                        <h4 className="text-sm font-bold text-white leading-snug line-clamp-2 group-hover:text-violet-200 transition-colors">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:text-violet-700 dark:group-hover:text-violet-200 transition-colors">
                           {material.titulo}
                         </h4>
 
-                        <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
                           {material.descripcion}
                         </p>
                       </div>
 
                       {/* Acciones de la Tarjeta */}
-                      <div className="space-y-2 pt-2 border-t border-white/5">
+                      <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-white/5">
                         {/* Botón Secundario: Analizar con Gemini Copilot */}
                         <button
                           onClick={() => handleOpenAiAssistant(material)}
-                          className="w-full py-2 px-3 rounded-xl bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-400 text-violet-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                          className="w-full py-2 px-3 rounded-xl bg-violet-100 dark:bg-violet-500/10 hover:bg-violet-200 dark:hover:bg-violet-500/20 border border-violet-300 dark:border-violet-500/30 hover:border-violet-400 text-violet-700 dark:text-violet-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
                         >
                           {isPremium ? (
                             <>
-                              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                              <Sparkles className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
                               <span>✨ Analizar con Gemini</span>
                             </>
                           ) : (
                             <>
-                              <Lock className="w-3.5 h-3.5 text-slate-400" />
+                              <Lock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                               <span>✨ Resumen con Gemini (Premium)</span>
                             </>
                           )}
@@ -656,12 +656,12 @@ function RecomendacionContent() {
 
           {/* Sin resultados tras filtrar */}
           {!cargando && materialesFiltrados.length === 0 && paginasRecursos.length > 0 && (
-            <div className="p-12 text-center bg-white/5 border border-white/10 rounded-2xl space-y-3">
+            <div className="p-12 text-center bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl space-y-3">
               <Compass className="w-10 h-10 text-slate-500 mx-auto" />
-              <h3 className="text-sm font-bold text-white">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                 No se encontraron recursos con este filtro
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Prueba cambiando la categoría o borrando el texto del buscador.
               </p>
             </div>
@@ -677,7 +677,7 @@ export default function RecomendacionPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#040613] text-white flex items-center justify-center text-sm font-bold">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-white flex items-center justify-center text-sm font-bold">
           Cargando rutas de aprendizaje...
         </div>
       }

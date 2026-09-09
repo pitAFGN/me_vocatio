@@ -38,17 +38,17 @@ export default function XpLevelCard({ xp = 0, level = 1 }) {
   return (
     <div className="mt-8">
       <div className="flex justify-between items-end mb-3">
-        <span className="text-xs text-slate-400 tracking-wider font-semibold uppercase flex items-center gap-1.5">
-          <Zap className="w-3.5 h-3.5 text-cyan-400" />
+        <span className="text-xs text-slate-600 dark:text-slate-400 tracking-wider font-semibold uppercase flex items-center gap-1.5">
+          <Zap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
           Progreso de Nivel
         </span>
-        <span className="text-lg text-cyan-400 font-bold">
+        <span className="text-lg text-cyan-600 dark:text-cyan-400 font-bold">
           {animatedXp} / {xpNeededForLevel} XP
         </span>
       </div>
 
       {/* Energy Core Bar */}
-      <div className="relative h-4 w-full bg-slate-900 rounded-full overflow-visible mb-8 border border-slate-700/50 shadow-inner">
+      <div className="relative h-4 w-full bg-slate-200 dark:bg-slate-900 rounded-full overflow-visible mb-8 border border-slate-300 dark:border-slate-700/50 shadow-inner">
         {/* Glow effect container */}
         <div 
           className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-1000 ease-out"
@@ -61,14 +61,14 @@ export default function XpLevelCard({ xp = 0, level = 1 }) {
         </div>
 
         {/* Level Badges */}
-        <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.4)] z-10 rotate-45 group">
-          <span className="text-white font-black text-sm -rotate-45 group-hover:scale-110 transition-transform">
+        <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border-2 border-cyan-500 dark:border-cyan-400 flex items-center justify-center shadow-[0_0_15px_rgba(34,211,238,0.4)] z-10 rotate-45 group">
+          <span className="text-slate-900 dark:text-white font-black text-sm -rotate-45 group-hover:scale-110 transition-transform">
             L{level}
           </span>
         </div>
 
-        <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-slate-900 border-2 border-slate-700 flex items-center justify-center z-10 rotate-45 opacity-60">
-          <span className="text-slate-400 font-bold text-xs -rotate-45">
+        <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center z-10 rotate-45 opacity-60">
+          <span className="text-slate-600 dark:text-slate-400 font-bold text-xs -rotate-45">
             L{level + 1}
           </span>
         </div>

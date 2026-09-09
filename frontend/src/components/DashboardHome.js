@@ -34,15 +34,15 @@ export default function DashboardHome({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
 
                 {/* Status Card con los puntitos estáticos */}
-                <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-8 lg:col-span-2 flex flex-col justify-between relative overflow-hidden shadow-xl">
+                <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-2xl p-8 lg:col-span-2 flex flex-col justify-between relative overflow-hidden shadow-xl">
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 rounded-full bg-cyan-950/80 flex items-center justify-center border border-cyan-500/30 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+                            <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-950/80 flex items-center justify-center border border-cyan-300 dark:border-cyan-500/30 text-cyan-700 dark:text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
                                 <Sparkles className="w-5 h-5" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white tracking-wide">Progresión Global</h3>
-                                <p className="text-xs text-slate-400">Tu avance y experiencia en la plataforma</p>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-wide">Progresión Global</h3>
+                                <p className="text-xs text-slate-600 dark:text-slate-400">Tu avance y experiencia en la plataforma</p>
                             </div>
                         </div>
 
@@ -51,13 +51,13 @@ export default function DashboardHome({
                 </div>
 
                 {/* Action Card / Analytics */}
-                <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl p-8 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
+                <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-2xl p-8 flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl"></div>
-                    <div className="w-16 h-16 rounded-full bg-orange-950/40 flex items-center justify-center mb-6 border border-orange-500/30 text-orange-400 z-10">
+                    <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center mb-6 border border-orange-300 dark:border-orange-500/30 text-orange-700 dark:text-orange-400 z-10">
                         <Flame className="w-8 h-8" />
                     </div>
-                    <h4 className="text-lg font-bold text-white mb-2 z-10">Racha de {profileData.current_streak} Días</h4>
-                    <p className="text-sm text-slate-400 mb-6 z-10">
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2 z-10">Racha de {profileData.current_streak} Días</h4>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 z-10">
                         ¡Mantén tu racha activa ingresando todos los días! Próxima meta a alcanzar nivel {profileData.level + 1}.
                     </p>
                     <button
@@ -68,7 +68,7 @@ export default function DashboardHome({
                     </button>
                     <button
                         onClick={handleAddXp}
-                        className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-700 z-10"
+                        className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold text-xs text-slate-600 dark:text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-300 dark:border-slate-700 z-10"
                     >
                         [TEST] Sumar 500 XP
                     </button>
@@ -80,22 +80,22 @@ export default function DashboardHome({
             <section id="explorar" className="mb-10 scroll-mt-24">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                        <Sparkles className="w-6 h-6 text-indigo-400" />
-                        <h2 className="text-2xl font-bold text-white">Explorar Vocaciones</h2>
+                        <Sparkles className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Explorar Vocaciones</h2>
                     </div>
 
                     <div className="flex gap-2">
                         <button
                             onClick={() => setPage(0)}
                             disabled={page === 0}
-                            className={`p-2.5 rounded-xl border transition-all ${page === 0 ? "bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed" : "bg-white/5 border-white/10 text-indigo-200 hover:bg-white/10 cursor-pointer"}`}
+                            className={`p-2.5 rounded-xl border transition-all ${page === 0 ? "bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer"}`}
                         >
                             <ArrowLeft className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setPage(1)}
                             disabled={page === 1 || filteredProfessions.length <= ITEMS_PER_PAGE}
-                            className={`p-2.5 rounded-xl border transition-all ${page === 1 || filteredProfessions.length <= ITEMS_PER_PAGE ? "bg-slate-900/50 border-slate-800 text-slate-600 cursor-not-allowed" : "bg-white/5 border-white/10 text-indigo-200 hover:bg-white/10 cursor-pointer"}`}
+                            className={`p-2.5 rounded-xl border transition-all ${page === 1 || filteredProfessions.length <= ITEMS_PER_PAGE ? "bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer"}`}
                         >
                             <ArrowRight className="w-4 h-4" />
                         </button>
@@ -103,13 +103,13 @@ export default function DashboardHome({
                 </div>
 
                 <div className="relative flex items-center mb-6">
-                    <Search className="absolute left-4 text-indigo-300/50 w-5 h-5" />
+                    <Search className="absolute left-4 text-slate-400 dark:text-indigo-300/50 w-5 h-5" />
                     <input
                         type="text"
                         placeholder="Buscar profesiones o áreas de interés (ej. Desarrollo, Datos, Ciberseguridad)..."
                         value={searchQuery}
                         onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
-                        className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 backdrop-blur-xl rounded-xl text-sm placeholder-slate-400 text-white focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
+                        className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-xl text-sm placeholder-slate-400 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
                     />
                 </div>
 
