@@ -106,7 +106,7 @@ export default function DiagnosticoPage() {
           localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.unlocked));
         }
         router.push(
-          `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&evaluation_id=${data.evaluation_id}`
+          `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&puntaje=${encodeURIComponent(data.puntaje || '')}&evaluation_id=${data.evaluation_id}`
         );
       } else {
         alert("Hubo un error al registrar la evaluación: " + (data.error || data.mensaje || "Error desconocido"));
@@ -135,7 +135,9 @@ export default function DiagnosticoPage() {
   return (
     <div style={{ padding: '2rem', color: '#fff', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
       <h1>Cuestionario de Diagnóstico: {profession.title}</h1>
-      <p style={{ marginBottom: '2rem' }}>Responde las siguientes preguntas para evaluar tu nivel técnico.</p>
+      <p style={{ marginBottom: '2rem', color: '#94a3b8' }}>
+        Responde este breve test de 8 preguntas generales para conocer tu afinidad y nivel de partida en esta vocación.
+      </p>
 
       {/* LISTADO DE PREGUNTAS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>

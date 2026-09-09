@@ -55,20 +55,6 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
             placeholder="Ej: Curso de Diseño UX"
           />
         </div>
-
-        <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-            URL del curso
-          </label>
-          <input
-            value={curso.url}
-            disabled={!isPremium}
-            onChange={(e) => setCurso({ ...curso, url: e.target.value })}
-            className={inputClass}
-            placeholder="https://..."
-          />
-        </div>
-
         <div>
           <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
             Descripción breve

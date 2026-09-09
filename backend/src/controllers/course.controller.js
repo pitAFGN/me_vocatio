@@ -76,6 +76,39 @@ const eliminar = async (req, res) => {
   }
 };
 
+/* ─────────────────────────────────────────
+   ANALÍTICAS DEL INSTRUCTOR
+───────────────────────────────────────── */
+const analiticasInstructor = async (req, res) => {
+  try {
+    const analiticas = await courseService.obtenerAnaliticasInstructor(req.user.id);
+    res.json(analiticas);
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Error interno al obtener analíticas" });
+  }
+};
+
+/* ─────────────────────────────────────────
+   RESEÑAS DEL CURSO
+───────────────────────────────────────── */
+const agregarReview = async (req, res) => {
+  try {
+    const review = await courseService.crearOActualizarReview(req.params.id, req.user.id, req.body);
+    res.status(201).json(review);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error al agregar reseña" });
+  }
+};
+
+const obtenerReviews = async (req, res) => {
+  try {
+    const data = await courseService.obtenerReviewsCurso(req.params.id);
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener reseñas del curso" });
+  }
+};
+
 module.exports = {
   crear,
   listar,
@@ -83,4 +116,7 @@ module.exports = {
   obtenerPorId,
   actualizar,
   eliminar,
+  analiticasInstructor,
+  agregarReview,
+  obtenerReviews,
 };

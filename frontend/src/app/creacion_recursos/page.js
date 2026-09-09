@@ -84,15 +84,20 @@ export default function CreacionRecursosPage() {
     setIsModalOpen(true);
   };
 
-  const handleAddResource = (title, type) => {
+  const handleAddResource = (title, type, url) => {
     setRecursos((prev) => [
       ...prev,
       {
-        id: prev.length + 1,
+        id: Date.now() + Math.random(),
         title: title,
         type: type || "Video",
+        url: url || "",
       },
     ]);
+  };
+
+  const handleRemoveResource = (id) => {
+    setRecursos((prev) => prev.filter((item) => item.id !== id));
   };
 
   const toggleBadge = (badge) => {
@@ -120,7 +125,11 @@ export default function CreacionRecursosPage() {
           category: "Desarrollo", // Default fallback since validation requires it
           background_style: selectedBackground,
           badges: selectedBadges,
-          lessons_list: recursos,
+          lessons_list: recursos.map((r, i) => ({
+            title: r.title,
+            content: r.type,
+            video_url: r.url || ""
+          })),
           status: "published"
         })
       });
@@ -213,6 +222,7 @@ export default function CreacionRecursosPage() {
               resources={recursos}
               freeResourceLimit={FREE_RESOURCE_LIMIT}
               onCreateResource={openResourceModal}
+              onRemoveResource={handleRemoveResource}
               onUpgrade={() => setMostrarPlanModal(true)}
             />
           </div>
@@ -221,6 +231,7 @@ export default function CreacionRecursosPage() {
             <AnalyticsPanel
               isPremium={isPremium}
               onUpgrade={() => setMostrarPlanModal(true)}
+              resources={recursos}
               metricCards={metricCards}
               funnelData={funnelData}
               recentStudents={recentStudents}

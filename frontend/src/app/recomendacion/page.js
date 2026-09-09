@@ -43,9 +43,9 @@ function RecomendacionContent() {
   const searchParams = useSearchParams();
   const peticionInicialRealizada = useRef(false);
 
-  // 1. Parámetros de la URL
   const profesionURL = searchParams.get("profesion") || searchParams.get("vocacion") || "Desarrollo de Software";
   const nivelURL = searchParams.get("nivel") || "Principiante";
+  const puntajeURL = searchParams.get("puntaje") || null;
   const evaluationIdURL = searchParams.get("evaluation_id") || null;
 
   // Estado del Plan (free vs premium)
@@ -323,12 +323,20 @@ function RecomendacionContent() {
               {/* Fila 1: Título Vocación, Nivel y Botón de Copiloto */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-[10px] font-black uppercase tracking-[0.25em] text-sky-400">
                       Misión de Aprendizaje • Bloque {paginasRecursos.length > 0 ? paginaActualIndex + 1 : 1}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/40 text-[9px] font-bold text-violet-300 uppercase tracking-wider">
-                      Nivel {nivelURL}
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                        nivelURL.toLowerCase().includes("avanzado")
+                          ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                          : nivelURL.toLowerCase().includes("intermedio")
+                          ? "bg-sky-500/20 border-sky-500/40 text-sky-300"
+                          : "bg-violet-500/20 border-violet-500/40 text-violet-300"
+                      }`}
+                    >
+                      Nivel {nivelURL} {puntajeURL ? `• ${puntajeURL}% aciertos` : ""}
                     </span>
                   </div>
                   <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">

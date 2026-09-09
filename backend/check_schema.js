@@ -4,13 +4,13 @@ const client = new Client({ connectionString: process.env.DATABASE_URL });
 
 async function run() {
   await client.connect();
-  const res1 = await client.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'courses'");
-  console.log('COURSES:');
-  console.table(res1.rows);
-  
-  const res2 = await client.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'lessons'");
-  console.log('LESSONS:');
-  console.table(res2.rows);
+  const res = await client.query(`
+    SELECT table_name, column_name, data_type 
+    FROM information_schema.columns 
+    WHERE table_name IN ('reviews', 'enrollments', 'course_progress', 'courses', 'lessons') 
+    ORDER BY table_name, ordinal_position
+  `);
+  console.table(res.rows);
   await client.end();
 }
 run().catch(console.error);
