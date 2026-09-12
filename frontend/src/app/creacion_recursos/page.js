@@ -61,6 +61,7 @@ export default function CreacionRecursosPage() {
   const [myCourses, setMyCourses] = useState([]);
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [editingResource, setEditingResource] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Form States
   const [recursos, setRecursos] = useState([]);
@@ -267,32 +268,58 @@ export default function CreacionRecursosPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row shrink-0 sm:items-center gap-3">
-            <div className="relative group">
-              <select 
-                value={editingCourseId || ""}
-                onChange={(e) => handleCargarCursoParaEditar(e.target.value)}
-                disabled={myCourses.length === 0}
-                className="appearance-none bg-slate-900/80 border border-slate-700 text-slate-200 text-[11px] font-bold uppercase tracking-wider rounded-xl pl-4 pr-10 py-2.5 outline-none focus:border-violet-500 hover:border-violet-400/60 hover:bg-slate-800 transition-all cursor-pointer shadow-lg shadow-black/20 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">
-                  {myCourses.length === 0 ? "Sin cursos publicados" : "+ Nuevo Curso"}
-                </option>
-                {myCourses.length > 0 && (
-                  <optgroup label="Mis Cursos">
-                    {myCourses.map(course => (
-                      <option key={course.id} value={course.id} className="bg-slate-900 text-sm normal-case tracking-normal">
-                        Editar: {course.title}
-                      </option>
-                    ))}
-                  </optgroup>
+            {myCourses.length > 0 && (
+              <div className="relative group">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center justify-between bg-slate-900/80 border border-slate-700 text-slate-200 text-[11px] font-bold uppercase tracking-wider rounded-xl px-4 py-2.5 outline-none focus:border-violet-500 hover:border-violet-400/60 hover:bg-slate-800 transition-all cursor-pointer shadow-lg shadow-black/20 w-full sm:w-[180px]"
+                >
+                  <span className="truncate">
+                    {editingCourseId ? "Editando..." : "+ Nuevo Curso"}
+                  </span>
+                  <svg className={`fill-current h-4 w-4 text-slate-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                  </svg>
+                </button>
+
+                {isDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsDropdownOpen(false)}
+                    />
+                    <div className="absolute top-full mt-2 w-full sm:w-[220px] rounded-xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black overflow-hidden z-50">
+                    <button
+                      onClick={() => {
+                        handleCargarCursoParaEditar("");
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-xs font-bold text-violet-300 hover:bg-slate-800 transition-colors uppercase tracking-wider border-b border-slate-800"
+                    >
+                      + Crear nuevo curso
+                    </button>
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                      <div className="px-3 pt-3 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                        Mis Cursos
+                      </div>
+                      {myCourses.map(course => (
+                        <button
+                          key={course.id}
+                          onClick={() => {
+                            handleCargarCursoParaEditar(course.id);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors truncate ${editingCourseId === course.id ? "bg-violet-600/20 text-violet-300 border-l-2 border-violet-500" : "text-slate-300 hover:bg-slate-800 border-l-2 border-transparent"}`}
+                        >
+                          {course.title}
+                        </button>
+                      ))}
+                      </div>
+                    </div>
+                  </>
                 )}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 group-hover:text-violet-400 transition-colors">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
               </div>
-            </div>
+            )}
 
             <Link
               href="/dashboard"
