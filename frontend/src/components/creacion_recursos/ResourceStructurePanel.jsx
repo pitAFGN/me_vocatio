@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2, HelpCircle, Edit3 } from "lucide-react";
+import { ExternalLink, Trash2, HelpCircle, Edit3, Eye, EyeOff } from "lucide-react";
 
 export default function ResourceStructurePanel({
   isPremium,
@@ -7,6 +7,7 @@ export default function ResourceStructurePanel({
   onCreateResource,
   onRemoveResource,
   onEditResource,
+  onToggleResourceActive,
   onUpgrade,
 }) {
   const visibleResources = isPremium ? resources : resources.slice(0, freeResourceLimit);
@@ -110,9 +111,28 @@ export default function ResourceStructurePanel({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300">
-                    Activo
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onToggleResourceActive && onToggleResourceActive(resource.id)}
+                    className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors cursor-pointer ${
+                      resource.isActive !== false 
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" 
+                        : "border-slate-700 bg-slate-900 text-slate-500 hover:bg-slate-800"
+                    }`}
+                    title={resource.isActive !== false ? "Ocultar recurso a estudiantes" : "Mostrar recurso a estudiantes"}
+                  >
+                    {resource.isActive !== false ? (
+                      <>
+                        <Eye className="w-3 h-3" />
+                        Activo
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="w-3 h-3" />
+                        Oculto
+                      </>
+                    )}
+                  </button>
                   {onEditResource && (
                     <button
                       type="button"

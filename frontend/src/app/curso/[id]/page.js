@@ -80,6 +80,11 @@ export default function CourseDetailPage() {
         const res = await fetch(`${API_URL}/api/courses/${params.id}`);
         if (!res.ok) throw new Error("No se pudo cargar el curso");
         const data = await res.json();
+        
+        // Filtrar lecciones ocultas para el estudiante
+        if (data.lessons) {
+          data.lessons = data.lessons.filter(l => l.is_active !== false);
+        }
         setCourse(data);
 
         // Cargar reseñas

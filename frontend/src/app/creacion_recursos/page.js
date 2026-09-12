@@ -129,7 +129,8 @@ export default function CreacionRecursosPage() {
             id: l.id, // Mantener el ID original
             title: l.title,
             type: l.content || "Video",
-            url: l.video_url || ""
+            url: l.video_url || "",
+            isActive: l.is_active !== undefined ? l.is_active : true
           })));
         } else {
           setRecursos([]);
@@ -169,6 +170,7 @@ export default function CreacionRecursosPage() {
         title: title,
         type: type || "Video",
         url: url || "",
+        isActive: true
       },
     ]);
   };
@@ -176,6 +178,10 @@ export default function CreacionRecursosPage() {
   const handleEditResourceSubmit = (id, title, type, url) => {
     setRecursos((prev) => prev.map(r => r.id === id ? { ...r, title, type, url } : r));
     setEditingResource(null);
+  };
+
+  const handleToggleResourceActive = (id) => {
+    setRecursos((prev) => prev.map(r => r.id === id ? { ...r, isActive: !r.isActive } : r));
   };
 
   const handleRemoveResource = (id) => {
@@ -204,7 +210,8 @@ export default function CreacionRecursosPage() {
         id: typeof r.id === 'number' ? r.id : undefined, // Enviar ID solo si es número (lección existente)
         title: r.title,
         content: r.type,
-        video_url: r.url || ""
+        video_url: r.url || "",
+        is_active: r.isActive
       })),
       status: "published"
     };
@@ -367,6 +374,7 @@ export default function CreacionRecursosPage() {
               onCreateResource={openResourceModal}
               onRemoveResource={handleRemoveResource}
               onEditResource={handleEditResourceOpen}
+              onToggleResourceActive={handleToggleResourceActive}
               onUpgrade={() => setMostrarPlanModal(true)}
             />
           </div>

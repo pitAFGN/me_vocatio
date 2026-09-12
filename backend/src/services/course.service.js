@@ -35,16 +35,18 @@ const crearCurso = async (instructorId, datos) => {
     if (lessons_list && Array.isArray(lessons_list) && lessons_list.length > 0) {
       for (let i = 0; i < lessons_list.length; i++) {
         const lesson = lessons_list[i];
+        const isActive = lesson.is_active !== undefined ? lesson.is_active : true;
         await client.query(
-          `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index)
-           VALUES ($1, $2, $3, $4, $5, $6)`,
+          `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
             nuevoCurso.id,
             lesson.title || `Lección ${i + 1}`,
             lesson.content || "",
             lesson.video_url || null,
             lesson.duration_minutes || null,
-            i
+            i,
+            isActive
           ]
         );
       }
@@ -204,11 +206,13 @@ const actualizarCurso = async (id, instructorId, datos) => {
       // Actualizar o insertar lecciones
       for (let i = 0; i < lessons_list.length; i++) {
         const lesson = lessons_list[i];
+        const isActive = lesson.is_active !== undefined ? lesson.is_active : true;
+        
         if (lesson.id && idsActuales.includes(lesson.id)) {
           // Update
           await client.query(
             `UPDATE lessons 
-             SET title = $1, content = $2, video_url = $3, duration_minutes = $4, order_index = $5
+             SET title = $1, content = $2, video_url = $3, duration_minutes = $4, order_index = $5, is_active = $8
              WHERE id = $6 AND course_id = $7`,
             [
               lesson.title, 
@@ -217,21 +221,23 @@ const actualizarCurso = async (id, instructorId, datos) => {
               lesson.duration_minutes || null,
               i + 1, // order
               lesson.id, 
-              id
+              id,
+              isActive
             ]
           );
         } else {
           // Insert
           await client.query(
-            `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
+            `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index, is_active)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
             [
               id, 
               lesson.title, 
               lesson.content || "Video", 
               lesson.video_url || "", 
               lesson.duration_minutes || null,
-              i + 1
+              i + 1,
+              isActive
             ]
           );
         }
