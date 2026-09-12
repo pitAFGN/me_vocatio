@@ -132,6 +132,17 @@ export default function AnalyticsPanel({
     ];
   }
 
+  const weeklyActivity = isRealData && liveData.weeklyActivity 
+    ? liveData.weeklyActivity 
+    : [
+      { day: "L", h: "10%" }, { day: "M", h: "10%" }, { day: "X", h: "10%" },
+      { day: "J", h: "10%" }, { day: "V", h: "10%" }, { day: "S", h: "10%" }, { day: "D", h: "10%" }
+    ];
+
+  const peakDay = weeklyActivity.find(d => d.peak)?.day;
+  const daysFull = { "L": "Lunes", "M": "Martes", "X": "Miércoles", "J": "Jueves", "V": "Viernes", "S": "Sábado", "D": "Domingo" };
+  const peakText = peakDay ? `Pico: ${daysFull[peakDay]}` : "Sin actividad";
+
   return (
     <section className="rounded-3xl border border-violet-500/30 bg-slate-900/80 p-5 backdrop-blur-sm relative overflow-hidden">
       {/* Fondo decorativo */}
@@ -159,7 +170,7 @@ export default function AnalyticsPanel({
           <select 
             value={selectedCourseId}
             onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-violet-500 transition-colors"
+            className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-violet-500 transition-colors cursor-pointer"
           >
             <option value="">Todos mis cursos</option>
             {liveData.courses.map(course => (
@@ -199,23 +210,15 @@ export default function AnalyticsPanel({
             Actividad (Últimos 7 días)
           </h3>
           <span className="text-[9px] font-bold text-violet-300 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20">
-            Pico: Miércoles
+            {peakText}
           </span>
         </div>
         <div className="flex items-end justify-between gap-1.5 h-16 pt-2 px-1">
-          {[
-            { day: "L", h: "40%" },
-            { day: "M", h: "60%" },
-            { day: "X", h: "95%", peak: true },
-            { day: "J", h: "70%" },
-            { day: "V", h: "80%" },
-            { day: "S", h: "45%" },
-            { day: "D", h: "55%" },
-          ].map((bar, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+          {weeklyActivity.map((bar, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
               <div 
-                className={`w-full rounded-t-md transition-all ${
-                  bar.peak ? 'bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'bg-slate-800 hover:bg-violet-600'
+                className={`w-full rounded-t-md transition-all duration-500 ${
+                  bar.peak ? 'bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'bg-slate-800 group-hover:bg-violet-600/50'
                 }`} 
                 style={{ height: bar.h }} 
               />
@@ -261,6 +264,11 @@ export default function AnalyticsPanel({
               </div>
             </div>
           ))}
+          {isRealData && (!liveData.totalStudents || liveData.totalStudents === 0) && (
+            <p className="text-[10px] text-slate-500 italic text-center mt-4">
+              Aún no hay inscripciones para medir retención.
+            </p>
+          )}
         </div>
 
         {/* Tip pedagógico de IA / Analítica */}
@@ -297,22 +305,33 @@ export default function AnalyticsPanel({
               </tr>
             </thead>
             <tbody>
-              {studentsList.map((student, idx) => (
-                <tr key={`${student.name}-${idx}`} className="border-t border-slate-850 bg-slate-950/40 hover:bg-slate-900/50 transition-colors">
-                  <td className="px-3 py-2.5">
-                    <div className="font-semibold text-white truncate max-w-[110px]">{student.name}</div>
-                  </td>
-                  <td className="px-3 py-2.5 text-slate-300 truncate max-w-[110px]">{student.course}</td>
-                  <td className="px-3 py-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-slate-300 font-bold">{student.progress}</span>
-                      <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-300">
-                        {student.status}
-                      </span>
+              {studentsList.length > 0 ? (
+                studentsList.map((student, idx) => (
+                  <tr key={`${student.name}-${idx}`} className="border-t border-slate-850 bg-slate-950/40 hover:bg-slate-900/50 transition-colors">
+                    <td className="px-3 py-2.5">
+                      <div className="font-semibold text-white truncate max-w-[110px]">{student.name}</div>
+                    </td>
+                    <td className="px-3 py-2.5 text-slate-300 truncate max-w-[110px]">{student.course}</td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-300 font-bold">{student.progress}</span>
+                        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-300">
+                          {student.status}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3" className="px-3 py-6 text-center border-t border-slate-850">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Users className="w-6 h-6 text-slate-600" />
+                      <span className="text-slate-500 font-medium">Aún no hay estudiantes inscritos</span>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

@@ -285,6 +285,40 @@ const obtenerAnaliticasInstructor = async (instructorId, courseId = null) => {
   const avgSatisfaction = reviewsStats.rows[0]?.avg_rating ? parseFloat(reviewsStats.rows[0].avg_rating) : 0;
   const totalReviews = parseInt(reviewsStats.rows[0]?.total_reviews || 0, 10);
 
+  // Actividad de los últimos 7 días
+  const activityRes = await pool.query(
+    `SELECT to_char(enrolled_at, 'Dy') as day_name, 
+            EXTRACT(ISODOW FROM enrolled_at) as day_index, 
+            COUNT(*) as enrolls
+     FROM enrollments
+     WHERE course_id = ANY($1::int[]) 
+       AND enrolled_at >= NOW() - INTERVAL '7 days'
+     GROUP BY day_name, day_index
+     ORDER BY day_index ASC`,
+    [courseIds]
+  );
+  
+  const daysMap = { "Mon": "L", "Tue": "M", "Wed": "X", "Thu": "J", "Fri": "V", "Sat": "S", "Sun": "D" };
+  const baseActivity = [
+    { day: "L", h: "10%" }, { day: "M", h: "10%" }, { day: "X", h: "10%" },
+    { day: "J", h: "10%" }, { day: "V", h: "10%" }, { day: "S", h: "10%" }, { day: "D", h: "10%" }
+  ];
+  
+  if (activityRes.rows.length > 0) {
+    const maxEnrolls = Math.max(...activityRes.rows.map(r => parseInt(r.enrolls, 10)));
+    activityRes.rows.forEach(r => {
+      const dayLetter = daysMap[r.day_name] || r.day_name.substring(0,1);
+      const activityIndex = baseActivity.findIndex(b => b.day === dayLetter);
+      if (activityIndex !== -1) {
+        const heightPct = Math.max(10, Math.round((parseInt(r.enrolls, 10) / maxEnrolls) * 100));
+        baseActivity[activityIndex].h = `${heightPct}%`;
+        if (parseInt(r.enrolls, 10) === maxEnrolls && maxEnrolls > 0) {
+          baseActivity[activityIndex].peak = true;
+        }
+      }
+    });
+  }
+
   let funnel = [];
   if (courseId) {
     const funnelRes = await pool.query(
@@ -327,6 +361,7 @@ const obtenerAnaliticasInstructor = async (instructorId, courseId = null) => {
     courses: allCoursesRes.rows,
     recentStudents,
     funnel,
+    weeklyActivity: baseActivity,
   };
 };
 
