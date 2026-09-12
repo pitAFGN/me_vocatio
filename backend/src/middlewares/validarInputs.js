@@ -209,7 +209,7 @@ const reglasActualizarCurso = [
 
   body("status")
     .optional()
-    .isIn(["activo", "inactivo"]).withMessage("El estado debe ser 'activo' o 'inactivo'."),
+    .isIn(["activo", "inactivo", "published", "draft"]).withMessage("El estado debe ser 'activo', 'inactivo', 'published' o 'draft'."),
 
   validar,
 ];
