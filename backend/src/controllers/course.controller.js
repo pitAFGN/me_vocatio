@@ -1,4 +1,5 @@
 const courseService = require("../services/course.service");
+const pool = require("../config/db");
 const achievementService = require("../services/achievement.service");
 
 /* ─────────────────────────────────────────
@@ -110,14 +111,86 @@ const obtenerReviews = async (req, res) => {
   }
 };
 
+/* ─────────────────────────────────────────
+   INSCRIPCIÓN Y PROGRESO DEL ESTUDIANTE
+───────────────────────────────────────── */
+const enrollInCourse = async (req, res) => {
+  try {
+    const courseId = parseInt(req.params.id, 10);
+    const userId = req.user.id;
+    
+    // Check if already enrolled
+    const checkRes = await pool.query(
+      `SELECT id FROM enrollments WHERE user_id = $1 AND course_id = $2`,
+      [userId, courseId]
+    );
+    
+    if (checkRes.rows.length === 0) {
+      // Create enrollment
+      await pool.query(
+        `INSERT INTO enrollments (user_id, course_id, status) VALUES ($1, $2, 'active')`,
+        [userId, courseId]
+      );
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateProgress = async (req, res) => {
+  try {
+    const courseId = parseInt(req.params.id, 10);
+    const { lessonId } = req.body;
+    const userId = req.user.id;
+
+    // Get enrollment
+    const enrollmentRes = await pool.query(
+      `SELECT id FROM enrollments WHERE user_id = $1 AND course_id = $2`,
+      [userId, courseId]
+    );
+
+    let enrollmentId;
+    if (enrollmentRes.rows.length === 0) {
+      // Create enrollment if it somehow didn't exist
+      const newEnroll = await pool.query(
+        `INSERT INTO enrollments (user_id, course_id, status) VALUES ($1, $2, 'active') RETURNING id`,
+        [userId, courseId]
+      );
+      enrollmentId = newEnroll.rows[0].id;
+    } else {
+      enrollmentId = enrollmentRes.rows[0].id;
+    }
+
+    // Check if lesson is already marked as complete
+    const progressCheck = await pool.query(
+      `SELECT id FROM course_progress WHERE enrollment_id = $1 AND lesson_id = $2`,
+      [enrollmentId, lessonId]
+    );
+
+    if (progressCheck.rows.length === 0) {
+      await pool.query(
+        `INSERT INTO course_progress (enrollment_id, lesson_id) VALUES ($1, $2)`,
+        [enrollmentId, lessonId]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
-  crear,
   listar,
   misCursos,
   obtenerPorId,
+  crear,
   actualizar,
   eliminar,
   analiticasInstructor,
   agregarReview,
   obtenerReviews,
+  enrollInCourse,
+  updateProgress,
 };

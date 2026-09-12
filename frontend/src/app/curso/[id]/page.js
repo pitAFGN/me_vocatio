@@ -52,7 +52,7 @@ export default function CourseDetailPage() {
     "💻 Excelente código",
   ];
 
-  // Cargar progreso previo del almacenamiento local
+  // Cargar progreso previo del almacenamiento local y asegurar inscripción
   useEffect(() => {
     if (!params.id) return;
     try {
@@ -60,6 +60,13 @@ export default function CourseDetailPage() {
       if (saved) {
         setVisitedLessons(JSON.parse(saved));
       }
+      
+      // Registrar inscripción en backend silenciosamente
+      fetch(`${API_URL}/api/courses/${params.id}/enroll`, {
+        method: "POST",
+        credentials: "include"
+      }).catch(e => console.error(e));
+      
     } catch (e) {
       console.error(e);
     }
@@ -95,6 +102,15 @@ export default function CourseDetailPage() {
       const updated = [...prev, lessonId];
       try {
         localStorage.setItem(`mevocatio_course_progress_${params.id}`, JSON.stringify(updated));
+        
+        // Sincronizar progreso con el backend
+        fetch(`${API_URL}/api/courses/${params.id}/progress`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lessonId }),
+          credentials: "include"
+        }).catch(e => console.error(e));
+        
       } catch (e) {}
       return updated;
     });
