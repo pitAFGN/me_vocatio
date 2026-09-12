@@ -27,6 +27,7 @@ export default function DashboardHome({
     handleAddXp
 }) {
     const currentProfessions = filteredProfessions.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(filteredProfessions.length / ITEMS_PER_PAGE));
 
     return (
         <>
@@ -61,7 +62,7 @@ export default function DashboardHome({
                         ¡Mantén tu racha activa ingresando todos los días! Próxima meta a alcanzar nivel {profileData.level + 1}.
                     </p>
                     <button
-                        onClick={() => router.push("/vocacion/desarrollador-de-software")}
+                        onClick={() => router.push("/favoritos")}
                         className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
                     >
                         Continuar Carrera
@@ -86,15 +87,15 @@ export default function DashboardHome({
 
                     <div className="flex gap-2">
                         <button
-                            onClick={() => setPage(0)}
+                            onClick={() => setPage((p) => Math.max(0, p - 1))}
                             disabled={page === 0}
                             className={`p-2.5 rounded-xl border transition-all ${page === 0 ? "bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer"}`}
                         >
                             <ArrowLeft className="w-4 h-4" />
                         </button>
                         <button
-                            onClick={() => setPage(1)}
-                            disabled={page === 1 || filteredProfessions.length <= ITEMS_PER_PAGE}
+                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                            disabled={page >= totalPages - 1}
                             className={`p-2.5 rounded-xl border transition-all ${page === 1 || filteredProfessions.length <= ITEMS_PER_PAGE ? "bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer"}`}
                         >
                             <ArrowRight className="w-4 h-4" />

@@ -1,26 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import OpinionesCarrusel from "@/components/OpinionesCarrusel";
-
-const BackgroundStars = dynamic(
-  () => import("@/components/ThreeScene").then((m) => m.BackgroundStars),
-  { ssr: false }
-);
-
-function BackgroundStarsDiferidas() {
-  const [mostrar, setMostrar] = useState(false);
-
-  useEffect(() => {
-    import("@/components/ThreeScene").catch(() => {});
-    const timer = setTimeout(() => setMostrar(true), 700);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return mostrar ? <BackgroundStars /> : null;
-}
+import BackgroundStarsDiferidas from "@/components/BackgroundStarsDiferidas";
 
 const BENEFICIOS = [
     {

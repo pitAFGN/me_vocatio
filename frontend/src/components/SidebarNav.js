@@ -57,17 +57,17 @@ export default function SidebarNav({ logout }) {
                             <span>PANEL PRINCIPAL</span>
                         </Link>
 
-                        <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname.startsWith("/recomendacion") ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                        <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname.startsWith("/recomendacion") ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
                             <Compass className={`w-5 h-5 ${pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400" : ""}`} />
                             <span>RUTAS DE APRENDIZAJE</span>
                         </Link>
 
-                        <Link href="/favoritos" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/favoritos" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                        <Link href="/favoritos" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/favoritos" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
                             <Bookmark className={`w-5 h-5 ${pathname === "/favoritos" ? "text-indigo-500 dark:text-indigo-400" : ""}`} />
                             <span>FAVORITOS</span>
                         </Link>
 
-                        <Link href="/insignias" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/insignias" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                        <Link href="/insignias" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/insignias" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
                             <Award className="w-5 h-5" />
                             <span className="flex items-center justify-between w-full">
                                 <span>INSIGNIAS</span>
@@ -79,12 +79,12 @@ export default function SidebarNav({ logout }) {
                             </span>
                         </Link>
 
-                        <Link href="/configuracion" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/configuracion" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                        <Link href="/configuracion" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/configuracion" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
                             <Settings className="w-5 h-5" />
                             <span>CONFIGURACIÓN</span>
                         </Link>
                         {userRole === 'admin' && (
-                            <Link href="/admin" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/admin" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                            <Link href="/admin" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname === "/admin" ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
                                 <LayoutDashboard className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
                                 <span>PANEL ADMIN</span>
                             </Link>
@@ -100,17 +100,17 @@ export default function SidebarNav({ logout }) {
                     <span className="text-[9px] font-medium">Panel</span>
                 </Link>
 
-                <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
+                <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" prefetch={false} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
                     <Compass className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Rutas</span>
                 </Link>
 
-                <Link href="/favoritos" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/favoritos" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
+                <Link href="/favoritos" prefetch={false} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/favoritos" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
                     <Bookmark className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Favoritos</span>
                 </Link>
 
-                <Link href="/insignias" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/insignias" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
+                <Link href="/insignias" prefetch={false} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/insignias" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
                     <Award className="w-5 h-5" />
                     <span className="flex items-center gap-1 text-[9px] font-medium">
                         Insignias
@@ -118,7 +118,7 @@ export default function SidebarNav({ logout }) {
                     </span>
                 </Link>
 
-                <Link href="/configuracion" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/configuracion" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
+                <Link href="/configuracion" prefetch={false} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/configuracion" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
                     <Settings className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Ajustes</span>
                 </Link>

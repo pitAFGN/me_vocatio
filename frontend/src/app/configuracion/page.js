@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Settings, User, Mail, Lock, Bell, LogOut, Save, ShieldCheck, ArrowLeft
+  Settings, User, Lock, Bell, LogOut, Save, ShieldCheck, ArrowLeft
 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,7 +14,6 @@ export default function Configuracion() {
   const { loading } = useProtectedRoute();
 
   const [nombre, setNombre] = useState("");
-  const [email, setEmail] = useState("");
   const [notificaciones, setNotificaciones] = useState(true);
   const [guardado, setGuardado] = useState(false);
   const [userLoaded, setUserLoaded] = useState(false);
@@ -26,7 +25,6 @@ export default function Configuracion() {
         const res = await authService.me();
         if (res?.user) {
           setNombre(res.user.name || "");
-          setEmail(res.user.email || "");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -98,18 +96,6 @@ export default function Configuracion() {
               onChange={(e) => setNombre(e.target.value)}
               className="w-full px-5 py-3.5 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 text-sm shadow-inner focus:border-indigo-500/50"
               type="text"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1 flex items-center gap-1.5">
-              <Mail className="w-3 h-3 text-indigo-500 dark:text-indigo-400" /> Email
-            </label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 text-sm shadow-inner focus:border-indigo-500/50"
-              type="email"
             />
           </div>
 

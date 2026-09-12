@@ -1,5 +1,3 @@
-"use client";
-
 export default function LoadingScreen({
   mensaje = "Verificando acceso...",
   claseFondo = "bg-slate-50 dark:bg-[#0a0b14]",

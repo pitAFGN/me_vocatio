@@ -103,6 +103,7 @@ export default function Navbar() {
         {/* Botón Nosotros */}
         <Link
           href="/nosotros"
+          prefetch={false}
           className={`${getButtonStyle("/nosotros")} px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider shrink-0`}
         >
           NOSOTROS
