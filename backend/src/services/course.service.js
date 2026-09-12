@@ -195,25 +195,37 @@ const eliminarCurso = async (id, instructorId) => {
 /* ─────────────────────────────────────────
    ANALÍTICAS DEL INSTRUCTOR
 ───────────────────────────────────────── */
-const obtenerAnaliticasInstructor = async (instructorId) => {
-  const coursesRes = await pool.query(
+const obtenerAnaliticasInstructor = async (instructorId, courseId = null) => {
+  let coursesQuery = `SELECT id, title FROM courses WHERE instructor_id = $1`;
+  const queryParams = [instructorId];
+  
+  if (courseId) {
+    coursesQuery += ` AND id = $2`;
+    queryParams.push(courseId);
+  }
+
+  const coursesRes = await pool.query(coursesQuery, queryParams);
+  const courseIds = coursesRes.rows.map((c) => c.id);
+
+  const allCoursesRes = await pool.query(
     `SELECT id, title FROM courses WHERE instructor_id = $1`,
     [instructorId]
   );
-  const courseIds = coursesRes.rows.map((c) => c.id);
 
   if (courseIds.length === 0) {
     return {
-      hasCourses: false,
+      hasCourses: allCoursesRes.rows.length > 0,
       totalStudents: 0,
       completionRate: "0%",
       totalStudyHours: "0h",
-      courses: [],
+      satisfactionRating: 0,
+      totalReviews: 0,
+      courses: allCoursesRes.rows,
       recentStudents: [],
+      funnel: [],
     };
   }
 
-  // Estudiantes totales
   const studentsRes = await pool.query(
     `SELECT COUNT(DISTINCT user_id) as total_students 
      FROM enrollments 
@@ -222,28 +234,23 @@ const obtenerAnaliticasInstructor = async (instructorId) => {
   );
   const totalStudents = parseInt(studentsRes.rows[0]?.total_students || 0, 10);
 
-  // Total inscripciones
   const totalEnrollmentsRes = await pool.query(
     `SELECT COUNT(*) as total_count 
-     FROM enrollments e
-     JOIN courses c ON c.id = e.course_id
-     WHERE c.instructor_id = $1`,
-    [instructorId]
+     FROM enrollments 
+     WHERE course_id = ANY($1::int[])`,
+    [courseIds]
   );
   const totalEnrollments = parseInt(totalEnrollmentsRes.rows[0]?.total_count || 0, 10);
 
-  // Completados
   const completedEnrollmentsRes = await pool.query(
     `SELECT COUNT(*) as completed_count 
-     FROM enrollments e
-     JOIN courses c ON c.id = e.course_id
-     WHERE c.instructor_id = $1 AND e.status = 'completed'`,
-    [instructorId]
+     FROM enrollments 
+     WHERE course_id = ANY($1::int[]) AND status = 'completed'`,
+    [courseIds]
   );
   const completedCount = parseInt(completedEnrollmentsRes.rows[0]?.completed_count || 0, 10);
   const completionRate = totalEnrollments > 0 ? Math.round((completedCount / totalEnrollments) * 100) : 0;
 
-  // Estudiantes y progreso reciente
   const recentStudentsRes = await pool.query(
     `SELECT u.name, c.title as course, e.status, e.enrolled_at,
             (SELECT COUNT(*) FROM course_progress cp WHERE cp.enrollment_id = e.id) as completed_lessons,
@@ -251,10 +258,10 @@ const obtenerAnaliticasInstructor = async (instructorId) => {
      FROM enrollments e
      JOIN users u ON u.id = e.user_id
      JOIN courses c ON c.id = e.course_id
-     WHERE c.instructor_id = $1
+     WHERE c.id = ANY($1::int[])
      ORDER BY e.enrolled_at DESC
      LIMIT 6`,
-    [instructorId]
+    [courseIds]
   );
 
   const recentStudents = recentStudentsRes.rows.map((r) => {
@@ -269,25 +276,57 @@ const obtenerAnaliticasInstructor = async (instructorId) => {
     };
   });
 
-  // Calificación promedio y reseñas
   const reviewsStats = await pool.query(
     `SELECT AVG(rating)::numeric(10,1) as avg_rating, COUNT(*) as total_reviews 
      FROM reviews 
      WHERE course_id = ANY($1::int[])`,
     [courseIds]
   );
-  const avgSatisfaction = reviewsStats.rows[0]?.avg_rating ? parseFloat(reviewsStats.rows[0].avg_rating) : 4.9;
+  const avgSatisfaction = reviewsStats.rows[0]?.avg_rating ? parseFloat(reviewsStats.rows[0].avg_rating) : 0;
   const totalReviews = parseInt(reviewsStats.rows[0]?.total_reviews || 0, 10);
 
+  let funnel = [];
+  if (courseId) {
+    const funnelRes = await pool.query(
+      `SELECT l.title, l.order_index, COUNT(DISTINCT cp.enrollment_id) as completions
+       FROM lessons l
+       LEFT JOIN course_progress cp ON cp.lesson_id = l.id
+       WHERE l.course_id = $1
+       GROUP BY l.id, l.title, l.order_index
+       ORDER BY l.order_index ASC`,
+      [courseId]
+    );
+    
+    funnel = [{ step: "Inicio del curso", value: 100 }];
+    if (totalEnrollments > 0) {
+      funnelRes.rows.forEach(r => {
+        const completions = parseInt(r.completions, 10) || 0;
+        const percentage = Math.round((completions / totalEnrollments) * 100);
+        funnel.push({
+          step: r.title,
+          value: percentage
+        });
+      });
+    }
+  } else {
+    const halfway = totalEnrollments > 0 ? Math.round((completedCount + totalEnrollments) / 2 / totalEnrollments * 100) : 0;
+    funnel = [
+      { step: "Inscripciones totales", value: 100 },
+      { step: "Llegaron a la mitad", value: halfway },
+      { step: "Finalizaron", value: completionRate }
+    ];
+  }
+
   return {
-    hasCourses: true,
+    hasCourses: allCoursesRes.rows.length > 0,
     totalStudents,
     completionRate: `${completionRate}%`,
-    totalStudyHours: `${Math.max(1, Math.round(totalStudents * 2.8))}h`,
+    totalStudyHours: `${Math.max(0, Math.round(totalStudents * 2.8))}h`,
     satisfactionRating: avgSatisfaction,
     totalReviews,
-    courses: coursesRes.rows,
+    courses: allCoursesRes.rows,
     recentStudents,
+    funnel,
   };
 };
 

@@ -14,7 +14,7 @@ export default function AnalyticsPanel({
 }) {
   const [liveData, setLiveData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState("dynamic"); // "dynamic" (basado en lecciones actuales) o "live" (datos reales del servidor)
+  const [selectedCourseId, setSelectedCourseId] = useState("");
 
   // Cargar analíticas reales si el usuario está autenticado
   useEffect(() => {
@@ -23,7 +23,11 @@ export default function AnalyticsPanel({
     const fetchAnalytics = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_URL}/api/courses/instructor/analytics`, {
+        const url = selectedCourseId 
+          ? `${API_URL}/api/courses/instructor/analytics?courseId=${selectedCourseId}`
+          : `${API_URL}/api/courses/instructor/analytics`;
+          
+        const res = await fetch(url, {
           credentials: "include",
         });
         if (res.ok) {
@@ -38,7 +42,7 @@ export default function AnalyticsPanel({
     };
 
     fetchAnalytics();
-  }, [isPremium]);
+  }, [isPremium, selectedCourseId]);
 
   if (!isPremium) {
     return (
@@ -63,101 +67,112 @@ export default function AnalyticsPanel({
     );
   }
 
-  // Métricas calculadas o del servidor
-  const hasRealStudents = liveData?.hasCourses && liveData.totalStudents > 0;
+  // Siempre mostramos datos reales si el backend responde (incluso si son 0)
+  const isRealData = liveData !== null;
   
   const displayMetrics = [
     {
       label: "Estudiantes totales",
-      value: hasRealStudents ? `${liveData.totalStudents}` : (fallbackCards?.[0]?.value || "0"),
-      delta: hasRealStudents ? "+100% nuevos" : (fallbackCards?.[0]?.delta || "+12.4%"),
+      value: isRealData ? `${liveData.totalStudents}` : "0",
+      delta: isRealData && liveData.totalStudents > 0 ? "Nuevos inscritos" : "",
       icon: Users,
     },
     {
       label: "Tasa de finalización",
-      value: hasRealStudents ? liveData.completionRate : (fallbackCards?.[1]?.value || "78%"),
-      delta: hasRealStudents ? "Promedio real" : (fallbackCards?.[1]?.delta || "+6.1%"),
+      value: isRealData ? liveData.completionRate : "0%",
+      delta: isRealData ? "Promedio real" : "",
       icon: Award,
     },
     {
       label: "Tiempo de estudio",
-      value: hasRealStudents ? liveData.totalStudyHours : (fallbackCards?.[2]?.value || "4h 32m"),
-      delta: hasRealStudents ? "Acumulado" : (fallbackCards?.[2]?.delta || "+1h 10m"),
+      value: isRealData ? liveData.totalStudyHours : "0h",
+      delta: isRealData ? "Acumulado" : "",
       icon: Clock,
     },
     {
       label: "Satisfacción Alumnos",
-      value: liveData?.satisfactionRating ? `⭐ ${liveData.satisfactionRating}` : "⭐ 4.9",
-      delta: liveData?.totalReviews ? `${liveData.totalReviews} opiniones` : "Opiniones",
+      value: isRealData && liveData.totalReviews > 0 ? `★ ${liveData.satisfactionRating}` : "★ 0",
+      delta: isRealData ? `${liveData.totalReviews} opiniones` : "0 opiniones",
       icon: Sparkles,
     },
   ];
 
-  // Embudo dinámico adaptado a las lecciones que el creador está agregando
+  const studentsList = isRealData && liveData.recentStudents.length > 0 
+    ? liveData.recentStudents 
+    : [];
+
+  // Configurar el embudo (funnel) dinámicamente
   const colors = ["bg-violet-500", "bg-purple-500", "bg-indigo-500", "bg-fuchsia-500", "bg-pink-500", "bg-cyan-500"];
+  let dynamicFunnel = [];
   
-  const dynamicFunnel = (() => {
-    if (resources.length === 0) {
-      return fallbackFunnel || [
-        { step: "Inicio del curso", value: 100, color: "bg-violet-500" },
-        { step: "Lección 1", value: 85, color: "bg-purple-500" },
-        { step: "Lección 2", value: 70, color: "bg-indigo-500" },
-        { step: "Finalización", value: 55, color: "bg-emerald-500" },
-      ];
-    }
-
-    const steps = [{ step: "Inicio del curso", value: 100, color: "bg-violet-500" }];
-    const stepDrop = Math.max(8, Math.floor(60 / (resources.length + 1)));
-
-    resources.forEach((r, idx) => {
-      const val = Math.max(15, 100 - (idx + 1) * stepDrop);
-      steps.push({
-        step: `${idx + 1}. ${r.title.slice(0, 18)}${r.title.length > 18 ? "..." : ""}`,
-        value: val,
-        color: colors[idx % colors.length],
+  if (isRealData && liveData.funnel && liveData.funnel.length > 0) {
+    dynamicFunnel = liveData.funnel.map((item, idx) => ({
+      ...item,
+      color: colors[idx % colors.length]
+    }));
+  } else if (resources.length > 0) {
+    dynamicFunnel = [
+      { step: "Inicio del curso", value: 100, color: colors[0] }
+    ];
+    let currentValue = 100;
+    resources.forEach((res, idx) => {
+      currentValue = Math.max(10, currentValue - Math.floor(Math.random() * 20 + 5));
+      dynamicFunnel.push({
+        step: res.title || `Lección ${idx + 1}`,
+        value: currentValue,
+        color: colors[(idx + 1) % colors.length]
       });
     });
-
-    const finalVal = Math.max(10, 100 - (resources.length + 1) * stepDrop);
-    steps.push({
-      step: "Finalización del curso",
-      value: finalVal,
-      color: "bg-emerald-500",
-    });
-
-    return steps;
-  })();
-
-  const studentsList = (hasRealStudents && liveData?.recentStudents?.length > 0)
-    ? liveData.recentStudents
-    : fallbackStudents || [];
+  } else {
+    dynamicFunnel = fallbackFunnel || [
+      { step: "Inicio del curso", value: 100, color: "bg-violet-500" },
+      { step: "Lección 1", value: 85, color: "bg-purple-500" },
+      { step: "Lección 2", value: 70, color: "bg-indigo-500" },
+      { step: "Finalización", value: 55, color: "bg-emerald-500" },
+    ];
+  }
 
   return (
-    <section className="rounded-3xl border border-violet-500/30 bg-slate-900/80 p-5 backdrop-blur-sm">
-      <div className="mb-5 flex items-center justify-between">
+    <section className="rounded-3xl border border-violet-500/30 bg-slate-900/80 p-5 backdrop-blur-sm relative overflow-hidden">
+      {/* Fondo decorativo */}
+      <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-violet-600/10 blur-[50px]"></div>
+      
+      {/* Encabezado Analíticas */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
             Analíticas de Rendimiento
           </p>
-          <h2 className="mt-1 text-xl font-black text-white">Métricas de Alumnos</h2>
+          <div className="flex items-center gap-3 mt-1">
+            <h2 className="text-xl font-black text-white">Métricas de Alumnos</h2>
+            {isRealData && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                Datos Reales
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {hasRealStudents ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              En Vivo
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 border border-violet-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-violet-300">
-              <Sparkles className="w-3 h-3 text-violet-400" />
-              Proyección
-            </span>
-          )}
-        </div>
+        
+        {/* Selector de Cursos */}
+        {isRealData && liveData.courses && liveData.courses.length > 0 && (
+          <select 
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+            className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-violet-500 transition-colors"
+          >
+            <option value="">Todos mis cursos</option>
+            {liveData.courses.map(course => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Tarjetas de Métricas */}
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 xl:grid-cols-2">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 xl:grid-cols-2 relative z-10">
         {displayMetrics.map((metric) => {
           const Icon = metric.icon;
           return (
@@ -178,7 +193,7 @@ export default function AnalyticsPanel({
       </div>
 
       {/* Actividad de los últimos 7 días */}
-      <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+      <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 relative z-10">
         <div className="flex items-center justify-between mb-2.5">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
             Actividad (Últimos 7 días)
@@ -211,16 +226,19 @@ export default function AnalyticsPanel({
       </div>
 
       {/* Embudo de Abandono (Drop-off Funnel) */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 relative z-10">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-200">
               Embudo de retención
             </h3>
             <p className="text-[10px] text-slate-400 mt-0.5">
-              {resources.length > 0 
-                ? `Adaptado a tus ${resources.length} lecciones configuradas`
-                : "Estimación paso a paso de deserción de alumnos"}
+              {isRealData
+                ? (selectedCourseId ? "Deserción por lección de este curso" : "Tasa general de tus cursos")
+                : (resources.length > 0 
+                  ? `Adaptado a tus ${resources.length} lecciones configuradas`
+                  : "Estimación paso a paso de deserción de alumnos")
+              }
             </p>
           </div>
           <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-300 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">
@@ -256,7 +274,7 @@ export default function AnalyticsPanel({
       </div>
 
       {/* Estudiantes Recientes */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
+      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 relative z-10">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-200">

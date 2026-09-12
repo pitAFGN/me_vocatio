@@ -81,7 +81,8 @@ const eliminar = async (req, res) => {
 ───────────────────────────────────────── */
 const analiticasInstructor = async (req, res) => {
   try {
-    const analiticas = await courseService.obtenerAnaliticasInstructor(req.user.id);
+    const courseId = req.query.courseId ? parseInt(req.query.courseId, 10) : null;
+    const analiticas = await courseService.obtenerAnaliticasInstructor(req.user.id, courseId);
     res.json(analiticas);
   } catch (error) {
     res.status(500).json({ error: error.message || "Error interno al obtener analíticas" });
