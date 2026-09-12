@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Video, FileText, FileBadge, Link as LinkIcon, Globe } from "lucide-react";
 
 const resourceTypes = [
@@ -9,19 +9,35 @@ const resourceTypes = [
   { id: "Enlace", icon: LinkIcon, label: "Enlace", desc: "Recurso externo" },
 ];
 
-export default function ResourceModal({ isOpen, onClose, onAdd, lessonNumber }) {
+export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNumber, editingResource }) {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [selectedType, setSelectedType] = useState("Video");
 
+  // Al abrir el modal, pre-cargar los datos si estamos editando
+  useEffect(() => {
+    if (isOpen) {
+      if (editingResource) {
+        setTitle(editingResource.title || "");
+        setUrl(editingResource.url || "");
+        setSelectedType(editingResource.type || "Video");
+      } else {
+        setTitle("");
+        setUrl("");
+        setSelectedType("Video");
+      }
+    }
+  }, [isOpen, editingResource]);
+
   if (!isOpen) return null;
 
-  const handleAdd = () => {
+  const handleAction = () => {
     if (!title.trim()) return;
-    onAdd(title.trim(), selectedType, url.trim());
-    setTitle("");
-    setUrl("");
-    setSelectedType("Video");
+    if (editingResource && onEdit) {
+      onEdit(editingResource.id, title.trim(), selectedType, url.trim());
+    } else {
+      onAdd(title.trim(), selectedType, url.trim());
+    }
     onClose();
   };
 
@@ -49,7 +65,7 @@ export default function ResourceModal({ isOpen, onClose, onAdd, lessonNumber }) 
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && title.trim() && handleAdd()}
+              onKeyDown={(e) => e.key === 'Enter' && title.trim() && handleAction()}
               className="w-full rounded-xl border border-slate-700 bg-slate-900/50 px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-violet-500 focus:bg-slate-900"
               placeholder="Ej: Introducción a los componentes"
             />
@@ -66,7 +82,7 @@ export default function ResourceModal({ isOpen, onClose, onAdd, lessonNumber }) 
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && title.trim() && handleAdd()}
+                onKeyDown={(e) => e.key === 'Enter' && title.trim() && handleAction()}
                 className="w-full rounded-xl border border-slate-700 bg-slate-900/50 pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-violet-500 focus:bg-slate-900"
                 placeholder="https://youtube.com/watch?v=... o enlace de material"
               />
@@ -115,11 +131,11 @@ export default function ResourceModal({ isOpen, onClose, onAdd, lessonNumber }) 
           </button>
           <button 
             type="button"
-            onClick={handleAdd}
+            onClick={handleAction}
             disabled={!title.trim()}
             className="flex-1 rounded-xl bg-violet-600 py-3 text-xs font-bold text-white transition-colors hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-600/20 cursor-pointer"
           >
-            Agregar Recurso
+            {editingResource ? "Guardar Cambios" : "Agregar Recurso"}
           </button>
         </div>
       </div>

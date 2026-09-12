@@ -182,6 +182,7 @@ const updateProgress = async (req, res) => {
 };
 
 module.exports = {
+  crear,
   listar,
   misCursos,
   obtenerPorId,

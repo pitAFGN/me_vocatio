@@ -16,12 +16,14 @@ router.post("/", authenticateToken, reglasCrearCurso, courseController.crear);
 router.put("/:id", authenticateToken, reglasActualizarCurso, courseController.actualizar);
 router.delete("/:id", authenticateToken, courseController.eliminar);
 
+/* ─── Reseñas del curso ─── */
 /* ─────────────────────────────────────────
    Reseñas del curso
 ───────────────────────────────────────── */
 router.post("/:id/reviews", authenticateToken, courseController.agregarReview);
 router.get("/:id/reviews", courseController.obtenerReviews);
 
+/* ─── Ruta pública: detalle de un curso (va al final por el ":id") ─── */
 /* ─────────────────────────────────────────
    Inscripción y progreso
 ───────────────────────────────────────── */

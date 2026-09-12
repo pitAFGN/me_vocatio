@@ -150,28 +150,102 @@ const actualizarCurso = async (id, instructorId, datos) => {
     throw { status: 403, message: "No tienes permiso para editar este curso" };
   }
 
-  const { title, description, category, level, duration_hours, modality, status } = datos;
+  const { title, description, category, level, duration_hours, modality, status, background_style, badges, lessons_list } = datos;
   const actual = cursoExistente.rows[0];
 
-  const resultado = await pool.query(
-    `UPDATE courses
-     SET title = $1, description = $2, category = $3, level = $4,
-         duration_hours = $5, modality = $6, status = $7, updated_at = NOW()
-     WHERE id = $8
-     RETURNING *`,
-    [
-      title ?? actual.title,
-      description ?? actual.description,
-      category ?? actual.category,
-      level ?? actual.level,
-      duration_hours ?? actual.duration_hours,
-      modality ?? actual.modality,
-      status ?? actual.status,
-      id,
-    ]
-  );
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-  return resultado.rows[0];
+    const resultado = await client.query(
+      `UPDATE courses
+       SET title = $1, description = $2, category = $3, level = $4,
+           duration_hours = $5, modality = $6, status = $7, 
+           background_style = $8, badges = $9, updated_at = NOW()
+       WHERE id = $10
+       RETURNING *`,
+      [
+        title ?? actual.title,
+        description ?? actual.description,
+        category ?? actual.category,
+        level ?? actual.level,
+        duration_hours ?? actual.duration_hours,
+        modality ?? actual.modality,
+        status ?? actual.status,
+        background_style ?? actual.background_style,
+        badges ? JSON.stringify(badges) : actual.badges,
+        id,
+      ]
+    );
+
+    // Si se enviaron lecciones, actualizar la lista
+    if (lessons_list && Array.isArray(lessons_list)) {
+      // Obtener lecciones actuales para saber cuáles eliminar
+      const leccionesActuales = await client.query(
+        "SELECT id FROM lessons WHERE course_id = $1",
+        [id]
+      );
+      const idsActuales = leccionesActuales.rows.map(r => r.id);
+      const idsEnviados = lessons_list.filter(l => l.id).map(l => l.id);
+
+      // Eliminar lecciones que ya no están (puede fallar si tienen progreso asociado)
+      const idsAEliminar = idsActuales.filter(id => !idsEnviados.includes(id));
+      if (idsAEliminar.length > 0) {
+        try {
+          await client.query(
+            `DELETE FROM lessons WHERE id = ANY($1::int[]) AND course_id = $2`,
+            [idsAEliminar, id]
+          );
+        } catch (e) {
+          throw { status: 400, message: "No se puede eliminar una lección porque hay estudiantes que ya tienen progreso en ella." };
+        }
+      }
+
+      // Actualizar o insertar lecciones
+      for (let i = 0; i < lessons_list.length; i++) {
+        const lesson = lessons_list[i];
+        if (lesson.id && idsActuales.includes(lesson.id)) {
+          // Update
+          await client.query(
+            `UPDATE lessons 
+             SET title = $1, content = $2, video_url = $3, duration_minutes = $4, order_index = $5
+             WHERE id = $6 AND course_id = $7`,
+            [
+              lesson.title, 
+              lesson.content || "Video", 
+              lesson.video_url || "", 
+              lesson.duration_minutes || null,
+              i + 1, // order
+              lesson.id, 
+              id
+            ]
+          );
+        } else {
+          // Insert
+          await client.query(
+            `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [
+              id, 
+              lesson.title, 
+              lesson.content || "Video", 
+              lesson.video_url || "", 
+              lesson.duration_minutes || null,
+              i + 1
+            ]
+          );
+        }
+      }
+    }
+
+    await client.query("COMMIT");
+    return resultado.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 /* ─────────────────────────────────────────

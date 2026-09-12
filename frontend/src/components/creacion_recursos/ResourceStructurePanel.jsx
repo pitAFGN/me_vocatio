@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2, HelpCircle } from "lucide-react";
+import { ExternalLink, Trash2, HelpCircle, Edit3 } from "lucide-react";
 
 export default function ResourceStructurePanel({
   isPremium,
@@ -6,6 +6,7 @@ export default function ResourceStructurePanel({
   freeResourceLimit,
   onCreateResource,
   onRemoveResource,
+  onEditResource,
   onUpgrade,
 }) {
   const visibleResources = isPremium ? resources : resources.slice(0, freeResourceLimit);
@@ -112,6 +113,16 @@ export default function ResourceStructurePanel({
                   <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-300">
                     Activo
                   </span>
+                  {onEditResource && (
+                    <button
+                      type="button"
+                      onClick={() => onEditResource(resource)}
+                      className="rounded-xl p-1.5 text-slate-500 hover:bg-violet-500/10 hover:text-violet-400 transition-colors cursor-pointer"
+                      title="Editar recurso"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  )}
                   {onRemoveResource && (
                     <button
                       type="button"

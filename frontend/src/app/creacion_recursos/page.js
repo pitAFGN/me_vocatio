@@ -56,6 +56,11 @@ export default function CreacionRecursosPage() {
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "success" });
+  
+  // Edit State
+  const [myCourses, setMyCourses] = useState([]);
+  const [editingCourseId, setEditingCourseId] = useState(null);
+  const [editingResource, setEditingResource] = useState(null);
 
   // Form States
   const [recursos, setRecursos] = useState([]);
@@ -71,6 +76,71 @@ export default function CreacionRecursosPage() {
 
   const isPremium = plan === "premium";
 
+  // Cargar mis cursos para poder editarlos
+  useEffect(() => {
+    const fetchMisCursos = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/mios`, {
+          credentials: "include"
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMyCourses(data);
+        }
+      } catch (e) {
+        console.error("Error fetching courses", e);
+      }
+    };
+    fetchMisCursos();
+  }, []);
+
+  const handleCargarCursoParaEditar = async (courseId) => {
+    if (!courseId) {
+      setEditingCourseId(null);
+      setCurso({ nombre: "", url: "", descripcion: "" });
+      setRecursos([]);
+      setSelectedBackground("bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950");
+      setSelectedBadges(["Elite"]);
+      return;
+    }
+
+    try {
+      setToast({ message: "Cargando curso...", type: "success" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${courseId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setEditingCourseId(data.id);
+        setCurso({
+          nombre: data.title || "",
+          url: "",
+          descripcion: data.description || "",
+        });
+        setSelectedBackground(data.background_style || "bg-slate-950");
+        
+        try {
+          setSelectedBadges(typeof data.badges === 'string' ? JSON.parse(data.badges) : (data.badges || []));
+        } catch(e) {
+          setSelectedBadges([]);
+        }
+
+        if (data.lessons && Array.isArray(data.lessons)) {
+          setRecursos(data.lessons.map(l => ({
+            id: l.id, // Mantener el ID original
+            title: l.title,
+            type: l.content || "Video",
+            url: l.video_url || ""
+          })));
+        } else {
+          setRecursos([]);
+        }
+        
+        setToast({ message: "Curso cargado para editar", type: "success" });
+      }
+    } catch (e) {
+      setToast({ message: "Error al cargar el curso", type: "error" });
+    }
+  };
+
   const cambiarPlan = (nextPlan) => {
     setPlan(nextPlan);
     window.localStorage.setItem("mevocatio_plan", nextPlan);
@@ -81,6 +151,12 @@ export default function CreacionRecursosPage() {
       setMostrarPlanModal(true);
       return;
     }
+    setEditingResource(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditResourceOpen = (resource) => {
+    setEditingResource(resource);
     setIsModalOpen(true);
   };
 
@@ -94,6 +170,11 @@ export default function CreacionRecursosPage() {
         url: url || "",
       },
     ]);
+  };
+
+  const handleEditResourceSubmit = (id, title, type, url) => {
+    setRecursos((prev) => prev.map(r => r.id === id ? { ...r, title, type, url } : r));
+    setEditingResource(null);
   };
 
   const handleRemoveResource = (id) => {
@@ -112,36 +193,42 @@ export default function CreacionRecursosPage() {
       return;
     }
 
+    const payload = {
+      title: curso.nombre,
+      description: curso.descripcion,
+      category: "Desarrollo",
+      background_style: selectedBackground,
+      badges: selectedBadges,
+      lessons_list: recursos.map((r) => ({
+        id: typeof r.id === 'number' ? r.id : undefined, // Enviar ID solo si es número (lección existente)
+        title: r.title,
+        content: r.type,
+        video_url: r.url || ""
+      })),
+      status: "published"
+    };
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses`, {
-        method: "POST",
+      const url = editingCourseId 
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${editingCourseId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses`;
+        
+      const res = await fetch(url, {
+        method: editingCourseId ? "PUT" : "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          title: curso.nombre,
-          description: curso.descripcion,
-          category: "Desarrollo", // Default fallback since validation requires it
-          background_style: selectedBackground,
-          badges: selectedBadges,
-          lessons_list: recursos.map((r, i) => ({
-            title: r.title,
-            content: r.type,
-            video_url: r.url || ""
-          })),
-          status: "published"
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
         const errData = await res.json();
-        console.error("Backend validation errors:", errData);
-        setToast({ message: `Error: ${errData.error || "Datos inválidos"}`, type: "error" });
+        setToast({ message: `Error: ${errData.error || errData.message || "Datos inválidos"}`, type: "error" });
         return;
       }
       
-      setToast({ message: "¡Curso publicado exitosamente!", type: "success" });
+      setToast({ message: editingCourseId ? "¡Curso actualizado exitosamente!" : "¡Curso publicado exitosamente!", type: "success" });
       
     } catch (error) {
       console.error("Fetch error:", error);
@@ -161,13 +248,15 @@ export default function CreacionRecursosPage() {
       {/* Resource Creation Modal */}
       <ResourceModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setEditingResource(null); }}
         onAdd={handleAddResource}
-        lessonNumber={recursos.length + 1}
+        onEdit={handleEditResourceSubmit}
+        editingResource={editingResource}
+        lessonNumber={editingResource ? recursos.findIndex(r => r.id === editingResource.id) + 1 : recursos.length + 1}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
               Creador / Recursos
@@ -177,10 +266,27 @@ export default function CreacionRecursosPage() {
             </h1>
           </div>
 
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex flex-col sm:flex-row shrink-0 sm:items-center gap-3">
+            {myCourses.length > 0 && (
+              <select 
+                value={editingCourseId || ""}
+                onChange={(e) => handleCargarCursoParaEditar(e.target.value)}
+                className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-violet-500 transition-colors cursor-pointer max-w-[200px]"
+              >
+                <option value="">+ Crear nuevo curso</option>
+                <optgroup label="Mis Cursos">
+                  {myCourses.map(course => (
+                    <option key={course.id} value={course.id}>
+                      Editar: {course.title}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            )}
+
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-800 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>Volver</span>
@@ -188,9 +294,9 @@ export default function CreacionRecursosPage() {
 
             <button 
               onClick={handleGuardarCurso}
-              className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500 hover:shadow-violet-500/40 active:scale-95 transition-all"
+              className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500 hover:shadow-violet-500/40 active:scale-95 transition-all text-center"
             >
-              Publicar Curso
+              {editingCourseId ? "Actualizar Curso" : "Publicar Curso"}
             </button>
           </div>
         </div>
@@ -223,6 +329,7 @@ export default function CreacionRecursosPage() {
               freeResourceLimit={FREE_RESOURCE_LIMIT}
               onCreateResource={openResourceModal}
               onRemoveResource={handleRemoveResource}
+              onEditResource={handleEditResourceOpen}
               onUpgrade={() => setMostrarPlanModal(true)}
             />
           </div>
