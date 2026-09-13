@@ -1,21 +1,21 @@
 export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade }) {
   const inputClass =
-    "w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0f172a] px-4 py-3 text-sm font-medium text-slate-900 dark:text-white outline-none transition focus:border-violet-500";
+    "w-full rounded-xl border border-slate-700 bg-[#0f172a] px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-violet-500";
 
   return (
     <section
-      className={`rounded-3xl border p-5 transition-all transition-colors duration-300 ${
+      className={`rounded-3xl border p-5 transition-all ${
         isPremium
-          ? "border-violet-300 dark:border-violet-500/30 bg-white dark:bg-slate-900/80"
-          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 opacity-70"
+          ? "border-violet-500/30 bg-slate-900/80"
+          : "border-slate-800 bg-slate-900/50 opacity-70"
       }`}
     >
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-300/80">
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
             Curso
           </p>
-          <h2 className="mt-2 text-xl font-black text-slate-900 dark:text-white">Datos básicos</h2>
+          <h2 className="mt-2 text-xl font-black text-white">Datos básicos</h2>
         </div>
 
         {!isPremium && (
@@ -43,8 +43,9 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
             Nombre del curso
+            <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 5 caracteres)</span>
           </label>
           <input
             value={curso.nombre}
@@ -54,23 +55,10 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
             placeholder="Ej: Curso de Diseño UX"
           />
         </div>
-
         <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
-            URL del curso
-          </label>
-          <input
-            value={curso.url}
-            disabled={!isPremium}
-            onChange={(e) => setCurso({ ...curso, url: e.target.value })}
-            className={inputClass}
-            placeholder="https://..."
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
             Descripción breve
+            <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 20 caracteres)</span>
           </label>
           <textarea
             value={curso.descripcion}
@@ -79,79 +67,6 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
             rows={4}
             className={inputClass}
             placeholder="Describe el curso de manera clara y atractiva..."
-          />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-              Categoría
-            </label>
-            <input
-              value={curso.category}
-              onChange={(e) => setCurso({ ...curso, category: e.target.value })}
-              className={inputClass}
-              placeholder="Ej: Diseño"
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-              Nivel
-            </label>
-            <select
-              value={curso.level}
-              onChange={(e) => setCurso({ ...curso, level: e.target.value })}
-              className={inputClass}
-            >
-              <option value="Principiante">Principiante</option>
-              <option value="Intermedio">Intermedio</option>
-              <option value="Avanzado">Avanzado</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-              Modalidad
-            </label>
-            <select
-              value={curso.modality}
-              onChange={(e) => setCurso({ ...curso, modality: e.target.value })}
-              className={inputClass}
-            >
-              <option value="Virtual">Virtual</option>
-              <option value="Presencial">Presencial</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-              Duración (horas)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="1000"
-              value={curso.duration_hours}
-              onChange={(e) => setCurso({ ...curso, duration_hours: e.target.value })}
-              className={inputClass}
-              placeholder="Ej: 20"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
-            Precio (COP)
-          </label>
-          <input
-            type="number"
-            min="0.5"
-            step="0.01"
-            value={curso.price}
-            onChange={(e) => setCurso({ ...curso, price: e.target.value })}
-            className={inputClass}
-            placeholder="Ej: 50000"
           />
         </div>
       </div>

@@ -4,24 +4,62 @@ const pool = require("../config/db");
    CREAR CURSO
 ───────────────────────────────────────── */
 const crearCurso = async (instructorId, datos) => {
-  const { title, description, category, level, duration_hours, modality } = datos;
+  const { title, description, category, level, duration_hours, modality, background_style, badges, lessons_list } = datos;
 
-  const resultado = await pool.query(
-    `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, modality)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
-     RETURNING *`,
-    [
-      instructorId,
-      title,
-      description,
-      category,
-      level || "Principiante",
-      duration_hours || null,
-      modality || "Virtual",
-    ]
-  );
+  // Iniciar transacción
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-  return resultado.rows[0];
+    // Insertar curso
+    const resultCurso = await client.query(
+      `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, modality, background_style, badges)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
+      [
+        instructorId,
+        title,
+        description,
+        category,
+        level || "Principiante",
+        duration_hours || null,
+        modality || "Virtual",
+        background_style || "bg-slate-950",
+        JSON.stringify(badges || [])
+      ]
+    );
+
+    const nuevoCurso = resultCurso.rows[0];
+
+    // Insertar lecciones si existen
+    if (lessons_list && Array.isArray(lessons_list) && lessons_list.length > 0) {
+      for (let i = 0; i < lessons_list.length; i++) {
+        const lesson = lessons_list[i];
+        const isActive = lesson.is_active !== undefined ? lesson.is_active : true;
+        await client.query(
+          `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [
+            nuevoCurso.id,
+            lesson.title || `Lección ${i + 1}`,
+            lesson.content || "",
+            lesson.video_url || null,
+            lesson.duration_minutes || null,
+            i,
+            isActive
+          ]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    return nuevoCurso;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 /* ─────────────────────────────────────────
@@ -29,7 +67,7 @@ const crearCurso = async (instructorId, datos) => {
    Filtros opcionales: búsqueda por texto, categoría, nivel
 ───────────────────────────────────────── */
 const listarCursos = async ({ search, category, level } = {}) => {
-  const condiciones = ["c.status = 'activo'"];
+  const condiciones = ["c.status = 'activo' OR c.status = 'published'"];
   const valores = [];
 
   if (search) {
@@ -48,7 +86,8 @@ const listarCursos = async ({ search, category, level } = {}) => {
   }
 
   const query = `
-    SELECT c.*, u.name AS instructor_name
+    SELECT c.*, u.name AS instructor_name,
+    (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) as lessons_count
     FROM courses c
     JOIN users u ON u.id = c.instructor_id
     WHERE ${condiciones.join(" AND ")}
@@ -75,7 +114,17 @@ const obtenerCursoPorId = async (id) => {
     throw { status: 404, message: "El curso no existe" };
   }
 
-  return resultado.rows[0];
+  const curso = resultado.rows[0];
+
+  // Fetch the lessons for this course
+  const lessonsResult = await pool.query(
+    `SELECT * FROM lessons WHERE course_id = $1 ORDER BY order_index ASC`,
+    [id]
+  );
+
+  curso.lessons = lessonsResult.rows;
+
+  return curso;
 };
 
 /* ─────────────────────────────────────────
@@ -103,28 +152,106 @@ const actualizarCurso = async (id, instructorId, datos) => {
     throw { status: 403, message: "No tienes permiso para editar este curso" };
   }
 
-  const { title, description, category, level, duration_hours, modality, status } = datos;
+  const { title, description, category, level, duration_hours, modality, status, background_style, badges, lessons_list } = datos;
   const actual = cursoExistente.rows[0];
 
-  const resultado = await pool.query(
-    `UPDATE courses
-     SET title = $1, description = $2, category = $3, level = $4,
-         duration_hours = $5, modality = $6, status = $7, updated_at = NOW()
-     WHERE id = $8
-     RETURNING *`,
-    [
-      title ?? actual.title,
-      description ?? actual.description,
-      category ?? actual.category,
-      level ?? actual.level,
-      duration_hours ?? actual.duration_hours,
-      modality ?? actual.modality,
-      status ?? actual.status,
-      id,
-    ]
-  );
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-  return resultado.rows[0];
+    const resultado = await client.query(
+      `UPDATE courses
+       SET title = $1, description = $2, category = $3, level = $4,
+           duration_hours = $5, modality = $6, status = $7, 
+           background_style = $8, badges = $9, updated_at = NOW()
+       WHERE id = $10
+       RETURNING *`,
+      [
+        title ?? actual.title,
+        description ?? actual.description,
+        category ?? actual.category,
+        level ?? actual.level,
+        duration_hours ?? actual.duration_hours,
+        modality ?? actual.modality,
+        status ?? actual.status,
+        background_style ?? actual.background_style,
+        badges ? JSON.stringify(badges) : actual.badges,
+        id,
+      ]
+    );
+
+    // Si se enviaron lecciones, actualizar la lista
+    if (lessons_list && Array.isArray(lessons_list)) {
+      // Obtener lecciones actuales para saber cuáles eliminar
+      const leccionesActuales = await client.query(
+        "SELECT id FROM lessons WHERE course_id = $1",
+        [id]
+      );
+      const idsActuales = leccionesActuales.rows.map(r => r.id);
+      const idsEnviados = lessons_list.filter(l => l.id).map(l => l.id);
+
+      // Eliminar lecciones que ya no están (puede fallar si tienen progreso asociado)
+      const idsAEliminar = idsActuales.filter(id => !idsEnviados.includes(id));
+      if (idsAEliminar.length > 0) {
+        try {
+          await client.query(
+            `DELETE FROM lessons WHERE id = ANY($1::int[]) AND course_id = $2`,
+            [idsAEliminar, id]
+          );
+        } catch (e) {
+          throw { status: 400, message: "No se puede eliminar una lección porque hay estudiantes que ya tienen progreso en ella." };
+        }
+      }
+
+      // Actualizar o insertar lecciones
+      for (let i = 0; i < lessons_list.length; i++) {
+        const lesson = lessons_list[i];
+        const isActive = lesson.is_active !== undefined ? lesson.is_active : true;
+        
+        if (lesson.id && idsActuales.includes(lesson.id)) {
+          // Update
+          await client.query(
+            `UPDATE lessons 
+             SET title = $1, content = $2, video_url = $3, duration_minutes = $4, order_index = $5, is_active = $8
+             WHERE id = $6 AND course_id = $7`,
+            [
+              lesson.title, 
+              lesson.content || "Video", 
+              lesson.video_url || "", 
+              lesson.duration_minutes || null,
+              i + 1, // order
+              lesson.id, 
+              id,
+              isActive
+            ]
+          );
+        } else {
+          // Insert
+          await client.query(
+            `INSERT INTO lessons (course_id, title, content, video_url, duration_minutes, order_index, is_active)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [
+              id, 
+              lesson.title, 
+              lesson.content || "Video", 
+              lesson.video_url || "", 
+              lesson.duration_minutes || null,
+              i + 1,
+              isActive
+            ]
+          );
+        }
+      }
+    }
+
+    await client.query("COMMIT");
+    return resultado.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 /* ─────────────────────────────────────────
@@ -145,6 +272,235 @@ const eliminarCurso = async (id, instructorId) => {
   return { message: "Curso eliminado correctamente" };
 };
 
+/* ─────────────────────────────────────────
+   ANALÍTICAS DEL INSTRUCTOR
+───────────────────────────────────────── */
+const obtenerAnaliticasInstructor = async (instructorId, courseId = null) => {
+  let coursesQuery = `SELECT id, title FROM courses WHERE instructor_id = $1`;
+  const queryParams = [instructorId];
+  
+  if (courseId) {
+    coursesQuery += ` AND id = $2`;
+    queryParams.push(courseId);
+  }
+
+  const coursesRes = await pool.query(coursesQuery, queryParams);
+  const courseIds = coursesRes.rows.map((c) => c.id);
+
+  const allCoursesRes = await pool.query(
+    `SELECT id, title FROM courses WHERE instructor_id = $1`,
+    [instructorId]
+  );
+
+  if (courseIds.length === 0) {
+    return {
+      hasCourses: allCoursesRes.rows.length > 0,
+      totalStudents: 0,
+      completionRate: "0%",
+      totalStudyHours: "0h",
+      satisfactionRating: 0,
+      totalReviews: 0,
+      courses: allCoursesRes.rows,
+      recentStudents: [],
+      funnel: [],
+    };
+  }
+
+  const studentsRes = await pool.query(
+    `SELECT COUNT(DISTINCT user_id) as total_students 
+     FROM enrollments 
+     WHERE course_id = ANY($1::int[])`,
+    [courseIds]
+  );
+  const totalStudents = parseInt(studentsRes.rows[0]?.total_students || 0, 10);
+
+  const totalEnrollmentsRes = await pool.query(
+    `SELECT COUNT(*) as total_count 
+     FROM enrollments 
+     WHERE course_id = ANY($1::int[])`,
+    [courseIds]
+  );
+  const totalEnrollments = parseInt(totalEnrollmentsRes.rows[0]?.total_count || 0, 10);
+
+  const completedEnrollmentsRes = await pool.query(
+    `SELECT COUNT(*) as completed_count 
+     FROM enrollments 
+     WHERE course_id = ANY($1::int[]) AND status = 'completed'`,
+    [courseIds]
+  );
+  const completedCount = parseInt(completedEnrollmentsRes.rows[0]?.completed_count || 0, 10);
+  const completionRate = totalEnrollments > 0 ? Math.round((completedCount / totalEnrollments) * 100) : 0;
+
+  const recentStudentsRes = await pool.query(
+    `SELECT u.name, c.title as course, e.status, e.enrolled_at,
+            (SELECT COUNT(*) FROM course_progress cp WHERE cp.enrollment_id = e.id) as completed_lessons,
+            (SELECT COUNT(*) FROM lessons l WHERE l.course_id = c.id) as total_lessons
+     FROM enrollments e
+     JOIN users u ON u.id = e.user_id
+     JOIN courses c ON c.id = e.course_id
+     WHERE c.id = ANY($1::int[])
+     ORDER BY e.enrolled_at DESC
+     LIMIT 6`,
+    [courseIds]
+  );
+
+  const recentStudents = recentStudentsRes.rows.map((r) => {
+    const total = parseInt(r.total_lessons, 10) || 1;
+    const completed = parseInt(r.completed_lessons, 10) || 0;
+    const progressPct = Math.min(100, Math.round((completed / total) * 100));
+    return {
+      name: r.name || "Estudiante",
+      course: r.course || "Curso",
+      progress: `${progressPct}%`,
+      status: r.status === "completed" || progressPct === 100 ? "Completado" : progressPct > 0 ? "Activo" : "En curso",
+    };
+  });
+
+  const reviewsStats = await pool.query(
+    `SELECT AVG(rating)::numeric(10,1) as avg_rating, COUNT(*) as total_reviews 
+     FROM reviews 
+     WHERE course_id = ANY($1::int[])`,
+    [courseIds]
+  );
+  const avgSatisfaction = reviewsStats.rows[0]?.avg_rating ? parseFloat(reviewsStats.rows[0].avg_rating) : 0;
+  const totalReviews = parseInt(reviewsStats.rows[0]?.total_reviews || 0, 10);
+
+  // Actividad de los últimos 7 días
+  const activityRes = await pool.query(
+    `SELECT to_char(enrolled_at, 'Dy') as day_name, 
+            EXTRACT(ISODOW FROM enrolled_at) as day_index, 
+            COUNT(*) as enrolls
+     FROM enrollments
+     WHERE course_id = ANY($1::int[]) 
+       AND enrolled_at >= NOW() - INTERVAL '7 days'
+     GROUP BY day_name, day_index
+     ORDER BY day_index ASC`,
+    [courseIds]
+  );
+  
+  const daysMap = { "Mon": "L", "Tue": "M", "Wed": "X", "Thu": "J", "Fri": "V", "Sat": "S", "Sun": "D" };
+  const baseActivity = [
+    { day: "L", h: "10%" }, { day: "M", h: "10%" }, { day: "X", h: "10%" },
+    { day: "J", h: "10%" }, { day: "V", h: "10%" }, { day: "S", h: "10%" }, { day: "D", h: "10%" }
+  ];
+  
+  if (activityRes.rows.length > 0) {
+    const maxEnrolls = Math.max(...activityRes.rows.map(r => parseInt(r.enrolls, 10)));
+    activityRes.rows.forEach(r => {
+      const dayLetter = daysMap[r.day_name] || r.day_name.substring(0,1);
+      const activityIndex = baseActivity.findIndex(b => b.day === dayLetter);
+      if (activityIndex !== -1) {
+        const heightPct = Math.max(10, Math.round((parseInt(r.enrolls, 10) / maxEnrolls) * 100));
+        baseActivity[activityIndex].h = `${heightPct}%`;
+        if (parseInt(r.enrolls, 10) === maxEnrolls && maxEnrolls > 0) {
+          baseActivity[activityIndex].peak = true;
+        }
+      }
+    });
+  }
+
+  let funnel = [];
+  if (courseId) {
+    const funnelRes = await pool.query(
+      `SELECT l.title, l.order_index, COUNT(DISTINCT cp.enrollment_id) as completions
+       FROM lessons l
+       LEFT JOIN course_progress cp ON cp.lesson_id = l.id
+       WHERE l.course_id = $1
+       GROUP BY l.id, l.title, l.order_index
+       ORDER BY l.order_index ASC`,
+      [courseId]
+    );
+    
+    funnel = [{ step: "Inicio del curso", value: 100 }];
+    if (totalEnrollments > 0) {
+      funnelRes.rows.forEach(r => {
+        const completions = parseInt(r.completions, 10) || 0;
+        const percentage = Math.round((completions / totalEnrollments) * 100);
+        funnel.push({
+          step: r.title,
+          value: percentage
+        });
+      });
+    }
+  } else {
+    const halfway = totalEnrollments > 0 ? Math.round((completedCount + totalEnrollments) / 2 / totalEnrollments * 100) : 0;
+    funnel = [
+      { step: "Inscripciones totales", value: 100 },
+      { step: "Llegaron a la mitad", value: halfway },
+      { step: "Finalizaron", value: completionRate }
+    ];
+  }
+
+  return {
+    hasCourses: allCoursesRes.rows.length > 0,
+    totalStudents,
+    completionRate: `${completionRate}%`,
+    totalStudyHours: `${Math.max(0, Math.round(totalStudents * 2.8))}h`,
+    satisfactionRating: avgSatisfaction,
+    totalReviews,
+    courses: allCoursesRes.rows,
+    recentStudents,
+    funnel,
+    weeklyActivity: baseActivity,
+  };
+};
+
+/* ─────────────────────────────────────────
+   GESTIÓN DE RESEÑAS / REVIEWS
+───────────────────────────────────────── */
+const crearOActualizarReview = async (courseId, userId, { rating, comment }) => {
+  if (!rating || rating < 1 || rating > 5) {
+    throw { status: 400, message: "La calificación debe estar entre 1 y 5 estrellas" };
+  }
+
+  // Verificar si ya existe una review previa de este usuario para este curso
+  const checkExisting = await pool.query(
+    `SELECT id FROM reviews WHERE course_id = $1 AND user_id = $2`,
+    [courseId, userId]
+  );
+
+  if (checkExisting.rows.length > 0) {
+    const updated = await pool.query(
+      `UPDATE reviews 
+       SET rating = $1, comment = $2, created_at = NOW() 
+       WHERE id = $3 
+       RETURNING *`,
+      [rating, comment || null, checkExisting.rows[0].id]
+    );
+    return updated.rows[0];
+  } else {
+    const inserted = await pool.query(
+      `INSERT INTO reviews (course_id, user_id, rating, comment)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [courseId, userId, rating, comment || null]
+    );
+    return inserted.rows[0];
+  }
+};
+
+const obtenerReviewsCurso = async (courseId) => {
+  const res = await pool.query(
+    `SELECT r.*, u.name as user_name 
+     FROM reviews r 
+     JOIN users u ON u.id = r.user_id 
+     WHERE r.course_id = $1 
+     ORDER BY r.created_at DESC`,
+    [courseId]
+  );
+  const stats = await pool.query(
+    `SELECT AVG(rating)::numeric(10,1) as avg_rating, COUNT(*) as total_reviews 
+     FROM reviews 
+     WHERE course_id = $1`,
+    [courseId]
+  );
+  return {
+    reviews: res.rows,
+    averageRating: stats.rows[0]?.avg_rating ? parseFloat(stats.rows[0].avg_rating) : 5.0,
+    totalReviews: parseInt(stats.rows[0]?.total_reviews || 0, 10),
+  };
+};
+
 module.exports = {
   crearCurso,
   listarCursos,
@@ -152,4 +508,7 @@ module.exports = {
   listarCursosPorInstructor,
   actualizarCurso,
   eliminarCurso,
+  obtenerAnaliticasInstructor,
+  crearOActualizarReview,
+  obtenerReviewsCurso,
 };

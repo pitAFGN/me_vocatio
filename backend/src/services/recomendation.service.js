@@ -42,11 +42,20 @@ const generarTestConGroq = async (professionTitle, professionArea, userId) => {
       messages: [
         {
           role: "system",
-          content: "Eres un evaluador técnico experto. Responde ÚNICA Y EXCLUSIVAMENTE con un objeto JSON válido."
+          content: "Eres un orientador vocacional y pedagogo experto. Tu misión es evaluar la afinidad, el razonamiento básico y el nivel de partida de un estudiante de manera accesible, clara y motivadora. Responde ÚNICA Y EXCLUSIVAMENTE con un objeto JSON válido."
         },
         {
           role: "user",
-          content: `Genera un test de 10 preguntas de opción múltiple para evaluar el nivel en: "${professionTitle}" (Área: "${professionArea || 'Tecnología'}").
+          content: `Genera un cuestionario de diagnóstico vocacional de EXACTAMENTE 8 preguntas de opción múltiple para la profesión: "${professionTitle}" (Área: "${professionArea || 'General'}").
+
+INSTRUCCIONES CLAVE DE CONTENIDO:
+1. Las preguntas deben ser GENERALES, ACCESIBLES Y CLARAS. No uses tecnicismos rebuscados, preguntas capciosas ni sintaxis excesivamente compleja.
+2. Enfócate en: conceptos esenciales, sentido común de la profesión, situaciones prácticas del día a día del rol y toma de decisiones intuitiva.
+3. Composición obligatoria (EXACTAMENTE 8 preguntas):
+   - 3 de nivel 'Principiante': conceptos fundamentales, propósito del rol y vocabulario básico.
+   - 3 de nivel 'Intermedio': situaciones prácticas cotidianas, flujo de trabajo típico y toma de decisiones.
+   - 2 de nivel 'Avanzado': buenas prácticas comunes y criterio general de resolución de problemas.
+4. Cada pregunta debe tener exactamente 4 opciones de respuesta comprensibles y un índice 'opcion_correcta_idx' del 0 al 3.
 
 Estructura JSON requerida:
 {
@@ -54,16 +63,14 @@ Estructura JSON requerida:
   "preguntas": [
     {
       "id": 1,
-      "enunciado": "Pregunta...",
+      "enunciado": "¿Cuál es la función principal de...?",
       "dificultad": "Principiante",
       "opciones": ["Opción A", "Opción B", "Opción C", "Opción D"],
       "opcion_correcta_idx": 0,
       "puntos": 1
     }
   ]
-}
-
-Requisitos obligatorios: Genera exactamente 10 preguntas compuestas por 3 de nivel 'Principiante', 4 de nivel 'Intermedio' y 3 de nivel 'Avanzado'. Cada pregunta debe tener exactamente 4 opciones de respuesta.`
+}`
         }
       ]
     })
@@ -84,7 +91,7 @@ Requisitos obligatorios: Genera exactamente 10 preguntas compuestas por 3 de niv
   const test = JSON.parse(rawContent);
   const preguntas = Array.isArray(test.preguntas) ? test.preguntas : [];
 
-  if (preguntas.length !== 10 || preguntas.some((pregunta) => (
+  if (preguntas.length !== 8 || preguntas.some((pregunta) => (
     !pregunta.id || !pregunta.enunciado || !Array.isArray(pregunta.opciones) ||
     pregunta.opciones.length !== 4 || !Number.isInteger(pregunta.opcion_correcta_idx) ||
     pregunta.opcion_correcta_idx < 0 || pregunta.opcion_correcta_idx > 3
@@ -142,9 +149,9 @@ const evaluarTest = async (testId, userId, respuestas = []) => {
     }
   }
 
-  const nivel = porDificultad.Avanzado.aciertos >= 2 &&
-    porDificultad.Intermedio.aciertos >= 3 ? "Avanzado" :
-    porDificultad.Intermedio.aciertos >= 3 ? "Intermedio" : "Principiante";
+  const nivel = (aciertos >= 6) || (porDificultad.Avanzado.aciertos >= 1 && porDificultad.Intermedio.aciertos >= 2 && aciertos >= 5) ? "Avanzado" :
+    (aciertos >= 4 || porDificultad.Intermedio.aciertos >= 2) ? "Intermedio" : "Principiante";
+    
   const totalPuntos = answerKey.reduce((total, clave) => total + (clave.puntos || 1), 0);
   const puntaje = Math.round((aciertos / totalPuntos) * 100);
   const evaluation = await pool.query(
