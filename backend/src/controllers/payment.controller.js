@@ -98,8 +98,23 @@ const evento = async (req, res) => {
   }
 };
 
+/* ─────────────────────────────────────────
+   CREAR PAGO DEL PLAN PREMIUM
+   Devuelve los datos que el FRONTEND necesita
+   para abrir el Widget de Wompi.
+───────────────────────────────────────── */
+const crearPagoPremium = async (req, res) => {
+  try {
+    const resultado = await paymentService.crearPagoPremium(req.user.id);
+    res.status(201).json(resultado);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error al iniciar el pago del Plan Premium" });
+  }
+};
+
 module.exports = {
   crearPago,
+  crearPagoPremium,
   misPagos,
   obtenerPorId,
   reconsultarEstado,

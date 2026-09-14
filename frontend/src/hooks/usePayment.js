@@ -1,55 +1,86 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { paymentService } from "@/services/payment.service";
+import { abrirCheckoutWompi } from "@/lib/wompi";
 
 /**
- * usePayment (STUB / RELLENO TEMPORAL)
+ * usePayment
  * ------------------------------------------------------------------
- * Este hook existe solo para que "Publicar y pagar con Wompi" compile
- * y no rompa el build de Next.js mientras se implementa la integración
- * real con la pasarela de pagos.
+ * Integración real con la pasarela de pagos Wompi.
  *
- * NO procesa pagos de verdad. Cuando se llame a pagarCurso(), simplemente
- * simula un breve estado de carga y luego dispara onError(...) avisando
- * que la pasarela todavía no está conectada.
+ * - pagarCurso(datosCurso, callbacks): crea un curso de pago en el
+ *   backend (POST /api/pagos/crear) y abre el widget de Wompi.
+ * - pagarPremium(callbacks): activa el pago del Plan Premium
+ *   (POST /api/pagos/premium) y abre el widget de Wompi.
  *
- * Cuando implementes la integración real con Wompi, reemplaza el cuerpo
- * de pagarCurso() por la llamada real (por ejemplo, abrir el widget de
- * Wompi o hacer fetch a tu backend para crear la transacción), y llama a
- * onExito() / onError(msg) / onCerrado() según corresponda. La forma en
- * que este hook se usa desde creacion_recursos/page.js NO tiene que
- * cambiar.
+ * callbacks: { onExito(transaction), onError(mensaje), onCerrado() }
  * ------------------------------------------------------------------
  */
+
+const ESTADOS_APROBADOS = ["APPROVED", "APPROVED_PENDING"];
+
 export function usePayment() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
 
-  const pagarCurso = useCallback((datosCurso, callbacks = {}) => {
+  const abrirWidget = useCallback(async (widget, callbacks = {}) => {
     const { onExito, onError, onCerrado } = callbacks;
 
-    setError(null);
-    setCargando(true);
+    try {
+      await abrirCheckoutWompi(widget, (transaction) => {
+        const estado = transaction?.status;
+        if (!transaction || !estado) {
+          setCargando(false);
+          onCerrado?.();
+          return;
+        }
 
-    // TODO: reemplazar este setTimeout por la integración real con Wompi.
-    // Por ejemplo: abrir el widget de Wompi con datosCurso, o hacer un
-    // fetch a tu backend (POST /api/pagos) para crear la transacción.
-    setTimeout(() => {
+        setCargando(false);
+        if (ESTADOS_APROBADOS.includes(estado)) {
+          onExito?.(transaction);
+        } else {
+          onError?.(`El pago no fue aprobado (${estado}).`);
+        }
+      });
+    } catch (err) {
       setCargando(false);
-      const mensaje =
-        "La pasarela de pago (Wompi) todavía no está conectada. " +
-        "Esta es una versión de relleno de usePayment.js.";
-      setError(mensaje);
-
-      if (onError) {
-        onError(mensaje);
-      } else if (onCerrado) {
-        onCerrado();
-      }
-    }, 600);
+      const msg = err?.message || "No se pudo abrir la pasarela de pago.";
+      setError(msg);
+      onError?.(msg);
+    }
   }, []);
 
-  return { pagarCurso, cargando, error };
+  const iniciarPago = useCallback(
+    async (promesa, callbacks = {}) => {
+      const { onError } = callbacks;
+      setError(null);
+      setCargando(true);
+      try {
+        const { widget } = await promesa;
+        await abrirWidget(widget, callbacks);
+      } catch (err) {
+        setCargando(false);
+        const msg = err?.message || "No se pudo iniciar el pago.";
+        setError(msg);
+        onError?.(msg);
+      }
+    },
+    [abrirWidget]
+  );
+
+  const pagarCurso = useCallback(
+    (datosCurso, callbacks = {}) =>
+      iniciarPago(paymentService.crearPago(datosCurso), callbacks),
+    [iniciarPago]
+  );
+
+  const pagarPremium = useCallback(
+    (callbacks = {}) => iniciarPago(paymentService.crearPagoPremium(), callbacks),
+    [iniciarPago]
+  );
+
+  return { pagarCurso, pagarPremium, cargando, error };
 }
 
 export default usePayment;

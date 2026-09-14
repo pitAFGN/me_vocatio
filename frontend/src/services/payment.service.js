@@ -3,15 +3,22 @@ import { API_URL } from "@/lib/constants";
 /**
  * Servicio de pagos.
  * Igual que auth.service.js: solo habla con el backend, nada más.
- * Todas las rutas necesitan el token del usuario logueado.
+ * Todas las rutas necesitan la sesión del usuario logueado (cookie HttpOnly),
+ * por eso se envía siempre `credentials: "include"`.
  */
-const getAuthHeaders = () => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-};
+async function requestJson(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    credentials: "include",
+    headers: {
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || data.message || "Error en la petición de pago");
+  return data;
+}
 
 export const paymentService = {
   /**
@@ -20,53 +27,36 @@ export const paymentService = {
    * es con lo que se abre el checkout de Wompi.
    */
   async crearPago(datosCurso) {
-    const res = await fetch(`${API_URL}/api/payment/crear`, {
+    return requestJson(`${API_URL}/api/pagos/crear`, {
       method: "POST",
-      headers: getAuthHeaders(),
       body: JSON.stringify(datosCurso),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "No se pudo iniciar el pago");
-    return data;
+  },
+
+  /**
+   * Inicia el pago del Plan Premium.
+   * El backend responde con { pago, widget } y con "widget"
+   * es con lo que se abre el checkout de Wompi.
+   */
+  async crearPagoPremium() {
+    return requestJson(`${API_URL}/api/pagos/premium`, {
+      method: "POST",
+    });
   },
 
   async misPagos() {
-    const res = await fetch(`${API_URL}/api/payment/mios`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "No se pudieron cargar tus pagos");
-    return data;
+    return requestJson(`${API_URL}/api/pagos/mios`);
   },
 
   async obtenerPorId(id) {
-    const res = await fetch(`${API_URL}/api/payment/${id}`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "No se pudo obtener el pago");
-    return data;
+    return requestJson(`${API_URL}/api/pagos/${id}`);
   },
 
   async reconsultarEstado(id) {
-    const res = await fetch(`${API_URL}/api/payment/${id}/reconsultar`, {
-      method: "GET",
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "No se pudo consultar el estado del pago");
-    return data;
+    return requestJson(`${API_URL}/api/pagos/${id}/reconsultar`);
   },
 
   async cancelar(id) {
-    const res = await fetch(`${API_URL}/api/payment/${id}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "No se pudo cancelar el pago");
-    return data;
+    return requestJson(`${API_URL}/api/pagos/${id}`, { method: "DELETE" });
   },
 };

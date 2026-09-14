@@ -1,17 +1,19 @@
 const crypto = require("crypto");
 const pool = require("../config/db");
 const wompi = require("../config/wompi");
+const achievementService = require("./achievement.service");
 
 const MONEDA = "COP";
+const PRECIO_PREMIUM = 49000; // $49.000 COP
 
 /* ─────────────────────────────────────────
    GENERAR UNA REFERENCIA ÚNICA DE PAGO
    Wompi la usa para identificar la transacción,
-   nosotros la usamos para saber a qué curso
-   y a qué usuario corresponde.
+   nosotros la usamos para saber a qué pago,
+   concepto y usuario corresponde.
 ───────────────────────────────────────── */
-const generarReferencia = (courseId) =>
-  `MEVOCATIO-CURSO-${courseId}-${Date.now()}-${crypto.randomBytes(3).toString("hex")}`;
+const generarReferencia = (concepto, id) =>
+  `MEVOCATIO-${String(concepto).toUpperCase()}-${id || "PLAN"}-${Date.now()}-${crypto.randomBytes(3).toString("hex")}`;
 
 /* ─────────────────────────────────────────
    FIRMA DE INTEGRIDAD (para el Widget de Wompi)
@@ -63,14 +65,14 @@ const crearPagoParaCurso = async (userId, datosCurso) => {
 
   // 2) Generamos referencia única y el monto en centavos que pide Wompi
   //    (si el curso cuesta $50.000 COP, a Wompi le mandamos 5000000)
-  const reference = generarReferencia(curso.id);
+  const reference = generarReferencia("curso", curso.id);
   const amountInCents = Math.round(Number(price) * 100);
   const signature = generarFirmaIntegridad(reference, amountInCents, MONEDA);
 
   // 3) Guardamos el intento de pago en nuestra base de datos
   await pool.query(
-    `INSERT INTO payments (user_id, course_id, reference, amount, currency, status)
-     VALUES ($1, $2, $3, $4, $5, 'pendiente')`,
+    `INSERT INTO payments (user_id, course_id, reference, amount, currency, status, concept)
+     VALUES ($1, $2, $3, $4, $5, 'pendiente', 'curso')`,
     [userId, curso.id, reference, price, MONEDA]
   );
 
@@ -84,6 +86,44 @@ const crearPagoParaCurso = async (userId, datosCurso) => {
       reference,
       signature,
       redirectUrl: `${process.env.FRONTEND_URL}/pago-resultado?course_id=${curso.id}`,
+    },
+  };
+};
+
+/* ─────────────────────────────────────────
+   CREAR UN PAGO PARA ACTIVAR EL PLAN PREMIUM
+   1. Genera la referencia única y la firma de integridad
+   2. Guarda el intento de pago (sin curso asociado,
+      concept = 'premium')
+   3. Devuelve lo que el frontend necesita para abrir el
+      Widget de Wompi. Cuando Wompi confirme APPROVED,
+      el webhook activará el plan del usuario.
+───────────────────────────────────────── */
+const crearPagoPremium = async (userId) => {
+  const reference = generarReferencia("premium", null);
+  const amountInCents = PRECIO_PREMIUM * 100;
+  const signature = generarFirmaIntegridad(reference, amountInCents, MONEDA);
+
+  await pool.query(
+    `INSERT INTO payments (user_id, course_id, reference, amount, currency, status, concept)
+     VALUES ($1, NULL, $2, $3, $4, 'pendiente', 'premium')`,
+    [userId, reference, PRECIO_PREMIUM, MONEDA]
+  );
+
+  return {
+    pago: {
+      reference,
+      amount: PRECIO_PREMIUM,
+      currency: MONEDA,
+      concept: "premium",
+    },
+    widget: {
+      publicKey: process.env.WOMPI_PUBLIC_KEY,
+      currency: MONEDA,
+      amountInCents,
+      reference,
+      signature,
+      redirectUrl: `${process.env.FRONTEND_URL}/pago-resultado?concept=premium&reference=${reference}`,
     },
   };
 };
@@ -227,7 +267,22 @@ const aplicarEstadoTransaccion = async (transaction) => {
   );
 
   const pago = pagoResultado.rows[0];
-  if (!pago || !pago.course_id) return;
+  if (!pago) return;
+
+  // Pago del PLAN PREMIUM: no está ligado a ningún curso.
+  if (pago.concept === "premium") {
+    if (nuevoEstado === "pagado") {
+      await pool.query(
+        `UPDATE users SET plan = 'premium', updated_at = NOW() WHERE id = $1`,
+        [pago.user_id]
+      );
+      await achievementService.registrarCompraPremium(pago.user_id);
+    }
+    return;
+  }
+
+  // Pago de publicación de un CURSO.
+  if (!pago.course_id) return;
 
   if (nuevoEstado === "pagado") {
     await pool.query(
@@ -243,6 +298,7 @@ const aplicarEstadoTransaccion = async (transaction) => {
 
 module.exports = {
   crearPagoParaCurso,
+  crearPagoPremium,
   listarPagosPorUsuario,
   obtenerPagoPorId,
   reconsultarEstado,

@@ -51,12 +51,12 @@ export default function CreacionRecursosPage() {
     const savedPlan = window.localStorage.getItem("mevocatio_plan");
     return savedPlan === "premium" ? "premium" : "free";
   });
-  
+
   // UI States
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState({ message: "", type: "success" });
-  
+
   // Edit State
   const [myCourses, setMyCourses] = useState([]);
   const [editingCourseId, setEditingCourseId] = useState(null);
@@ -76,14 +76,17 @@ export default function CreacionRecursosPage() {
   });
 
   const isPremium = plan === "premium";
-
   // Cargar mis cursos para poder editarlos
   useEffect(() => {
     const fetchMisCursos = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/mios`, {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/mios`,
+          {
+            credentials: "include",
+          }
+        );
+
         if (res.ok) {
           const data = await res.json();
           setMyCourses(data);
@@ -92,6 +95,7 @@ export default function CreacionRecursosPage() {
         console.error("Error fetching courses", e);
       }
     };
+
     fetchMisCursos();
   }, []);
 
@@ -100,46 +104,71 @@ export default function CreacionRecursosPage() {
       setEditingCourseId(null);
       setCurso({ nombre: "", url: "", descripcion: "" });
       setRecursos([]);
-      setSelectedBackground("bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950");
+      setSelectedBackground(
+        "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950"
+      );
       setSelectedBadges(["Elite"]);
       return;
     }
 
     try {
       setToast({ message: "Cargando curso...", type: "success" });
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${courseId}`);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${courseId}`
+      );
+
       if (res.ok) {
         const data = await res.json();
+
         setEditingCourseId(data.id);
+
         setCurso({
           nombre: data.title || "",
           url: "",
           descripcion: data.description || "",
         });
-        setSelectedBackground(data.background_style || "bg-slate-950");
-        
+
+        setSelectedBackground(
+          data.background_style || "bg-slate-950"
+        );
+
         try {
-          setSelectedBadges(typeof data.badges === 'string' ? JSON.parse(data.badges) : (data.badges || []));
-        } catch(e) {
+          setSelectedBadges(
+            typeof data.badges === "string"
+              ? JSON.parse(data.badges)
+              : data.badges || []
+          );
+        } catch (e) {
           setSelectedBadges([]);
         }
 
         if (data.lessons && Array.isArray(data.lessons)) {
-          setRecursos(data.lessons.map(l => ({
-            id: l.id, // Mantener el ID original
-            title: l.title,
-            type: l.content || "Video",
-            url: l.video_url || "",
-            isActive: l.is_active !== undefined ? l.is_active : true
-          })));
+          setRecursos(
+            data.lessons.map((l) => ({
+              id: l.id,
+              title: l.title,
+              type: l.content || "Video",
+              url: l.video_url || "",
+              isActive:
+                l.is_active !== undefined ? l.is_active : true,
+            }))
+          );
         } else {
           setRecursos([]);
         }
-        
-        setToast({ message: "Curso cargado para editar", type: "success" });
+
+        setToast({
+          message: "Curso cargado para editar",
+          type: "success",
+        });
       }
     } catch (e) {
-      setToast({ message: "Error al cargar el curso", type: "error" });
+      console.error("Error loading course:", e);
+      setToast({
+        message: "Error al cargar el curso",
+        type: "error",
+      });
     }
   };
 
@@ -217,10 +246,10 @@ export default function CreacionRecursosPage() {
     };
 
     try {
-      const url = editingCourseId 
+      const url = editingCourseId
         ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${editingCourseId}`
         : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses`;
-        
+
       const res = await fetch(url, {
         method: editingCourseId ? "PUT" : "POST",
         credentials: "include",
@@ -235,9 +264,9 @@ export default function CreacionRecursosPage() {
         setToast({ message: `Error: ${errData.error || errData.message || "Datos inválidos"}`, type: "error" });
         return;
       }
-      
+
       setToast({ message: editingCourseId ? "¡Curso actualizado exitosamente!" : "¡Curso publicado exitosamente!", type: "success" });
-      
+
     } catch (error) {
       console.error("Fetch error:", error);
       setToast({ message: "Hubo un error de conexión.", type: "error" });
@@ -247,14 +276,14 @@ export default function CreacionRecursosPage() {
   return (
     <main className="min-h-screen bg-[#070b17] text-slate-100 relative">
       {/* Toast Notification */}
-      <Toast 
-        message={toast.message} 
-        type={toast.type} 
-        onClose={() => setToast({ message: "", type: "success" })} 
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ message: "", type: "success" })}
       />
 
       {/* Resource Creation Modal */}
-      <ResourceModal 
+      <ResourceModal
         isOpen={isModalOpen}
         onClose={() => { setIsModalOpen(false); setEditingResource(null); }}
         onAdd={handleAddResource}
@@ -285,42 +314,42 @@ export default function CreacionRecursosPage() {
                     {editingCourseId ? "Editando..." : "+ Nuevo Curso"}
                   </span>
                   <svg className={`fill-current h-4 w-4 text-slate-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                   </svg>
                 </button>
 
                 {isDropdownOpen && (
                   <>
-                    <div 
+                    <div
                       className="fixed inset-0 z-40"
                       onClick={() => setIsDropdownOpen(false)}
                     />
                     <div className="absolute top-full mt-2 w-full sm:w-[220px] rounded-xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black overflow-hidden z-50">
-                    <button
-                      onClick={() => {
-                        handleCargarCursoParaEditar("");
-                        setIsDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-3 text-xs font-bold text-violet-300 hover:bg-slate-800 transition-colors uppercase tracking-wider border-b border-slate-800"
-                    >
-                      + Crear nuevo curso
-                    </button>
-                    <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                      <div className="px-3 pt-3 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                        Mis Cursos
-                      </div>
-                      {myCourses.map(course => (
-                        <button
-                          key={course.id}
-                          onClick={() => {
-                            handleCargarCursoParaEditar(course.id);
-                            setIsDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-2.5 text-xs transition-colors truncate ${editingCourseId === course.id ? "bg-violet-600/20 text-violet-300 border-l-2 border-violet-500" : "text-slate-300 hover:bg-slate-800 border-l-2 border-transparent"}`}
-                        >
-                          {course.title}
-                        </button>
-                      ))}
+                      <button
+                        onClick={() => {
+                          handleCargarCursoParaEditar("");
+                          setIsDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-xs font-bold text-violet-300 hover:bg-slate-800 transition-colors uppercase tracking-wider border-b border-slate-800"
+                      >
+                        + Crear nuevo curso
+                      </button>
+                      <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                        <div className="px-3 pt-3 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                          Mis Cursos
+                        </div>
+                        {myCourses.map(course => (
+                          <button
+                            key={course.id}
+                            onClick={() => {
+                              handleCargarCursoParaEditar(course.id);
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors truncate ${editingCourseId === course.id ? "bg-violet-600/20 text-violet-300 border-l-2 border-violet-500" : "text-slate-300 hover:bg-slate-800 border-l-2 border-transparent"}`}
+                          >
+                            {course.title}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </>
@@ -336,7 +365,7 @@ export default function CreacionRecursosPage() {
               <span>Volver</span>
             </Link>
 
-            <button 
+            <button
               onClick={handleGuardarCurso}
               className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500 hover:shadow-violet-500/40 active:scale-95 transition-all text-center"
             >

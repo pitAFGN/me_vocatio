@@ -28,10 +28,36 @@ const TEXTOS_ESTADO = {
   },
 };
 
+const TEXTOS_ESTADO_PREMIUM = {
+  pagado: {
+    titulo: "¡Pago aprobado! 🎉",
+    detalle: "Tu Plan Premium ya está activo. ¡Disfruta de todos los beneficios sin límites!",
+    color: "text-emerald-400",
+  },
+  pendiente: {
+    titulo: "Tu pago está pendiente",
+    detalle: "En cuanto se confirme, tu Plan Premium quedará activo.",
+    color: "text-amber-400",
+  },
+  fallido: {
+    titulo: "El pago no se pudo completar",
+    detalle: "Intenta de nuevo o usa otro medio de pago para activar tu Plan Premium.",
+    color: "text-red-400",
+  },
+  cancelado: {
+    titulo: "El pago fue cancelado",
+    detalle: "No se realizó ningún cobro.",
+    color: "text-slate-400",
+  },
+};
+
 function PagoResultadoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const courseId = searchParams.get("course_id");
+  const concept = searchParams.get("concept");
+  const reference = searchParams.get("reference");
+  const esPremium = concept === "premium";
 
   const [estado, setEstado] = useState("cargando");
   const [errorMsg, setErrorMsg] = useState(null);
@@ -40,7 +66,13 @@ function PagoResultadoContent() {
     const revisar = async () => {
       try {
         const pagos = await paymentService.misPagos();
-        const pago = pagos.find((p) => String(p.course_id) === String(courseId));
+
+        let pago;
+        if (esPremium) {
+          pago = pagos.find((p) => String(p.reference) === String(reference));
+        } else {
+          pago = pagos.find((p) => String(p.course_id) === String(courseId));
+        }
 
         if (!pago) {
           setEstado("no-encontrado");
@@ -48,6 +80,14 @@ function PagoResultadoContent() {
         }
 
         const pagoActualizado = await paymentService.reconsultarEstado(pago.id);
+
+        if (esPremium && pagoActualizado.status === "pagado") {
+          // El backend ya activó el plan; sincronizamos la interfaz.
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("mevocatio_plan", "premium");
+          }
+        }
+
         setEstado(pagoActualizado.status || "pendiente");
       } catch (err) {
         setErrorMsg(err.message || "No se pudo consultar el pago");
@@ -55,11 +95,11 @@ function PagoResultadoContent() {
       }
     };
 
-    if (courseId) revisar();
+    if (esPremium ? reference : courseId) revisar();
     else setEstado("no-encontrado");
-  }, [courseId]);
+  }, [courseId, concept, reference, esPremium]);
 
-  const info = TEXTOS_ESTADO[estado];
+  const info = esPremium ? TEXTOS_ESTADO_PREMIUM[estado] : TEXTOS_ESTADO[estado];
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#070b17] px-4">
@@ -85,7 +125,7 @@ function PagoResultadoContent() {
 
         <div className="mt-8 flex justify-center gap-3">
           <button
-            onClick={() => router.push("/creacion_recursos")}
+            onClick={() => router.push(esPremium ? "/dashboard" : "/creacion_recursos")}
             className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800"
           >
             Volver

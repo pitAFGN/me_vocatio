@@ -9,6 +9,7 @@ const { reglasCrearPago } = require("../middlewares/validarInputs");
    sin el token de un usuario. */
 
 router.post("/crear", authenticateToken, reglasCrearPago, paymentController.crearPago);
+router.post("/premium", authenticateToken, paymentController.crearPagoPremium);
 router.get("/mios", authenticateToken, paymentController.misPagos);
 router.get("/:id", authenticateToken, paymentController.obtenerPorId);
 router.get("/:id/reconsultar", authenticateToken, paymentController.reconsultarEstado);

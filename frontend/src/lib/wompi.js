@@ -28,7 +28,7 @@ function cargarScriptWompi() {
 
 /**
  * Abre la ventana de pago de Wompi con los datos que devuelve el backend
- * (endpoint /api/payment/crear -> campo "widget").
+ * (endpoint /api/pagos/crear o /api/pagos/premium -> campo "widget").
  *
  * onResultado(transaction) se llama cuando el usuario cierra el checkout,
  * con la transacción que quedó (o null si la cerró sin pagar).
