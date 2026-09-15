@@ -39,7 +39,7 @@ import PlanSelectionModal from "@/components/PlanSelectionModal";
 
 function RecomendacionContent() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, me } = useAuth();
   const searchParams = useSearchParams();
   const peticionInicialRealizada = useRef(false);
 
@@ -59,6 +59,7 @@ function RecomendacionContent() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState(null);
   const [newAchievements, setNewAchievements] = useState([]);
+  const [userRole, setUserRole] = useState(null);
 
   const [paginasRecursos, setPaginasRecursos] = useState([]);
   const [urlsVistas, setUrlsVistas] = useState([]);
@@ -95,6 +96,13 @@ function RecomendacionContent() {
     }, 1800);
     return () => clearInterval(interval);
   }, [cargando]);
+
+  // Frenar insignia de TEST: solo visible para administradores (igual que add-xp)
+  useEffect(() => {
+    me()
+      .then((data) => setUserRole((data && data.user && data.user.role) || null))
+      .catch(() => setUserRole(null));
+  }, [me]);
 
   const cambiarPlan = (nuevoPlan) => {
     setPlan(nuevoPlan);
@@ -280,15 +288,17 @@ function RecomendacionContent() {
 
             {/* Acciones de Cabecera */}
             <div className="flex items-center gap-3 shrink-0">
-              {/* Botón de Prueba de Insignias (Temporal para testing) */}
-              <button
-                onClick={activarLogroPrueba}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
-                title="Haz clic para probar la notificación y el '!' rojo en el sidebar"
-              >
-                <Award className="w-3.5 h-3.5 text-amber-400" />
-                <span>🏆 Probar Insignia</span>
-              </button>
+              {/* Botón de Prueba de Insignias (Temporal para testing) - solo admin */}
+              {userRole === "admin" && (
+                <button
+                  onClick={activarLogroPrueba}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  title="Haz clic para probar la notificación y el '!' rojo en el sidebar"
+                >
+                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                  <span>🏆 Probar Insignia</span>
+                </button>
+              )}
 
               <button
                 onClick={() => setIsPlanModalOpen(true)}

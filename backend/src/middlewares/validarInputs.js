@@ -35,8 +35,7 @@ const reglasNombre = body("name")
   .notEmpty().withMessage("El nombre es obligatorio.")
   .isLength({ min: 3 }).withMessage("El nombre debe tener al menos 3 caracteres.")
   .isLength({ max: 100 }).withMessage("El nombre no puede superar 100 caracteres.")
-  .matches(NOMBRE_REGEX).withMessage("El nombre solo puede contener letras y espacios (sin números ni símbolos).")
-  .escape();
+  .matches(NOMBRE_REGEX).withMessage("El nombre solo puede contener letras y espacios (sin números ni símbolos).");
 
 const reglasPasswordFuerte = (campo, mensajeRequerido) =>
   body(campo)
@@ -142,24 +141,21 @@ const reglasCrearCurso = [
     .bail()
     .isString().trim()
     .notEmpty().withMessage("El título es obligatorio.")
-    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres.")
-    .escape(),
+    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres."),
 
   body("description")
     .exists().withMessage("La descripción es obligatoria.")
     .bail()
     .isString().trim()
     .notEmpty().withMessage("La descripción es obligatoria.")
-    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres.")
-    .escape(),
+    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres."),
 
   body("category")
     .exists().withMessage("La categoría es obligatoria.")
     .bail()
     .isString().trim()
     .notEmpty().withMessage("La categoría es obligatoria.")
-    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres.")
-    .escape(),
+    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres."),
 
   body("level")
     .optional()
@@ -180,20 +176,17 @@ const reglasActualizarCurso = [
   body("title")
     .optional()
     .isString().trim()
-    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres.")
-    .escape(),
+    .isLength({ min: 5, max: 150 }).withMessage("El título debe tener entre 5 y 150 caracteres."),
 
   body("description")
     .optional()
     .isString().trim()
-    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres.")
-    .escape(),
+    .isLength({ min: 20, max: 2000 }).withMessage("La descripción debe tener entre 20 y 2000 caracteres."),
 
   body("category")
     .optional()
     .isString().trim()
-    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres.")
-    .escape(),
+    .isLength({ max: 100 }).withMessage("La categoría no puede superar 100 caracteres."),
 
   body("level")
     .optional()

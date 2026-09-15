@@ -16,7 +16,7 @@ const googleSyncController = async (req, res) => {
 
     const { accessToken, refreshToken, user } = await authService.encontrarOCrearUsuarioGoogle(email, nombre);
     const sessionId = setAuthCookies(res, accessToken);
-    await storeRefreshToken(sessionId, refreshToken);
+    await storeRefreshToken(sessionId, refreshToken, user.id);
 
     return res.status(200).json({
       message: "Sincronización con Google exitosa",

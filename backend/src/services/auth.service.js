@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken"); 
 const pool = require("../config/db");
 const transporter = require("../config/mailer");
 const { generarTokenSeguro, hashearToken, calcularExpiracion } = require("../utils/tokens");
@@ -7,20 +6,26 @@ const { generateAccessToken, generateRefreshToken } = require("../utils/jwt");
 
 require("dotenv").config();
 
-// Mantenemos la clave por si acaso para forgotPassword/resetPassword
-const SECRET = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || "mevocatio_secret";
-
 // Horas de validez del enlace de verificación de correo (magic link)
 const EMAIL_VERIFICATION_EXPIRES_HOURS =
   Number(process.env.EMAIL_VERIFICATION_EXPIRES_HOURS) || 24;
 
 /* ─────────────────────────────────────────
    REGISTER
+   Respuesta genérica (anti-enumeración): no revela si el correo ya
+   estaba registrado. Si el email existe, responde igual que un registro
+   nuevo para no permitir mapear cuentas (M3).
 ───────────────────────────────────────── */
 const register = async (name, email, password) => {
   const existe = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existe.rows.length > 0) {
-    throw { status: 409, message: "El correo ya está registrado" };
+    return {
+      id: null,
+      email: null,
+      message:
+        "Si el correo no estaba registrado, revisa tu bandeja para confirmar tu cuenta antes de iniciar sesión.",
+      emailSent: null,
+    };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,14 +37,17 @@ const register = async (name, email, password) => {
 
   const usuario = resultado.rows[0];
 
+  let emailSent = true;
   try {
     await enviarCorreoVerificacion(usuario.id, usuario.email, usuario.name);
   } catch (error) {
+    emailSent = false;
     console.error("Error enviando correo de verificación:", error.message);
   }
 
   return {
     ...usuario,
+    emailSent,
     message:
       "Usuario creado exitosamente. Revisa tu correo para verificar tu cuenta antes de iniciar sesión.",
   };
@@ -128,8 +136,10 @@ const login = async (email, password) => {
 const forgotPassword = async (email) => {
   const resultado = await pool.query("SELECT id, name FROM users WHERE email = $1", [email]);
 
+  // Anti-enumeración (M3): si el correo no existe, se responde igual que
+  // cuando sí existe (mensaje genérico), sin distinguir códigos ni mensajes.
   if (resultado.rows.length === 0) {
-    throw { status: 404, message: "El correo no está registrado" };
+    return { sent: false, reason: "email_not_found" };
   }
 
   const user = resultado.rows[0];
@@ -147,22 +157,30 @@ const forgotPassword = async (email) => {
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
-  await transporter.sendMail({
-    from: `"MeVocatio" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Recuperar contraseña",
-    html: `
-      <div style="font-family:sans-serif;">
-        <h2>Recuperar contraseña</h2>
-        <p>Hola${user.name ? ` ${user.name}` : ""}, haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos y solo puede ser usado una vez.</p>
-        <a href="${resetLink}"
-           style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-           Cambiar contraseña
-        </a>
-        <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
-      </div>
-    `,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"MeVocatio" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Recuperar contraseña",
+      html: `
+        <div style="font-family:sans-serif;">
+          <h2>Recuperar contraseña</h2>
+          <p>Hola${user.name ? ` ${user.name}` : ""}, haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos y solo puede ser usado una vez.</p>
+          <a href="${resetLink}"
+             style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
+             Cambiar contraseña
+          </a>
+          <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("Error enviando correo de recuperación:", error.message);
+    // M4: no silenciar el fallo; el usuario debe poder reintentar.
+    throw { status: 502, message: "No se pudo enviar el correo de recuperación. Inténtalo de nuevo." };
+  }
+
+  return { sent: true };
 };
 
 /* ─────────────────────────────────────────
@@ -263,17 +281,21 @@ const resendVerification = async (email) => {
     [email]
   );
 
-  if (resultado.rows.length === 0) {
-    throw { status: 404, message: "El correo no está registrado" };
+  // Anti-enumeración (M3): mismas respuestas genéricas para todos los casos.
+  if (resultado.rows.length === 0 || resultado.rows[0].email_verified) {
+    return { sent: false };
   }
 
   const user = resultado.rows[0];
 
-  if (user.email_verified) {
-    throw { status: 400, message: "Este correo ya ha sido verificado." };
+  try {
+    await enviarCorreoVerificacion(user.id, user.email, user.name);
+  } catch (error) {
+    console.error("Error reenviando correo de verificación:", error.message);
+    throw { status: 502, message: "No se pudo enviar el correo de verificación. Inténtalo de nuevo." };
   }
 
-  await enviarCorreoVerificacion(user.id, user.email, user.name);
+  return { sent: true };
 };
 
 /* ─────────────────────────────────────────

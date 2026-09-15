@@ -68,12 +68,14 @@ export default function DashboardHome({
                     >
                         Continuar Carrera
                     </button>
-                    <button
-                        onClick={handleAddXp}
-                        className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-700 z-10"
-                    >
-                        [TEST] Sumar 500 XP
-                    </button>
+                    {profileData.role === "admin" && (
+                        <button
+                            onClick={handleAddXp}
+                            className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-700 z-10"
+                        >
+                            [TEST] Sumar 500 XP
+                        </button>
+                    )}
                 </div>
 
             </div>
