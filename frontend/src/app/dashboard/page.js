@@ -7,8 +7,7 @@ import { Bell } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
-import { useFavorites } from "@/hooks/useFavorites";
-import { PROFESSIONS } from "@/app/data/professions";
+import { VOCATION_GROUPS, getVocationsForGroup } from "@/lib/vocationGroups";
 import { API_URL } from "@/lib/constants";
 import { authService } from "@/services/auth.service";
 
@@ -30,8 +29,6 @@ export default function ExecutiveDashboard() {
 
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(0);
-  const { savedIds, toggleSave } = useFavorites();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -116,12 +113,19 @@ export default function ExecutiveDashboard() {
     }
   };
 
-  // Filtrado de profesiones según la barra de búsqueda
-  const filteredProfessions = PROFESSIONS.filter((job) =>
-    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.desc.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Grupos visibles según la barra de búsqueda
+  const visibleGroups = (() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return VOCATION_GROUPS.map((g) => g.id);
+
+    return VOCATION_GROUPS.filter((group) =>
+      getVocationsForGroup(group.id).some((v) =>
+        [v.title, v.area, v.desc, v.detalle, v.competencias]
+          .filter(Boolean)
+          .some((field) => field.toLowerCase().includes(q))
+      )
+    ).map((group) => group.id);
+  })();
 
   if (loading) return <LoadingScreen />;
 
@@ -148,11 +152,7 @@ export default function ExecutiveDashboard() {
             profileData={profileData}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            page={page}
-            setPage={setPage}
-            filteredProfessions={filteredProfessions}
-            savedIds={savedIds}
-            onToggleSave={toggleSave}
+            groups={visibleGroups}
             router={router}
             handleAddXp={handleAddXp}
           />

@@ -60,7 +60,7 @@ export default function Configuracion() {
           onClick={() => router.push("/dashboard")}
           className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
         >
-          <ArrowLeft className="w-4 h-4" /> Volver al Dashboard
+          <ArrowLeft className="w-4 h-4" /> Volver
         </button>
 
         <header className="mb-10 border-b border-slate-200 dark:border-white/10 pb-6">
