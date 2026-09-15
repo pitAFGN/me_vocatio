@@ -153,7 +153,13 @@ function RecomendacionContent() {
         if (!response.ok) {
           const textoError = await response.text();
           console.error("Error crudo del backend:", textoError);
-          throw new Error(`Error en el servidor (${response.status}).`);
+          let errorMsg = `Error en el servidor (${response.status}).`;
+          try {
+            const parsed = JSON.parse(textoError);
+            if (parsed.error) errorMsg = parsed.error;
+            else if (parsed.message) errorMsg = parsed.message;
+          } catch (e) {}
+          throw new Error(errorMsg);
         }
 
         const data = await response.json();
@@ -179,9 +185,40 @@ function RecomendacionContent() {
   useEffect(() => {
     if (profesionURL && !peticionInicialRealizada.current) {
       peticionInicialRealizada.current = true;
+      
+      // Intentar cargar del caché local primero
+      const cacheKey = `mevocatio_route_cache_${evaluationIdURL || profesionURL}`;
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const parsedCache = JSON.parse(cached);
+          if (parsedCache && parsedCache.length > 0) {
+            setPaginasRecursos(parsedCache);
+            setPaginaActualIndex(parsedCache.length - 1);
+            
+            // Reconstruir urlsVistas a partir del caché
+            const todasLasUrls = parsedCache.flatMap(pagina => 
+              (pagina.materiales || []).map(m => m.url)
+            );
+            setUrlsVistas(todasLasUrls);
+            return; // No hacer fetch inicial si hay caché
+          }
+        }
+      } catch (e) {
+        console.error("Error leyendo caché:", e);
+      }
+
       ejecutarPeticion(profesionURL, nivelURL, []);
     }
-  }, [profesionURL, nivelURL, ejecutarPeticion]);
+  }, [profesionURL, nivelURL, evaluationIdURL, ejecutarPeticion]);
+
+  // Guardar en caché cada vez que cambien los recursos
+  useEffect(() => {
+    if (paginasRecursos.length > 0) {
+      const cacheKey = `mevocatio_route_cache_${evaluationIdURL || profesionURL}`;
+      localStorage.setItem(cacheKey, JSON.stringify(paginasRecursos));
+    }
+  }, [paginasRecursos, evaluationIdURL, profesionURL]);
 
   const manejarCargarMas = () => {
     ejecutarPeticion(profesionURL, nivelURL, urlsVistas);

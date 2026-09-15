@@ -170,9 +170,7 @@ const evaluarTest = async (testId, userId, respuestas = []) => {
 };
 
 // Normalizar y asegurar URLs 100% funcionales evitando errores 404 o alucinaciones
-const ytSearch = require("yt-search");
-
-const construirUrlSegura = async (material, vocation, nivel) => {
+const construirUrlSegura = (material, vocation, nivel) => {
   const tipo = (material.tipo || "").toLowerCase();
   const titulo = material.titulo || vocation || "Recurso educativo";
   const plataforma = (material.plataforma || "").toLowerCase();
@@ -190,22 +188,15 @@ const construirUrlSegura = async (material, vocation, nivel) => {
 
   // 1. VIDEOS (YouTube)
   if (tipo.includes("video") || plataforma.includes("youtube")) {
-    if (!esUrlFalsa && (rawUrl.includes("youtube.com/@") || rawUrl.includes("youtube.com/c/") || rawUrl.includes("youtube.com/watch") || rawUrl.includes("youtu.be"))) {
+    if (!esUrlFalsa && (rawUrl.includes("youtube.com/@") || rawUrl.includes("youtube.com/c/"))) {
       return rawUrl;
     }
-    const cleanYtQuery = query.toLowerCase().includes("tutorial") || query.toLowerCase().includes("curso") || query.toLowerCase().includes("video")
+    const cleanYtQuery = encodeURIComponent(
+      query.toLowerCase().includes("tutorial") || query.toLowerCase().includes("curso") || query.toLowerCase().includes("video")
         ? query
-        : `${query} tutorial curso español`;
-    
-    try {
-      const r = await ytSearch(cleanYtQuery);
-      if (r.videos && r.videos.length > 0) {
-        return r.videos[0].url; // Enlace 100% directo y funcional
-      }
-    } catch (e) {
-      console.error("Error buscando en yt-search:", e);
-    }
-    return `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanYtQuery)}`;
+        : `${query} tutorial curso español`
+    );
+    return `https://www.youtube.com/results?search_query=${cleanYtQuery}`;
   }
 
   // 2. DOCUMENTACIÓN / GUÍAS OFICIALES
@@ -249,7 +240,7 @@ const construirUrlSegura = async (material, vocation, nivel) => {
     }
     const cleanCourseQuery = query.toLowerCase().includes("curso") ? query : `${query} curso online`;
     if (!esUrlFalsa && (rawUrl.includes("udemy.com") || rawUrl.includes("platzi.com") || rawUrl.includes("openbootcamp.com"))) {
-      return rawUrl; // CORREGIDO BUG: Devuelve el enlace directo en lugar de Google
+      return `https://www.google.com/search?q=${encodeURIComponent(cleanCourseQuery)}`;
     }
     if (!esUrlFalsa) {
       return rawUrl;
@@ -304,7 +295,7 @@ const construirUrlSegura = async (material, vocation, nivel) => {
   return `https://www.google.com/search?q=${encodeURIComponent(`${query} ${vocation}`)}`;
 };
 
-const sanitizarRecurso = async (material, vocation, nivel) => {
+const sanitizarRecurso = (material, vocation, nivel) => {
   const tipoLimpio = material.tipo || "Recurso";
   const tituloLimpio = material.titulo || `${vocation} - Nivel ${nivel}`;
   const descripcionLimpia =
@@ -317,7 +308,7 @@ const sanitizarRecurso = async (material, vocation, nivel) => {
       ? "Docs Oficiales"
       : "Web");
 
-  const urlSegura = await construirUrlSegura(material, vocation, nivel);
+  const urlSegura = construirUrlSegura(material, vocation, nivel);
 
   return {
     titulo: tituloLimpio,
@@ -405,9 +396,9 @@ const generarYGuardarBloque = async (evaluationId, vocation, nivel, evitarUrls =
 
     const aiResponse = JSON.parse(response.choices[0].message.content);
 
-    const materialesNormalizados = await Promise.all((aiResponse.materiales || []).map((material) =>
+    const materialesNormalizados = (aiResponse.materiales || []).map((material) =>
       sanitizarRecurso(material, vocation, nivel)
-    ));
+    );
 
     return {
       resumen_enfoque:

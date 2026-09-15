@@ -68,7 +68,15 @@ export default function ResourceAiModal({
           });
 
           if (!response.ok) {
-            throw new Error(`Error en el servidor (${response.status})`);
+            let errorMsg = `Error en el servidor (${response.status})`;
+            try {
+              const errData = await response.json();
+              if (errData.error || errData.message) errorMsg = errData.error || errData.message;
+            } catch (e) {
+               const text = await response.text().catch(() => "");
+               if (text) errorMsg = text;
+            }
+            throw new Error(errorMsg);
           }
 
           const resJson = await response.json();

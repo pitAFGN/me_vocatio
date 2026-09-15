@@ -62,10 +62,10 @@ export default function DashboardHome({
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 z-10">
                         ¡Mantén tu racha activa ingresando todos los días! Próxima meta a alcanzar nivel {profileData.level + 1}.
                     </p>
-                    <button
-                        onClick={() => router.push("/favoritos")}
-                        className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
-                    >
+                      <button
+                          onClick={() => router.push("/mis-rutas")}
+                          className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
+                      >
                         Continuar Carrera
                     </button>
                     {profileData.role === "admin" && (

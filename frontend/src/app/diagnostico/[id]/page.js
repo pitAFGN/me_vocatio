@@ -139,11 +139,16 @@ export default function DiagnosticoPage() {
 
   if (error) {
     return (
-      <LoadingScreen
-        mensaje={`Error: ${error}`}
-        claseFondo="bg-slate-50 dark:bg-[#0f172a]"
-        claseTexto="text-red-500 dark:text-red-400"
-      />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white p-6 text-center">
+        <h2 className="text-xl font-bold text-red-500 mb-4">Ups, ocurrió un error</h2>
+        <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
+        <button
+          onClick={() => router.push("/mis-rutas")}
+          className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold shadow-lg shadow-indigo-500/30"
+        >
+          Ir a mis Rutas
+        </button>
+      </div>
     );
   }
 
