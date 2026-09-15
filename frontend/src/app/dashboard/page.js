@@ -53,7 +53,8 @@ export default function ExecutiveDashboard() {
     location: "Medellín, Colombia",
     xp: 0,
     level: 1,
-    current_streak: 0
+    current_streak: 0,
+    role: null
   });
 
   const fetchUser = async () => {
@@ -65,7 +66,8 @@ export default function ExecutiveDashboard() {
           name: userData.user.name,
           xp: userData.user.xp || 0,
           level: userData.user.level || 1,
-          current_streak: userData.user.current_streak || 0
+          current_streak: userData.user.current_streak || 0,
+          role: userData.user.role || null
         }));
       }
     } catch (err) {

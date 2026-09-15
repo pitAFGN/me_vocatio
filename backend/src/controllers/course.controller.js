@@ -118,20 +118,29 @@ const enrollInCourse = async (req, res) => {
   try {
     const courseId = parseInt(req.params.id, 10);
     const userId = req.user.id;
-    
-    // Check if already enrolled
-    const checkRes = await pool.query(
-      `SELECT id FROM enrollments WHERE user_id = $1 AND course_id = $2`,
+
+    if (!Number.isInteger(courseId) || courseId <= 0) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+
+    // El curso debe existir y estar publicado/activo para poder inscribirse.
+    const curso = await pool.query(
+      `SELECT id FROM courses WHERE id = $1 AND (status = 'activo' OR status = 'published')`,
+      [courseId]
+    );
+
+    if (curso.rows.length === 0) {
+      return res.status(404).json({ error: "El curso no existe o no está disponible" });
+    }
+
+    // Inscripción idempotente sin depender de una constraint específica.
+    await pool.query(
+      `INSERT INTO enrollments (user_id, course_id, status)
+       VALUES ($1, $2, 'active')
+       ON CONFLICT DO NOTHING`,
       [userId, courseId]
     );
-    
-    if (checkRes.rows.length === 0) {
-      // Create enrollment
-      await pool.query(
-        `INSERT INTO enrollments (user_id, course_id, status) VALUES ($1, $2, 'active')`,
-        [userId, courseId]
-      );
-    }
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -141,10 +150,29 @@ const enrollInCourse = async (req, res) => {
 const updateProgress = async (req, res) => {
   try {
     const courseId = parseInt(req.params.id, 10);
-    const { lessonId } = req.body;
+    const rawLessonId = req.body && req.body.lessonId;
+    const lessonId = parseInt(rawLessonId, 10);
     const userId = req.user.id;
 
-    // Get enrollment
+    if (!Number.isInteger(courseId) || courseId <= 0) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+    if (!Number.isInteger(lessonId) || lessonId <= 0) {
+      return res.status(400).json({ error: "Identificador de lección inválido" });
+    }
+
+    // La lección debe pertenecer al curso indicado: evita inflar progreso
+    // de lecciones de otros cursos (M5).
+    const leccion = await pool.query(
+      `SELECT id FROM lessons WHERE id = $1 AND course_id = $2`,
+      [lessonId, courseId]
+    );
+
+    if (leccion.rows.length === 0) {
+      return res.status(400).json({ error: "La lección no pertenece a este curso" });
+    }
+
+    // Obtener o crear la inscripción (solo tras validar curso y lección).
     const enrollmentRes = await pool.query(
       `SELECT id FROM enrollments WHERE user_id = $1 AND course_id = $2`,
       [userId, courseId]
@@ -152,12 +180,20 @@ const updateProgress = async (req, res) => {
 
     let enrollmentId;
     if (enrollmentRes.rows.length === 0) {
-      // Create enrollment if it somehow didn't exist
-      const newEnroll = await pool.query(
-        `INSERT INTO enrollments (user_id, course_id, status) VALUES ($1, $2, 'active') RETURNING id`,
+      await pool.query(
+        `INSERT INTO enrollments (user_id, course_id, status)
+         VALUES ($1, $2, 'active')
+         ON CONFLICT DO NOTHING`,
         [userId, courseId]
       );
-      enrollmentId = newEnroll.rows[0].id;
+      const creada = await pool.query(
+        `SELECT id FROM enrollments WHERE user_id = $1 AND course_id = $2`,
+        [userId, courseId]
+      );
+      enrollmentId = creada.rows[0] ? creada.rows[0].id : null;
+      if (!enrollmentId) {
+        return res.status(500).json({ error: "No se pudo crear la inscripción" });
+      }
     } else {
       enrollmentId = enrollmentRes.rows[0].id;
     }

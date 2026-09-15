@@ -7,7 +7,7 @@ const optionalAuth = authenticateToken.optionalAuth || authenticateToken;
 const requirePremium = authenticateToken.requirePremium;
 
 router.post("/generar", authenticateToken, aiLimiter, recommendationController.generarTest);
-router.post("/evaluar", authenticateToken, recommendationController.evaluar);
+router.post("/evaluar", authenticateToken, aiLimiter, recommendationController.evaluar);
 router.post("/recomendar", optionalAuth, recommendationLimiter, recommendationController.recomendar);
 router.post("/analizar", authenticateToken, requirePremium, aiLimiter, recommendationController.analizarRecurso);
 

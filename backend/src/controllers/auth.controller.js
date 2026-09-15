@@ -31,7 +31,7 @@ const login = async (req, res) => {
   try {
     const resultado = await authService.login(email, password);
     const sessionId = setAuthCookies(res, resultado.accessToken);
-    await storeRefreshToken(sessionId, resultado.refreshToken);
+    await storeRefreshToken(sessionId, resultado.refreshToken, resultado.user.id);
     res.json({ user: resultado.user });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
