@@ -7,9 +7,12 @@ const { verificarTokenSupabase } = require("../middlewares/alternativeLogin");
 const {
   loginLimiter,
   registerLimiter,
+  registerEmailLimiter,
   forgotPasswordLimiter,
+  forgotPasswordEmailLimiter,
   verifyEmailLimiter,
   resendVerificationLimiter,
+  resendVerificationEmailLimiter,
 } = require("../middlewares/rateLimiter");
 const {
   reglasRegister,
@@ -45,7 +48,7 @@ const { verificarCaptcha } = require("../middlewares/recaptcha");
  *       409: { description: El correo ya está registrado }
  *       429: { description: Demasiados registros, intenta más tarde }
  */
-router.post("/register", registerLimiter, reglasRegister, verificarCaptcha, authController.register);
+router.post("/register", registerLimiter, registerEmailLimiter, reglasRegister, verificarCaptcha, authController.register);
 
 /**
  * @swagger
@@ -120,7 +123,7 @@ router.post("/google-sync", verificarTokenSupabase, googleSyncController);
  *       404: { description: El correo no está registrado }
  *       429: { description: Demasiadas solicitudes }
  */
-router.post("/forgot-password", forgotPasswordLimiter, reglasForgotPassword, authController.forgotPassword);
+router.post("/forgot-password", forgotPasswordLimiter, forgotPasswordEmailLimiter, reglasForgotPassword, authController.forgotPassword);
 
 /**
  * @swagger
@@ -184,6 +187,7 @@ router.get("/verify-email", verifyEmailLimiter, reglasVerifyEmail, authControlle
 router.post(
   "/resend-verification",
   resendVerificationLimiter,
+  resendVerificationEmailLimiter,
   reglasResendVerification,
   authController.resendVerification
 );

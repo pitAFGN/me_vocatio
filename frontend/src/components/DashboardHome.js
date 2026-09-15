@@ -62,18 +62,20 @@ export default function DashboardHome({
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 z-10">
                         ¡Mantén tu racha activa ingresando todos los días! Próxima meta a alcanzar nivel {profileData.level + 1}.
                     </p>
-                    <button
-                        onClick={() => router.push("/favoritos")}
-                        className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
-                    >
+                      <button
+                          onClick={() => router.push("/mis-rutas")}
+                          className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
+                      >
                         Continuar Carrera
                     </button>
-                    <button
-                        onClick={handleAddXp}
-                        className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold text-xs text-slate-600 dark:text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-300 dark:border-slate-700 z-10"
-                    >
-                        [TEST] Sumar 500 XP
-                    </button>
+                    {profileData.role === "admin" && (
+                        <button
+                            onClick={handleAddXp}
+                            className="w-full mt-3 py-2 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 font-semibold text-xs text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-slate-700 z-10"
+                        >
+                            [TEST] Sumar 500 XP
+                        </button>
+                    )}
                 </div>
 
             </div>

@@ -57,8 +57,8 @@ export default function SidebarNav({ logout }) {
                             <span>PANEL PRINCIPAL</span>
                         </Link>
 
-                        <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname.startsWith("/recomendacion") ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
-                            <Compass className={`w-5 h-5 ${pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400" : ""}`} />
+                        <Link href="/mis-rutas" prefetch={false} className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${pathname.startsWith("/mis-rutas") || pathname.startsWith("/recomendacion") ? "bg-slate-200 dark:bg-white/10 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white shadow-lg" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"}`}>
+                            <Compass className={`w-5 h-5 ${pathname.startsWith("/mis-rutas") || pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400" : ""}`} />
                             <span>RUTAS DE APRENDIZAJE</span>
                         </Link>
 
@@ -100,7 +100,7 @@ export default function SidebarNav({ logout }) {
                     <span className="text-[9px] font-medium">Panel</span>
                 </Link>
 
-                <Link href="/recomendacion?profesion=Desarrollo%20de%20Software&nivel=Principiante" prefetch={false} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
+                <Link href="/mis-rutas" prefetch={false} className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname.startsWith("/mis-rutas") || pathname.startsWith("/recomendacion") ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
                     <Compass className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Rutas</span>
                 </Link>

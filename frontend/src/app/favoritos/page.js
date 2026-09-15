@@ -131,19 +131,19 @@ export default function FavoritosPage() {
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0c1222]/50 text-center mt-10">
-                        <div className="p-4 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-400 dark:text-slate-500 mb-4">
-                            <Layers className="w-8 h-8" />
+                        <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl w-full">
+                            <Bookmark className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" />
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Aún no tienes guardados</h3>
+                            <p className="text-slate-500 dark:text-slate-400 mb-6 text-center max-w-sm text-xs">
+                                Explora las rutas de aprendizaje y guarda los recursos que más te interesen para verlos aquí.
+                            </p>
+                            <Link 
+                                href="/mis-rutas"
+                                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all text-xs"
+                            >
+                                Ir a Rutas de Aprendizaje
+                            </Link>
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">No tienes recursos favoritos aún</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-6 leading-relaxed">
-                            Explora las rutas de aprendizaje y haz clic en el ícono de marcador de cada recurso para guardarlo aquí.
-                        </p>
-                        <Link
-                            href="/recomendacion"
-                            className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-lg shadow-indigo-600/30"
-                        >
-                            Explorar Rutas
-                        </Link>
                     </div>
                 )}
             </div>

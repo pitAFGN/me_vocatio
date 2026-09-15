@@ -1,4 +1,6 @@
 const recomendationService = require("../services/recomendation.service");
+const { incrementDailyLimit } = require("../middlewares/dailyLimitMiddleware");
+
 const generarTest = async (req, res) => {
   const profesion_title = req.body?.profesion_title;
   const profesion_area = req.body?.profesion_area;
@@ -9,6 +11,7 @@ const generarTest = async (req, res) => {
 
   try {
     const testGenerado = await recomendationService.generarTestConGroq(profesion_title, profesion_area, req.user.id);
+    await incrementDailyLimit(req.user.id); // Incrementar si tuvo éxito
     res.json({
       exito: true,
       data: testGenerado
@@ -43,6 +46,9 @@ const recomendar = async (req, res) => {
 
   try {
     const aiResponse = await recomendationService.generarYGuardarBloque(evaluation_id, vocation, nivel, evitarUrls);
+    if (req.user && req.user.id) {
+      await incrementDailyLimit(req.user.id);
+    }
     res.json(aiResponse);
   } catch (error) {
     console.error("Error en recomendación:", error);
@@ -68,6 +74,7 @@ const analizarRecurso = async (req, res) => {
       nivel,
       pregunta_usuario
     });
+    await incrementDailyLimit(req.user.id);
     res.json({
       exito: true,
       data: analisis

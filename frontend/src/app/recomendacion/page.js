@@ -31,7 +31,7 @@ import ResourceCard from "@/components/ResourceCard";
 
 function RecomendacionContent() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, me } = useAuth();
   const searchParams = useSearchParams();
   const peticionInicialRealizada = useRef(false);
 
@@ -55,6 +55,7 @@ function RecomendacionContent() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState(null);
   const [newAchievements, setNewAchievements] = useState([]);
+  const [userRole, setUserRole] = useState(null);
 
   const [paginasRecursos, setPaginasRecursos] = useState([]);
   const [urlsVistas, setUrlsVistas] = useState([]);
@@ -94,6 +95,13 @@ function RecomendacionContent() {
     }, 1800);
     return () => clearInterval(interval);
   }, [cargando]);
+
+  // Frenar insignia de TEST: solo visible para administradores (igual que add-xp)
+  useEffect(() => {
+    me()
+      .then((data) => setUserRole((data && data.user && data.user.role) || null))
+      .catch(() => setUserRole(null));
+  }, [me]);
 
   const cambiarPlan = (nuevoPlan) => {
     setPlan(nuevoPlan);
@@ -145,7 +153,13 @@ function RecomendacionContent() {
         if (!response.ok) {
           const textoError = await response.text();
           console.error("Error crudo del backend:", textoError);
-          throw new Error(`Error en el servidor (${response.status}).`);
+          let errorMsg = `Error en el servidor (${response.status}).`;
+          try {
+            const parsed = JSON.parse(textoError);
+            if (parsed.error) errorMsg = parsed.error;
+            else if (parsed.message) errorMsg = parsed.message;
+          } catch (e) {}
+          throw new Error(errorMsg);
         }
 
         const data = await response.json();
@@ -171,9 +185,40 @@ function RecomendacionContent() {
   useEffect(() => {
     if (profesionURL && !peticionInicialRealizada.current) {
       peticionInicialRealizada.current = true;
+      
+      // Intentar cargar del caché local primero
+      const cacheKey = `mevocatio_route_cache_${evaluationIdURL || profesionURL}`;
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const parsedCache = JSON.parse(cached);
+          if (parsedCache && parsedCache.length > 0) {
+            setPaginasRecursos(parsedCache);
+            setPaginaActualIndex(parsedCache.length - 1);
+            
+            // Reconstruir urlsVistas a partir del caché
+            const todasLasUrls = parsedCache.flatMap(pagina => 
+              (pagina.materiales || []).map(m => m.url)
+            );
+            setUrlsVistas(todasLasUrls);
+            return; // No hacer fetch inicial si hay caché
+          }
+        }
+      } catch (e) {
+        console.error("Error leyendo caché:", e);
+      }
+
       ejecutarPeticion(profesionURL, nivelURL, []);
     }
-  }, [profesionURL, nivelURL, ejecutarPeticion]);
+  }, [profesionURL, nivelURL, evaluationIdURL, ejecutarPeticion]);
+
+  // Guardar en caché cada vez que cambien los recursos
+  useEffect(() => {
+    if (paginasRecursos.length > 0) {
+      const cacheKey = `mevocatio_route_cache_${evaluationIdURL || profesionURL}`;
+      localStorage.setItem(cacheKey, JSON.stringify(paginasRecursos));
+    }
+  }, [paginasRecursos, evaluationIdURL, profesionURL]);
 
   const manejarCargarMas = () => {
     ejecutarPeticion(profesionURL, nivelURL, urlsVistas);
@@ -259,15 +304,17 @@ function RecomendacionContent() {
 
             {/* Acciones de Cabecera */}
             <div className="flex items-center gap-3 shrink-0">
-              {/* Botón de Prueba de Insignias (Temporal para testing) */}
-              <button
-                onClick={activarLogroPrueba}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
-                title="Haz clic para probar la notificación y el '!' rojo en el sidebar"
-              >
-                <Award className="w-3.5 h-3.5 text-amber-400" />
-                <span>🏆 Probar Insignia</span>
-              </button>
+              {/* Botón de Prueba de Insignias (Temporal para testing) - solo admin */}
+              {userRole === "admin" && (
+                <button
+                  onClick={activarLogroPrueba}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  title="Haz clic para probar la notificación y el '!' rojo en el sidebar"
+                >
+                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                  <span>🏆 Probar Insignia</span>
+                </button>
+              )}
 
               <button
                 onClick={() => setIsPlanModalOpen(true)}

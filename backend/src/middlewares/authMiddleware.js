@@ -67,16 +67,28 @@ const requirePremium = async (req, res, next) => {
   }
 };
 
-const authorizeRoles = (...roles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Autenticación requerida.' });
+const authorizeRoles = (...roles) => async (req, res, next) => {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: 'Autenticación requerida.' });
+  }
+
+  try {
+    const result = await pool.query('SELECT role FROM users WHERE id = $1', [req.user.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Acceso denegado. Permisos insuficientes.' });
+
+    const userRole = result.rows[0] && result.rows[0].role ? result.rows[0].role : 'user';
+    if (!roles.includes(userRole)) {
+      return res.status(403).json({ message: 'No tienes permisos para realizar esta acción.' });
     }
+
+    req.user.role = userRole;
     next();
-  };
+  } catch (error) {
+    console.error('Error al verificar rol:', error);
+    return res.status(500).json({ message: 'Error al verificar permisos.' });
+  }
 };
 
 authenticateToken.authenticateToken = authenticateToken;

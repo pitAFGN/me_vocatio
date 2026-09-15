@@ -53,7 +53,8 @@ export default function ExecutiveDashboard() {
     location: "Medellín, Colombia",
     xp: 0,
     level: 1,
-    current_streak: 0
+    current_streak: 0,
+    role: null
   });
 
   const fetchUser = async () => {
@@ -65,7 +66,8 @@ export default function ExecutiveDashboard() {
           name: userData.user.name,
           xp: userData.user.xp || 0,
           level: userData.user.level || 1,
-          current_streak: userData.user.current_streak || 0
+          current_streak: userData.user.current_streak || 0,
+          role: userData.user.role || null
         }));
       }
     } catch (err) {
@@ -140,9 +142,6 @@ export default function ExecutiveDashboard() {
               </p>
             </div>
 
-            <button className="w-10 h-10 rounded-full bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/15 transition-all cursor-pointer shadow-md dark:shadow-md hover:border-indigo-500/40 shrink-0 text-slate-700 dark:text-slate-300">
-              <Bell className="w-4 h-4" />
-            </button>
           </header>
 
           <DashboardHome

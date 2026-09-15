@@ -87,7 +87,28 @@ const addXp = async (req, res) => {
   }
 };
 
+const getEvaluations = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const result = await pool.query(
+      `SELECT * FROM (
+         SELECT DISTINCT ON (profession_title) id, profession_title, level, created_at 
+         FROM evaluations 
+         WHERE user_id = $1 
+         ORDER BY profession_title, created_at DESC
+       ) AS unique_evals
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error("Error fetching evaluations:", error);
+    res.status(500).json({ error: "Error interno al obtener evaluaciones" });
+  }
+};
+
 module.exports = {
-  addXp
+  addXp,
+  getEvaluations
 };
 

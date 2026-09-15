@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
   // Las rutas que queremos proteger (que requieren iniciar sesión)
-  const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias'];
+  const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias', '/mis-rutas', '/favoritos'];
   
   const { pathname } = request.nextUrl;
   
