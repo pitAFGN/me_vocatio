@@ -76,4 +76,18 @@ app.listen(PORT, async () => {
   } catch (error) {
     console.error("Error conectando a la base de datos:", error.message);
   }
+
+  /* ─── Keep-alive de la base de datos ───
+     Neon (Postgres serverless) suspende el cómputo tras unos minutos
+     de inactividad. La primera consulta después de eso tarda varios
+     segundos en "despertarlo". Mientras el backend esté corriendo,
+     este ping evita que la base llegue a dormirse. */
+  const INTERVALO_KEEP_ALIVE_MS = 4 * 60 * 1000; // 4 minutos
+  setInterval(async () => {
+    try {
+      await pool.query("SELECT 1");
+    } catch (error) {
+      console.error("⚠️  Falló el ping de keep-alive a la base de datos:", error.message);
+    }
+  }, INTERVALO_KEEP_ALIVE_MS);
 });

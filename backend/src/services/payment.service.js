@@ -22,7 +22,19 @@ const generarReferencia = (concepto, id) =>
    Sin separadores entre los valores.
 ───────────────────────────────────────── */
 const generarFirmaIntegridad = (reference, amountInCents, currency) => {
-  const cadena = `${reference}${amountInCents}${currency}${process.env.WOMPI_INTEGRITY_SECRET}`;
+  const secreto = process.env.WOMPI_INTEGRITY_SECRET || "";
+  const env = (process.env.WOMPI_ENV || "desconocido").toLowerCase();
+
+  if (process.env.NODE_ENV !== "production") {
+    const prefijo = secreto ? secreto.substring(0, 14) + "…" : "(vacío)";
+    console.log(
+      `[Wompi] Generando firma — entorno: ${env.toUpperCase()}, ` +
+      `secreto prefijo: ${prefijo}, reference: ${reference}, ` +
+      `amountInCents: ${amountInCents}, currency: ${currency}`
+    );
+  }
+
+  const cadena = `${reference}${amountInCents}${currency}${secreto}`;
   return crypto.createHash("sha256").update(cadena).digest("hex");
 };
 
