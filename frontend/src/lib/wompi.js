@@ -1,29 +1,47 @@
 const WOMPI_SCRIPT_SRC = "https://checkout.wompi.co/widget.js";
+const TIEMPO_MAXIMO_CARGA_MS = 10000;
 
-/**
- * Se asegura de que el script de Wompi esté cargado en la página.
- * Si ya está, no lo vuelve a poner.
- */
+// Promesa compartida: evita que dos clics simultáneos inserten el script dos veces
+// y evita el problema de "quedarse esperando para siempre" si el script ya existía
+// en el DOM de un intento anterior (fallido) cuyos eventos load/error ya se dispararon.
+let promesaScriptWompi = null;
+
 function cargarScriptWompi() {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") return reject(new Error("No hay ventana de navegador"));
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("No hay ventana de navegador"));
+  }
 
-    if (window.WidgetCheckout) return resolve();
+  if (window.WidgetCheckout) return Promise.resolve();
 
+  if (promesaScriptWompi) return promesaScriptWompi;
+
+  promesaScriptWompi = new Promise((resolve, reject) => {
+    // Si había un <script> de un intento anterior, lo quitamos: así garantizamos
+    // que el <script> nuevo dispare sus propios eventos load/error de forma confiable.
     const existente = document.querySelector(`script[src="${WOMPI_SCRIPT_SRC}"]`);
-    if (existente) {
-      existente.addEventListener("load", () => resolve());
-      existente.addEventListener("error", () => reject(new Error("No se pudo cargar Wompi")));
-      return;
-    }
+    if (existente) existente.remove();
+
+    const timeoutId = setTimeout(() => {
+      promesaScriptWompi = null;
+      reject(new Error("Wompi tardó demasiado en cargar. Revisa tu conexión o si un bloqueador de anuncios está interfiriendo."));
+    }, TIEMPO_MAXIMO_CARGA_MS);
 
     const script = document.createElement("script");
     script.src = WOMPI_SCRIPT_SRC;
     script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("No se pudo cargar Wompi"));
+    script.onload = () => {
+      clearTimeout(timeoutId);
+      resolve();
+    };
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      promesaScriptWompi = null;
+      reject(new Error("No se pudo cargar Wompi. Revisa tu conexión o si un bloqueador de anuncios está interfiriendo."));
+    };
     document.body.appendChild(script);
   });
+
+  return promesaScriptWompi;
 }
 
 /**
@@ -43,6 +61,7 @@ export async function abrirCheckoutWompi(widget, onResultado) {
     publicKey: widget.publicKey,
     redirectUrl: widget.redirectUrl,
     signature: { integrity: widget.signature },
+    bootstrapTransport: "postmessage",
   });
 
   checkout.open((resultado) => {

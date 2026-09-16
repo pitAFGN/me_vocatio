@@ -22,7 +22,7 @@ const plans = [
 ];
 
 export default function PlanSelectionModal({ onSelect }) {
-  const { pagarCurso, cargando } = usePayment();
+  const { pagarPremium, cargando } = usePayment();
   const [selected, setSelected] = useState(null);
 
   const mostrarAlerta = async (titulo, texto, icono) => {
@@ -36,18 +36,15 @@ export default function PlanSelectionModal({ onSelect }) {
   };
 
   const handlePagarPremium = () => {
-    pagarCurso(
-      { nombre: "Plan Premium MeVocatio", price: 49000 },
-      {
-        onExito: () => {
-          mostrarAlerta("¡Pago exitoso!", "Has adquirido el Plan Premium.", "success");
-          onSelect("premium");
-        },
-        onError: (err) => {
-          mostrarAlerta("Error", err, "error");
-        },
-      }
-    );
+    pagarPremium({
+      onExito: () => {
+        mostrarAlerta("¡Pago exitoso!", "Has adquirido el Plan Premium.", "success");
+        onSelect("premium");
+      },
+      onError: (err) => {
+        mostrarAlerta("Error", err, "error");
+      },
+    });
   };
 
   const handleCerrar = () => {

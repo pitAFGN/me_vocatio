@@ -17,6 +17,43 @@ if (!process.env.WOMPI_PRIVATE_KEY || !process.env.WOMPI_INTEGRITY_SECRET) {
   );
 }
 
+// ── Validación de consistencia entre WOMPI_ENV y los prefijos de las llaves ──
+(function validarConsistenciaWompi() {
+  const env = (process.env.WOMPI_ENV || "").toLowerCase();
+  const publicKey = process.env.WOMPI_PUBLIC_KEY || "";
+  const privateKey = process.env.WOMPI_PRIVATE_KEY || "";
+  const integritySecret = process.env.WOMPI_INTEGRITY_SECRET || "";
+  const eventsSecret = process.env.WOMPI_EVENTS_SECRET || "";
+
+  const esSandbox = env === "sandbox";
+
+  const check = (valor, prefijoTest, prefijoProd, nombre) => {
+    if (!valor) return;
+    const esTest = valor.startsWith(prefijoTest);
+    const esProd = valor.startsWith(prefijoProd);
+    if (esSandbox && esProd) {
+      console.error(
+        `❌  WOMPI CONFIG ERROR: ${nombre} usa prefijo de producción (${prefijoProd}…), pero WOMPI_ENV="${env}". ` +
+        `Cambia ${nombre} a un valor sandbox (${prefijoTest}…) o cambia WOMPI_ENV a "production".`
+      );
+    } else if (!esSandbox && esTest) {
+      console.error(
+        `❌  WOMPI CONFIG ERROR: ${nombre} usa prefijo de sandbox (${prefijoTest}…), pero WOMPI_ENV="${env}". ` +
+        `Cambia ${nombre} a un valor de producción (${prefijoProd}…) o cambia WOMPI_ENV a "sandbox".`
+      );
+    }
+  };
+
+  check(publicKey, "pub_test_", "pub_prod_", "WOMPI_PUBLIC_KEY");
+  check(privateKey, "prv_test_", "prv_prod_", "WOMPI_PRIVATE_KEY");
+  check(integritySecret, "test_integrity_", "prod_integrity_", "WOMPI_INTEGRITY_SECRET");
+  check(eventsSecret, "test_events_", "prod_events_", "WOMPI_EVENTS_SECRET");
+
+  console.log(
+    `✅  Wompi configurado para ambiente: ${env.toUpperCase()} — URL base: ${BASE_URL}`
+  );
+})();
+
 /**
  * Llama a la API de Wompi usando la llave privada (Bearer token).
  * Se usa, por ejemplo, para consultar el estado real de una transacción.
