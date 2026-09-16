@@ -1,6 +1,7 @@
 import Link from "next/link";
 import OpinionesCarrusel from "@/components/OpinionesCarrusel";
 import BackgroundStarsDiferidas from "@/components/BackgroundStarsDiferidas";
+import PublicFooter from "@/components/PublicFooter";
 
 const BENEFICIOS = [
     {
@@ -137,6 +138,7 @@ export default function NosotrosPage() {
             </div>
 
             <div className="h-12"></div>
+            <PublicFooter />
         </main>
     );
 }

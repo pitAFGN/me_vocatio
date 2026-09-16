@@ -44,7 +44,7 @@ export default async function VocationDetail({ params }) {
                     href="/dashboard"
                     className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/30 cursor-pointer"
                 >
-                    Volver al Dashboard
+                    Volver
                 </Link>
             </main>
         );

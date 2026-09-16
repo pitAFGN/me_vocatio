@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePublicRoute } from "@/hooks/useRouteGuard";
+import PublicFooter from "@/components/PublicFooter";
 import { Search, BarChart3, Award, ArrowRight } from "lucide-react";
 
 // 1. Carga dinámica del diamante
@@ -143,11 +144,7 @@ export default function LandingPage() {
       </div>
 
       {/* 6. FOOTER (Z-10) */}
-      <footer className="w-full pt-16 pb-4 z-10">
-        <p className="text-center text-slate-400 dark:text-slate-400 text-[11px] font-medium tracking-wide">
-          © 2026 MeVocatio. Elite Professional Development.<br className="sm:hidden" /> Transformando el potencial en legado.
-        </p>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }

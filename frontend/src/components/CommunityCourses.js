@@ -34,10 +34,10 @@ export default function CommunityCourses() {
     <section className="mt-8 mb-10">
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-col">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">
             Comunidad
           </span>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             Recursos Destacados
             <Sparkles className="w-5 h-5 text-violet-400" />
           </h2>
@@ -45,12 +45,12 @@ export default function CommunityCourses() {
       </div>
 
       {courses.length === 0 ? (
-        <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+        <div className="w-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
           <div className="w-16 h-16 rounded-full bg-violet-500/10 flex items-center justify-center mb-4">
-            <Users className="w-8 h-8 text-violet-400" />
+            <Users className="w-8 h-8 text-violet-600 dark:text-violet-400" />
           </div>
-          <h3 className="text-white font-bold mb-2">Aún no hay recursos de la comunidad</h3>
-          <p className="text-sm text-slate-400 max-w-sm">
+          <h3 className="text-slate-900 dark:text-white font-bold mb-2">Aún no hay recursos de la comunidad</h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
             ¡Sé el primero en compartir tu conocimiento! Ve a la sección Creador y publica tu primer curso o recurso para que aparezca aquí.
           </p>
         </div>

@@ -1,41 +1,29 @@
 "use client";
 
 import {
-    CheckCircle2,
-    Briefcase,
     Sparkles,
-    ArrowLeft,
-    ArrowRight,
     Search,
-    Flame
+    Flame,
+    Compass
 } from "lucide-react";
-import ProfessionCard from "@/components/ProfessionCard";
+import VocationGroupCard from "@/components/VocationGroupCard";
 import XpLevelCard from "./XpLevelCard";
 import CommunityCourses from "./CommunityCourses";
-
-const ITEMS_PER_PAGE = 6;
 
 export default function DashboardHome({
     profileData,
     searchQuery,
     setSearchQuery,
-    page,
-    setPage,
-    filteredProfessions,
-    savedIds = [],
-    onToggleSave,
+    groups = [],
     router,
     handleAddXp
 }) {
-    const currentProfessions = filteredProfessions.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
-    const totalPages = Math.max(1, Math.ceil(filteredProfessions.length / ITEMS_PER_PAGE));
-
     return (
         <>
             {/* Top Grid: Status Card & Quick Stats */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
 
-                {/* Status Card con los puntitos estáticos */}
+                {/* Status Card */}
                 <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-2xl p-8 lg:col-span-2 flex flex-col justify-between relative overflow-hidden shadow-xl">
                     <div className="relative z-10">
                         <div className="flex items-center gap-3 mb-6">
@@ -62,10 +50,10 @@ export default function DashboardHome({
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 z-10">
                         ¡Mantén tu racha activa ingresando todos los días! Próxima meta a alcanzar nivel {profileData.level + 1}.
                     </p>
-                      <button
-                          onClick={() => router.push("/mis-rutas")}
-                          className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
-                      >
+                    <button
+                        onClick={() => router.push("/mis-rutas")}
+                        className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 font-semibold text-xs text-white uppercase tracking-wider transition-all cursor-pointer shadow-lg shadow-orange-600/30 z-10"
+                    >
                         Continuar Carrera
                     </button>
                     {profileData.role === "admin" && (
@@ -87,43 +75,38 @@ export default function DashboardHome({
                         <Sparkles className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Explorar Vocaciones</h2>
                     </div>
-
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setPage((p) => Math.max(0, p - 1))}
-                            disabled={page === 0}
-                            className={`p-2.5 rounded-xl border transition-all ${page === 0 ? "bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer"}`}
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                            disabled={page >= totalPages - 1}
-                            className={`p-2.5 rounded-xl border transition-all ${page === 1 || filteredProfessions.length <= ITEMS_PER_PAGE ? "bg-slate-100 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-white/10 cursor-pointer"}`}
-                        >
-                            <ArrowRight className="w-4 h-4" />
-                        </button>
-                    </div>
                 </div>
 
                 <div className="relative flex items-center mb-6">
                     <Search className="absolute left-4 text-slate-400 dark:text-indigo-300/50 w-5 h-5" />
                     <input
                         type="text"
-                        placeholder="Buscar profesiones o áreas de interés (ej. Desarrollo, Datos, Ciberseguridad)..."
+                        placeholder="Buscar categorías o áreas de interés (ej. Desarrollo, Datos, Seguridad)..."
                         value={searchQuery}
-                        onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-xl text-sm placeholder-slate-400 text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {currentProfessions.map((job) => (
-                        <ProfessionCard key={job.id} profession={job} savedIds={savedIds} onToggleSave={onToggleSave} />
-                    ))}
-                </div>
+                {groups.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {groups.map((groupId) => (
+                            <VocationGroupCard key={groupId} groupId={groupId} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-12 text-center bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl space-y-3">
+                        <Compass className="w-10 h-10 text-slate-500 mx-auto" />
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                            No se encontraron categorías con ese criterio
+                        </h3>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">
+                            Prueba con otro término (ej. Desarrollo, Datos, Seguridad, Producto...).
+                        </p>
+                    </div>
+                )}
             </section>
-            
+
             <CommunityCourses />
         </>
     );

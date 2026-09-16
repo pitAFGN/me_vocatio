@@ -162,7 +162,7 @@ export default function DiagnosticoPage() {
         className="flex items-center gap-2 px-4 py-2.5 mb-8 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-indigo-950 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-        Volver al Dashboard
+        Volver
       </button>
 
       <h1 className="text-2xl font-bold mb-2">Cuestionario de Diagnóstico</h1>

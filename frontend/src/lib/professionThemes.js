@@ -9,13 +9,13 @@ import {
 
 export const TEMAS_AREAS = [
   {
-    keys: ["diseno", "ux"],
+    keys: ["diseno", "diseñ", "ux"],
     clase: "from-pink-500/70 via-rose-600/40 to-[#1e1b4b]",
     icono: Palette,
     colorTexto: "text-pink-300"
   },
   {
-    keys: ["dato", "analis", "ciencia"],
+    keys: ["dato", "data", "analis", "ciencia"],
     clase: "from-emerald-500/70 via-teal-600/40 to-[#042f2e]",
     icono: BarChart3,
     colorTexto: "text-emerald-300"

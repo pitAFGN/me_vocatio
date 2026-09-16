@@ -53,7 +53,6 @@ export default function CourseDetailPage() {
   ];
 
   // Cargar progreso previo del almacenamiento local
-  // Cargar progreso previo del almacenamiento local y asegurar inscripción
   useEffect(() => {
     if (!params.id) return;
     try {

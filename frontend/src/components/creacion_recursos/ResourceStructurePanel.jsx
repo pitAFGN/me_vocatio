@@ -69,7 +69,7 @@ export default function ResourceStructurePanel({
           <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 p-8 text-center">
             <p className="text-sm font-semibold text-slate-300">Aún no has agregado recursos a este curso</p>
             <p className="mt-1 text-xs text-slate-500">
-              Haz clic en "+ Crear recurso" para añadir tu primera lección, video o enlace.
+              Haz clic en &quot;+ Crear recurso&quot; para añadir tu primera lección, video o enlace.
             </p>
             <button
               type="button"

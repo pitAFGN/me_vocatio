@@ -89,7 +89,7 @@ export default function OpinionesCarrusel() {
                                     <div className="text-yellow-400 text-[9px]">★★★★★</div>
                                 </div>
                                 <p className="text-[10px] sm:text-xs leading-tight opacity-90 italic">
-                                    &ldquo;{op.texto}&rdquo; <span className="text-cyan-400 font-bold cursor-pointer ml-1">más</span>
+                                    &ldquo;{op.texto}&rdquo; <span className="text-cyan-400 font-bold ml-1">más</span>
                                 </p>
                             </div>
                         ))}

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export function middleware(request) {
   // Las rutas que queremos proteger (que requieren iniciar sesión)
-  const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias', '/mis-rutas', '/favoritos'];
+  const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias', '/mis-rutas', '/favoritos', '/configuracion', '/admin'];
   
   const { pathname } = request.nextUrl;
   
@@ -20,7 +20,7 @@ export function middleware(request) {
   }
   
   // Si el usuario ya está logueado y va a login, redirigir a dashboard
-  if (pathname === '/login' || pathname === '/register') {
+  if (pathname === '/login') {
     const token = request.cookies.get('access_token')?.value;
     if (token) {
       return NextResponse.redirect(new URL('/dashboard', request.url));

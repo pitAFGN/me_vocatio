@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Trophy, X, Sparkles } from "lucide-react";
 
 const achievementNames = {
@@ -21,13 +21,13 @@ export default function AchievementToast({ achievementCodes, onClose, duration =
   const [isExiting, setIsExiting] = useState(false);
   const timerRef = useRef(null);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       onClose?.();
       setIsExiting(false);
     }, 450); // Tiempo para la animación de salida
-  };
+  }, [onClose]);
 
   useEffect(() => {
     if (achievementCodes && achievementCodes.length > 0) {
@@ -47,7 +47,7 @@ export default function AchievementToast({ achievementCodes, onClose, duration =
     } else {
       setIsMounted(false);
     }
-  }, [achievementCodes, duration]);
+  }, [achievementCodes, duration, handleClose]);
 
   if (!achievementCodes || !achievementCodes.length) return null;
 
