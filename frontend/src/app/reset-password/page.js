@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { validarPassword } from "@/lib/validarPassword";
 
@@ -13,6 +14,8 @@ function ResetPasswordContent() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarConfirmPassword, setMostrarConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -67,28 +70,48 @@ function ResetPasswordContent() {
             <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">
               Contraseña
             </label>
-            <input
-              required
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 focus:border-purple-500 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl outline-none transition-all font-bold text-slate-900 dark:text-slate-100 text-sm shadow-sm dark:shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-500"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                required
+                type={mostrarPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-5 pr-12 py-3.5 bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 focus:border-purple-500 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl outline-none transition-all font-bold text-slate-900 dark:text-slate-100 text-sm shadow-sm dark:shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarPassword((visible) => !visible)}
+                className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+                aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {mostrarPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">
               Confirmar contraseña
             </label>
-            <input
-              required
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 focus:border-purple-500 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl outline-none transition-all font-bold text-slate-900 dark:text-slate-100 text-sm shadow-sm dark:shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-500"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                required
+                type={mostrarConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-5 pr-12 py-3.5 bg-white dark:bg-[#0f172a] border border-slate-300 dark:border-slate-700 focus:border-purple-500 hover:border-slate-400 dark:hover:border-slate-600 rounded-xl outline-none transition-all font-bold text-slate-900 dark:text-slate-100 text-sm shadow-sm dark:shadow-inner placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setMostrarConfirmPassword((visible) => !visible)}
+                className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-300 transition-colors cursor-pointer"
+                aria-label={mostrarConfirmPassword ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+              >
+                {mostrarConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           {error && (

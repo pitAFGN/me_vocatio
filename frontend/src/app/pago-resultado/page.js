@@ -57,7 +57,6 @@ function PagoResultadoContent() {
   const courseId = searchParams.get("course_id");
   const concept = searchParams.get("concept");
   const reference = searchParams.get("reference");
-  const wompiTransactionId = searchParams.get("id");
   const esPremium = concept === "premium";
 
   const [estado, setEstado] = useState("cargando");
@@ -80,10 +79,7 @@ function PagoResultadoContent() {
           return;
         }
 
-        const pagoActualizado = esPremium
-          ? await paymentService.reconsultarEstadoPorReferencia(reference, wompiTransactionId)
-          : await paymentService.reconsultarEstado(pago.id);
-
+        const pagoActualizado = await paymentService.reconsultarEstado(pago.id);
         if (esPremium && pagoActualizado.status === "pagado") {
           // El backend ya activó el plan; sincronizamos la interfaz.
           if (typeof window !== "undefined") {
@@ -100,7 +96,7 @@ function PagoResultadoContent() {
 
     if (esPremium ? reference : courseId) revisar();
     else setEstado("no-encontrado");
-  }, [courseId, concept, reference, esPremium, wompiTransactionId]);
+  }, [courseId, concept, reference, esPremium]);
 
   const info = esPremium ? TEXTOS_ESTADO_PREMIUM[estado] : TEXTOS_ESTADO[estado];
 
