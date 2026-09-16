@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export function middleware(request) {
+export function proxy(request) {
   // Las rutas que queremos proteger (que requieren iniciar sesión)
   const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias', '/mis-rutas', '/favoritos', '/configuracion', '/admin'];
   
@@ -42,4 +42,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
-
