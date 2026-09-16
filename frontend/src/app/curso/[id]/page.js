@@ -400,7 +400,7 @@ export default function CourseDetailPage() {
         {/* SECCIÓN DE VALORACIÓN Y COMENTARIOS AL FINAL DEL FLUJO */}
         <div className="mt-10 rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-950/20 via-slate-900/90 to-slate-950 p-6 shadow-2xl backdrop-blur-md">
           {reviewSubmitted ? (
-            <div className="text-center py-6 animate-in fade-in zoom-in-95 duration-300">
+            <div className="text-center py-6">
               <span className="text-4xl">🎉</span>
               <h3 className="text-lg font-black text-emerald-300 mt-2">¡Gracias por tu valoración!</h3>
               <p className="text-xs text-slate-300 mt-1 max-w-md mx-auto">

@@ -46,7 +46,7 @@ const PASOS = [
 
 export default function NosotrosPage() {
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-slate-100 via-slate-200 to-white dark:from-[#0b1329] dark:via-[#0f172a] dark:to-[#080d1a] text-slate-900 dark:text-slate-100 flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6 overflow-x-hidden transition-colors duration-300">
+        <main className="relative min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6 overflow-x-hidden transition-colors duration-300">
 
             <BackgroundStarsDiferidas />
 

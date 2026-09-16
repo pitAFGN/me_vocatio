@@ -40,7 +40,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-[#0b1329] text-slate-900 dark:text-white italic font-black uppercase tracking-widest transition-colors duration-300">
+        <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-[#0f172a] text-slate-900 dark:text-white italic font-black uppercase tracking-widest transition-colors duration-300">
           MeVocatio...
         </div>
       }
