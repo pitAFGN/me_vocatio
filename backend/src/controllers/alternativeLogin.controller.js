@@ -15,12 +15,18 @@ const googleSyncController = async (req, res) => {
       "Usuario";
 
     const { accessToken, refreshToken, user } = await authService.encontrarOCrearUsuarioGoogle(email, nombre);
+    
+    // Al acceder con Google, el correo est verificado. Revisamos logro.
+    const achievementService = require("../services/achievement.service");
+    const isNew = await achievementService.registrarVerificacionCorreo(user.id);
+    
     const sessionId = setAuthCookies(res, accessToken);
     await storeRefreshToken(sessionId, refreshToken, user.id);
 
     return res.status(200).json({
       message: "Sincronización con Google exitosa",
-      user
+      user,
+      newAchievements: isNew ? ["email_verified"] : []
     });
   } catch (error) {
     console.error("Error al procesar el login con Google:", error);

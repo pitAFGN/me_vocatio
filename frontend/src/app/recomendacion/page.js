@@ -243,17 +243,7 @@ function RecomendacionContent() {
       {/* Sidebar Nav Fijo del Dashboard */}
       <SidebarNav logout={logout} />
 
-      {/* Toast de Logros */}
-      <AchievementToast
-        achievementCodes={newAchievements}
-        onClose={() => {
-          setNewAchievements([]);
-          if (typeof window !== "undefined") {
-            window.localStorage.removeItem("mevocatio_new_achievements");
-            window.dispatchEvent(new Event("local-storage-update"));
-          }
-        }}
-      />
+
 
       {/* Modal de Copiloto IA */}
       <ResourceAiModal

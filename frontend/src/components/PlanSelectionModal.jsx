@@ -39,6 +39,9 @@ export default function PlanSelectionModal({ onSelect }) {
     pagarPremium({
       onExito: () => {
         mostrarAlerta("¡Pago exitoso!", "Has adquirido el Plan Premium.", "success");
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(["premium_member"]));
+        }
         onSelect("premium");
       },
       onError: (err) => {

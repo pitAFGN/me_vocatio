@@ -166,10 +166,7 @@ export default function ExecutiveDashboard() {
             onClose={() => setIsLevelUpModalOpen(false)} 
           />
 
-          <AchievementToast 
-            achievementCodes={newAchievements} 
-            onClose={() => setNewAchievements([])} 
-          />
+
 
         </div>
       </main>
