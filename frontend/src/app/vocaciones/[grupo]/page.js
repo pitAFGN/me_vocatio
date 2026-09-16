@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { VOCATION_GROUPS, getVocationsForGroup } from "@/lib/vocationGroups";
 import { obtenerChipDemanda, obtenerChipNivel } from "@/lib/professionThemes";
+import FavoriteVocationButton from "@/components/FavoriteVocationButton";
 
 export function generateStaticParams() {
   return VOCATION_GROUPS.map((group) => ({ grupo: group.id }));
@@ -135,6 +136,7 @@ export default async function VocacionesPorCategoria({ params }) {
                         {vocacion.area}
                       </span>
                     </div>
+                    <FavoriteVocationButton vocacion={vocacion} />
                   </div>
 
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">

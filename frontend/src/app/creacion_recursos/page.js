@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import PlanSelector from "@/components/creacion_recursos/PlanSelector";
 import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
@@ -12,6 +12,7 @@ import AnalyticsPanel from "@/components/creacion_recursos/AnalyticsPanel";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
 import Toast from "@/components/Toast";
 import ResourceModal from "@/components/creacion_recursos/ResourceModal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 const FREE_RESOURCE_LIMIT = 3;
 
@@ -60,6 +61,8 @@ export default function CreacionRecursosPage() {
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [editingResource, setEditingResource] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [courseStatus, setCourseStatus] = useState("published");
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, courseId: null });
 
   // Form States
   const [recursos, setRecursos] = useState([]);
@@ -74,49 +77,30 @@ export default function CreacionRecursosPage() {
     categoria: "Desarrollo",
   });
 
-  // Cargar mis cursos para poder editarlos
-  useEffect(() => {
-    const fetchMisCursos = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/mios`,
-          {
-            credentials: "include",
-          }
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          setMyCourses(data);
-        }
-      } catch (e) {
-        console.error("Error fetching courses", e);
-      }
-    };
-
-    const handlePublicarYPagar = () => {
-      setMensaje(null);
-      // El backend espera title/description (validación de /api/pagos/crear),
-      // no nombre/descripcion como se usan en el formulario.
-      pagarCurso(
+  const fetchMisCursos = async () => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/mios`,
         {
-          title: curso.nombre,
-          description: curso.descripcion,
-          category: curso.category,
-          level: curso.level,
-          modality: curso.modality,
-          duration_hours: curso.duration_hours ? Number(curso.duration_hours) : undefined,
-          price: curso.price,
-        },
-        {
-          onExito: (transaccion) => setMensaje({ tipo: "ok", texto: "Pago procesado exitosamente." }),
-          onError: (err) => setMensaje({ tipo: "error", texto: err }),
-          onCerrado: () => setMensaje({ tipo: "info", texto: "Se cerró el widget de pago." })
+          credentials: "include",
         }
       );
-    };
 
-    const handleCargarCursoParaEditar = async (courseId) => {
+      if (res.ok) {
+        const data = await res.json();
+        setMyCourses(data);
+      }
+    } catch (e) {
+      console.error("Error fetching courses", e);
+    }
+  };
+
+  // Cargar mis cursos para poder editarlos
+  useEffect(() => {
+    fetchMisCursos();
+  }, []);
+
+  const handleCargarCursoParaEditar = async (courseId) => {
       if (!courseId) {
         setEditingCourseId(null);
         setCurso({ nombre: "", url: "", descripcion: "" });
@@ -125,6 +109,7 @@ export default function CreacionRecursosPage() {
           "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950"
         );
         setSelectedBadges(["Elite"]);
+        setCourseStatus("published");
         return;
       }
 
@@ -139,6 +124,8 @@ export default function CreacionRecursosPage() {
           const data = await res.json();
 
           setEditingCourseId(data.id);
+          
+          setCourseStatus(data.status === "draft" ? "draft" : "published");
 
           setCurso({
             nombre: data.title || "",
@@ -261,7 +248,7 @@ export default function CreacionRecursosPage() {
           video_url: r.url || "",
           is_active: r.isActive
         })),
-        status: "published"
+        status: courseStatus
       };
 
       try {
@@ -284,11 +271,45 @@ export default function CreacionRecursosPage() {
           return;
         }
 
-        setToast({ message: editingCourseId ? "¡Curso actualizado exitosamente!" : "¡Curso publicado exitosamente!", type: "success" });
+        const msg = courseStatus === "draft" ? "borrador guardado" : (editingCourseId ? "actualizado" : "publicado");
+        setToast({ message: `¡Curso ${msg} exitosamente!`, type: "success" });
+        
+        if (!editingCourseId) {
+            // Recargar lista si era nuevo
+            fetchMisCursos();
+        }
 
       } catch (error) {
         console.error("Fetch error:", error);
         setToast({ message: "Hubo un error de conexión.", type: "error" });
+      }
+    };
+
+    const handleEliminarCurso = async (courseIdToDelete) => {
+      const id = courseIdToDelete || editingCourseId;
+      if (!id) return;
+
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${id}`;
+        const res = await fetch(url, {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          setToast({ message: `Error: ${errData.error || errData.message || "No se pudo eliminar"}`, type: "error" });
+          return;
+        }
+
+        setToast({ message: "Curso eliminado correctamente", type: "success" });
+        setMyCourses((prev) => prev.filter(c => c.id !== id));
+        if (editingCourseId === id) {
+          handleCargarCursoParaEditar("");
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setToast({ message: "Hubo un error de conexión al eliminar.", type: "error" });
       }
     };
 
@@ -299,6 +320,14 @@ export default function CreacionRecursosPage() {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast({ message: "", type: "success" })}
+        />
+
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal({ isOpen: false, courseId: null })}
+          onConfirm={() => handleEliminarCurso(confirmModal.courseId)}
+          title="Eliminar curso"
+          message="¿Estás seguro de que quieres eliminar este curso? Esta acción no se puede deshacer y borrará todo el progreso de los alumnos inscritos."
         />
 
         {/* Resource Creation Modal */}
@@ -358,16 +387,29 @@ export default function CreacionRecursosPage() {
                             Mis Cursos
                           </div>
                           {myCourses.map(course => (
-                            <button
-                              key={course.id}
-                              onClick={() => {
-                                handleCargarCursoParaEditar(course.id);
-                                setIsDropdownOpen(false);
-                              }}
-                              className={`w-full text-left px-4 py-2.5 text-xs transition-colors truncate ${editingCourseId === course.id ? "bg-violet-600/20 text-violet-700 dark:text-violet-300 border-l-2 border-violet-500" : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-l-2 border-transparent"}`}
-                            >
-                              {course.title}
-                            </button>
+                            <div key={course.id} className={`group flex items-center w-full transition-colors border-l-2 ${editingCourseId === course.id ? "bg-violet-600/20 border-violet-500" : "border-transparent hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
+                              <button
+                                onClick={() => {
+                                  handleCargarCursoParaEditar(course.id);
+                                  setIsDropdownOpen(false);
+                                }}
+                                className={`flex-1 text-left px-4 py-2.5 text-xs truncate ${editingCourseId === course.id ? "text-violet-700 dark:text-violet-300" : "text-slate-700 dark:text-slate-300"}`}
+                              >
+                                {course.title}
+                                {course.status === 'draft' && <span className="ml-2 text-[9px] font-bold uppercase text-amber-500">(Borrador)</span>}
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsDropdownOpen(false);
+                                  setConfirmModal({ isOpen: true, courseId: course.id });
+                                }}
+                                className="mr-2 p-1.5 text-slate-400 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all"
+                                title="Eliminar curso"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -385,10 +427,18 @@ export default function CreacionRecursosPage() {
               </Link>
 
               <button
-                onClick={handleGuardarCurso}
+                onClick={() => setCourseStatus(prev => prev === "published" ? "draft" : "published")}
+                className={`rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] border active:scale-95 transition-all text-center ${courseStatus === "draft" ? "bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700/50 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50" : "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50"}`}
+                title="Haz clic para cambiar el estado"
+              >
+                {courseStatus === "draft" ? "Estado: Borrador" : "Estado: Activo"}
+              </button>
+
+              <button
+                onClick={() => handleGuardarCurso()}
                 className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-lg shadow-violet-500/20 hover:from-violet-500 hover:to-indigo-500 hover:shadow-violet-500/40 active:scale-95 transition-all text-center"
               >
-                {editingCourseId ? "Actualizar Curso" : "Publicar Curso"}
+                {editingCourseId ? "Actualizar Curso" : "Guardar Curso"}
               </button>
             </div>
           </div>
@@ -452,5 +502,4 @@ export default function CreacionRecursosPage() {
         )}
       </main>
     );
-  })
 }

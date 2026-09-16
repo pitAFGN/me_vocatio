@@ -171,6 +171,10 @@ const reglasCrearCurso = [
     .optional({ nullable: true })
     .isInt({ min: 1, max: 1000 }).withMessage("La duración debe ser un número de horas entre 1 y 1000."),
 
+  body("status")
+    .optional()
+    .isIn(["activo", "inactivo", "published", "draft"]).withMessage("El estado debe ser 'activo', 'inactivo', 'published' o 'draft'."),
+
   validar,
 ];
 
