@@ -17,6 +17,7 @@ export default function Configuracion() {
   const [email, setEmail] = useState("");
   const [notificaciones, setNotificaciones] = useState(true);
   const [guardado, setGuardado] = useState(false);
+  const [guardandoNombre, setGuardandoNombre] = useState(false);
   const [userLoaded, setUserLoaded] = useState(false);
   const [enviandoReset, setEnviandoReset] = useState(false);
   const [resetEnviado, setResetEnviado] = useState(false);
@@ -49,10 +50,28 @@ export default function Configuracion() {
     );
   }
 
-  const handleGuardar = (e) => {
+  const handleGuardar = async (e) => {
     e.preventDefault();
-    setGuardado(true);
-    setTimeout(() => setGuardado(false), 2500);
+    if (!nombre.trim() || guardandoNombre) return;
+
+    setGuardandoNombre(true);
+    try {
+      const { authService } = await import("@/services/auth.service");
+      const response = await authService.updateName(nombre);
+      setNombre(response.user.name);
+      setGuardado(true);
+      setTimeout(() => setGuardado(false), 2500);
+    } catch (error) {
+      const { default: Swal } = await import("sweetalert2");
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo guardar",
+        text: error.message || "Intenta de nuevo más tarde.",
+        confirmButtonColor: "#4f46e5",
+      });
+    } finally {
+      setGuardandoNombre(false);
+    }
   };
 
   const cardBase =
@@ -64,11 +83,22 @@ export default function Configuracion() {
     setResetEnviado(false);
     try {
       await forgotPassword(email);
-      setResetEnviado(true);
-      setTimeout(() => setResetEnviado(false), 6000);
+      const { default: Swal } = await import("sweetalert2");
+      await Swal.fire({
+        icon: "success",
+        title: "¡Correo enviado!",
+        text: "Revisa tu bandeja de entrada para restablecer tu contraseña.",
+        confirmButtonColor: "#8b5cf6",
+      });
     } catch (error) {
       console.error("Error enviando correo de recuperación:", error);
-      alert("No se pudo enviar el correo. Intenta de nuevo en unos minutos.");
+      const { default: Swal } = await import("sweetalert2");
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "No se pudo enviar el correo",
+        confirmButtonColor: "#8b5cf6",
+      });
     } finally {
       setEnviandoReset(false);
     }
@@ -137,7 +167,7 @@ export default function Configuracion() {
                 type="submit"
                 className="w-full py-3.5 font-bold rounded-xl shadow-lg transition-all transform uppercase text-xs tracking-wider bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 text-white active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer shadow-indigo-600/30"
               >
-                <Save className="w-4 h-4" /> {guardado ? "¡Guardado!" : "Guardar Cambios"}
+                <Save className="w-4 h-4" /> {guardandoNombre ? "Guardando..." : guardado ? "¡Guardado!" : "Guardar Cambios"}
               </button>
             </form>
           </section>
@@ -179,14 +209,16 @@ export default function Configuracion() {
                   <ShieldCheck className="w-4 h-4" /> Seguridad
                 </h2>
                 <button
-                  onClick={() => router.push("/reset-password")}
+                  type="button"
+                  onClick={handleCambiarContrasena}
+                  disabled={enviandoReset || !email}
                   className="w-full flex items-center justify-between px-4 py-3.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-pointer group"
                 >
                   <span className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
                     <Lock className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Cambiar Contraseña
                   </span>
                   <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
-                    Actualizar <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                    {enviandoReset ? "Enviando..." : "Actualizar"} <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                   </span>
                 </button>
               </div>

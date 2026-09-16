@@ -78,6 +78,17 @@ const me = async (req, res) => {
   }
 };
 
+const actualizarNombre = async (req, res) => {
+  try {
+    const usuario = await authService.actualizarNombre(req.user.id, req.body.name);
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
+    res.json({ user: usuario });
+  } catch (error) {
+    console.error("Error actualizando nombre:", error);
+    res.status(500).json({ error: "No se pudo actualizar el nombre" });
+  }
+};
+
 const logout = async (req, res) => {
   const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
 
@@ -176,5 +187,6 @@ module.exports = {
   verifyEmail,
   resendVerification,
   me,
+  actualizarNombre,
   logout,
 };

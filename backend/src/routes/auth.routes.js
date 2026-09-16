@@ -16,6 +16,7 @@ const {
 } = require("../middlewares/rateLimiter");
 const {
   reglasRegister,
+  reglasActualizarNombre,
   reglasLogin,
   reglasForgotPassword,
   reglasResetPassword,
@@ -75,6 +76,7 @@ router.post("/register", registerLimiter, registerEmailLimiter, reglasRegister, 
 router.post("/login", loginLimiter, reglasLogin, authController.login);
 
 router.get("/me", authenticateToken, authController.me);
+router.patch("/me", authenticateToken, reglasActualizarNombre, authController.actualizarNombre);
 router.post("/refresh", authController.refreshToken);
 router.post("/logout", authController.logout);
 

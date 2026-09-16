@@ -84,6 +84,18 @@ export const authService = {
     return obtenerUsuario();
   },
 
+  async updateName(name) {
+    const res = await fetch(`${API_URL}/api/auth/me`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || "No se pudo actualizar el nombre");
+    return data;
+  },
+
   async refresh() {
     const res = await fetchConTimeout(`${API_URL}/api/auth/refresh`, {
       method: "POST",

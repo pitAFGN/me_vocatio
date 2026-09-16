@@ -55,8 +55,8 @@ const getRedis = async () => {
   }
 };
 
-const storeRefreshToken = async (sessionId, refreshToken) => {
-  if (!sessionId || !refreshToken) {
+const storeRefreshToken = async (sessionId, refreshToken, userId) => {
+  if (!sessionId || !refreshToken || !userId) {
     return null;
   }
 

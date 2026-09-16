@@ -20,6 +20,15 @@ const normalizarNombreRegistro = (name) => {
     .join(" ");
 };
 
+const actualizarNombre = async (userId, name) => {
+  const nombreNormalizado = normalizarNombreRegistro(name);
+  const resultado = await pool.query(
+    "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, plan, role",
+    [nombreNormalizado, userId]
+  );
+  return resultado.rows[0] || null;
+};
+
 /* ─────────────────────────────────────────
    REGISTER
    Respuesta genérica (anti-enumeración): no revela si el correo ya
@@ -389,6 +398,7 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
 // Exportamos todas las funciones juntas de manera correcta
 module.exports = {
   register,
+  actualizarNombre,
   normalizarNombreRegistro,
   login,
   forgotPassword,

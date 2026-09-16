@@ -69,6 +69,8 @@ const reglasRegister = [
   validar,
 ];
 
+const reglasActualizarNombre = [reglasNombre, validar];
+
 const reglasLogin = [
   body("email")
     .trim()
@@ -254,6 +256,7 @@ const reglasCrearPago = [
 
 module.exports = {
   reglasRegister,
+  reglasActualizarNombre,
   reglasLogin,
   reglasForgotPassword,
   reglasResetPassword,
