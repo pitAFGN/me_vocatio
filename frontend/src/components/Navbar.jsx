@@ -32,7 +32,7 @@ export default function Navbar() {
     return (
       <nav className="fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-2 sm:py-2.5 flex justify-between items-center border-b shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-2xl backdrop-blur-xl bg-white/80 dark:bg-gradient-to-r dark:from-[#1e293b] dark:via-[#0f172a] dark:to-[#0b1329] border-slate-200/60 dark:border-slate-800/80 transition-colors duration-500">
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
               <Image
                 src="/Layout 4.png"
@@ -45,7 +45,7 @@ export default function Navbar() {
             <span className="text-lg sm:text-xl font-bold tracking-tight text-[#0f172a] dark:text-white transition-colors truncate">
               MeVocatio
             </span>
-          </Link>
+          </div>
         </div>
       </nav>
     );
@@ -61,7 +61,7 @@ export default function Navbar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+        <div className="flex items-center gap-2 sm:gap-3 group">
           <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 active:scale-95 shrink-0">
             <Image
               src="/Layout 4.png"
@@ -78,7 +78,7 @@ export default function Navbar() {
           >
             MeVocatio
           </span>
-        </Link>
+        </div>
       </div>
 
       {/* Botones derecha */}
