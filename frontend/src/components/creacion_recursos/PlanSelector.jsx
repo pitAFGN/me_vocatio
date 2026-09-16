@@ -24,7 +24,7 @@ export default function PlanSelector({ plan, setPlan }) {
                 className={`rounded-lg px-4 py-2 text-sm font-bold transition-all ${
                   active
                     ? "bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.35)]"
-                    : "text-slate-600 dark:text-slate-300 hover:text-white"
+                    : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 {option.label}

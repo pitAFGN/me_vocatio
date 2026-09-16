@@ -1,32 +1,32 @@
 export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade }) {
   const inputClass =
-    "w-full rounded-xl border border-slate-700 bg-[#0f172a] px-4 py-3 text-sm font-medium text-white outline-none transition focus:border-violet-500";
+    "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none transition focus:border-violet-500 dark:border-slate-700 dark:bg-[#0f172a] dark:text-white dark:placeholder-slate-500";
 
   return (
     <section
       className={`rounded-3xl border p-5 transition-all ${
         isPremium
-          ? "border-violet-500/30 bg-slate-900/80"
-          : "border-slate-800 bg-slate-900/50 opacity-70"
+          ? "border-violet-500/30 bg-white dark:bg-slate-900/80"
+          : "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50 opacity-70"
       }`}
     >
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-300/80">
             Curso
           </p>
-          <h2 className="mt-2 text-xl font-black text-white">Datos básicos</h2>
+          <h2 className="mt-2 text-xl font-black text-slate-900 dark:text-white">Datos básicos</h2>
         </div>
 
         {!isPremium && (
           <div className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200">
-            🔒 Premium
+            <span className="text-amber-700 dark:text-amber-200">🔒 Premium</span>
           </div>
         )}
       </div>
 
       {!isPremium && (
-        <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm font-medium text-amber-100">
+        <div className="mb-5 rounded-2xl border border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4 text-sm font-medium text-amber-800 dark:text-amber-100">
             🔒 La creación de cursos es exclusiva del Plan Premium. Actualiza tu plan para crear y publicar cursos.
         </div>
       )}
@@ -43,7 +43,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-600 dark:text-slate-400">
             Nombre del curso
             <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 5 caracteres)</span>
           </label>
@@ -56,7 +56,7 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
           />
         </div>
         <div>
-          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-600 dark:text-slate-400">
             Descripción breve
             <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 20 caracteres)</span>
           </label>
