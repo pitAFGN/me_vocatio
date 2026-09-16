@@ -10,7 +10,7 @@ export default function CourseCustomizationPanel({
 }) {
   return (
     <section
-      className={`rounded-3xl border p-5 transition-all transition-colors duration-300 ${
+      className={`rounded-3xl border p-5 transition-colors duration-300 ${
         isPremium
           ? "border-violet-300 dark:border-violet-500/30 bg-white dark:bg-slate-900/80"
           : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 opacity-70"

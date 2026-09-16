@@ -44,7 +44,7 @@ export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNu
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[#02040a]/80 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-violet-500/30 bg-[#0a0b14] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15)] animate-in zoom-in-95 fade-in duration-200">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-violet-500/30 bg-[#0a0b14] p-6 shadow-[0_0_40px_rgba(139,92,246,0.15)]">
         
         <div className="flex items-center justify-between mb-6">
           <div>

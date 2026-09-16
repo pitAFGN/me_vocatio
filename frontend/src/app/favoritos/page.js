@@ -42,13 +42,13 @@ export default function FavoritosPage() {
                         </p>
                     </div>
 
-                    {/* Botón para volver al Dashboard */}
+                    {/* Botón Volver */}
                     <Link
                         href="/dashboard"
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all w-fit cursor-pointer"
                     >
                         <ArrowLeft className="w-4 h-4 text-violet-500 dark:text-violet-400" />
-                        <span>Volver al Dashboard</span>
+                        <span>Volver</span>
                     </Link>
                 </div>
 

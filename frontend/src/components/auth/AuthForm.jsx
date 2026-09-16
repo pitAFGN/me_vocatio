@@ -125,7 +125,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       if (msg.includes("Credenciales")) setErrorGeneral("Email o contraseña incorrectos.");
       else if (msg.includes("registrado")) setErrorGeneral("Este email ya tiene una cuenta. Inicia sesión.");
       else if (msg.includes("verificar tu correo") || msg.toLowerCase().includes("confirm")) {
-        Swal.fire({
+        mostrarAlerta({
           text: "Tenemos tu correo, para poder ingresar confírmalo primero.",
           icon: "warning",
           confirmButtonColor: "#8b5cf6"
@@ -319,7 +319,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
               value={formData.nombre}
               onChange={(e) => handleChange("nombre", e.target.value.slice(0, 60))}
               className={inputClass("nombre")}
-              placeholder="JESUS TORRES"
+              placeholder="Tu nombre completo"
               type="text"
               autoComplete="name"
             />
@@ -335,7 +335,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
             value={formData.email}
             onChange={(e) => handleChange("email", e.target.value)}
             className={inputClass("email")}
-            placeholder="NAME@COMPANY.COM"
+            placeholder="tu@correo.com"
             type="email"
             autoComplete="email"
           />

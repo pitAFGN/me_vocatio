@@ -340,7 +340,7 @@ function RecomendacionContent() {
           </header>
 
           {/* Top Hero Banner: AI Mentor Capsule (Opción 2) */}
-<div className="relative rounded-3xl border border-violet-200 dark:border-violet-500/30 bg-gradient-to-r from-white via-slate-50 to-white dark:from-[#0a0d22]/90 dark:via-[#0e122b]/90 dark:to-[#080a1a]/90 p-6 sm:p-7 shadow-xl dark:shadow-2xl overflow-hidden">
+          <div className="relative rounded-3xl border border-violet-200 dark:border-violet-500/30 bg-gradient-to-r from-white via-slate-50 to-white dark:from-[#0a0d22]/90 dark:via-[#0e122b]/90 dark:to-[#080a1a]/90 p-6 sm:p-7 shadow-xl dark:shadow-2xl overflow-hidden">
             {/* Glow Decorativo */}
             <div className="absolute -top-20 -left-20 w-48 h-48 rounded-full pointer-events-none glow-ambient-sky" />
             <div className="absolute -bottom-20 -right-20 w-48 h-48 rounded-full pointer-events-none glow-ambient-violet" />
@@ -384,7 +384,7 @@ function RecomendacionContent() {
                     <Compass className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                     <span>Enfoque Pedagógico de Gemini:</span>
                   </div>
-<p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
                     &ldquo;{paginasRecursos[paginaActualIndex].resumen_enfoque}&rdquo;
                   </p>
                 </div>

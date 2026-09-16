@@ -13,7 +13,7 @@ export default function Toast({ message, type = "success", onClose }) {
   if (!message) return null;
 
   return (
-    <div className="fixed top-24 right-8 z-[100] animate-in slide-in-from-right-8 fade-in duration-300">
+    <div className="fixed top-24 right-8 z-[100]">
       <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-xl shadow-2xl ${
         type === 'success' 
           ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.2)]' 
@@ -21,7 +21,7 @@ export default function Toast({ message, type = "success", onClose }) {
       }`}>
         {type === 'success' ? <CheckCircle2 className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-red-400" />}
         <p className="text-sm font-semibold">{message}</p>
-        <button onClick={onClose} className="ml-4 text-white/50 hover:text-white transition-colors">
+        <button onClick={onClose} className="ml-4 text-white/50 hover:text-white transition-colors cursor-pointer">
           <X className="w-4 h-4" />
         </button>
       </div>

@@ -139,7 +139,7 @@ export default function ExecutiveDashboard() {
           <header className="flex justify-between items-start gap-4 mb-8 sm:mb-10">
             <div className="min-w-0">
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-1">
-                Welcome,
+                Bienvenido,
               </h1>
               <p className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 dark:from-indigo-200 dark:via-purple-300 dark:to-indigo-400 bg-clip-text text-transparent truncate">
                 {profileData.name}

@@ -203,7 +203,7 @@ export default function ResourceAiModal({
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400">
                   Gemini Copilot
                 </span>
-                <span className="px-2 py-0.2 rounded-full bg-violet-500/20 border border-violet-500/40 text-[9px] font-bold text-violet-200">
+                <span className="px-2 py-0.5 rounded-full bg-violet-500/20 border border-violet-500/40 text-[9px] font-bold text-violet-200">
                   PREMIUM
                 </span>
               </div>
@@ -271,7 +271,7 @@ export default function ResourceAiModal({
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
               {loading && (
                 <div className="py-16 text-center space-y-3">
-                  <div className="w-10 h-10 border-3 border-violet-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                  <div className="w-10 h-10 border-2 border-violet-400 border-t-transparent rounded-full animate-spin mx-auto" />
                   <p className="text-xs sm:text-sm font-medium text-violet-300">
                     Gemini está leyendo y sintetizando el contenido del recurso...
                   </p>

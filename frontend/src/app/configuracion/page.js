@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Settings, User, Lock, Bell, LogOut, Save, ShieldCheck, ArrowLeft
+  Settings, User, Lock, Bell, LogOut, Save, ShieldCheck, ArrowLeft, ChevronRight
 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,7 +39,7 @@ export default function Configuracion() {
 
   if (loading || !userLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0a0b14] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#040613] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
         Cargando perfil...
       </div>
     );
@@ -51,102 +51,140 @@ export default function Configuracion() {
     setTimeout(() => setGuardado(false), 2500);
   };
 
+  const cardBase =
+    "bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-2xl shadow-xl";
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0b14] text-slate-900 dark:text-slate-100 p-6 md:p-10 transition-colors duration-300">
-      <main className="max-w-3xl mx-auto w-full pt-12">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 relative overflow-x-hidden transition-colors duration-300">
+      {/* Ambient Glows a juego con Rutas de Aprendizaje */}
+      <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none bg-indigo-500/10 blur-[100px]" />
+      <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none bg-purple-500/10 blur-[100px]" />
 
-        {/* Botón de retorno al Dashboard */}
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 hover:border-purple-500/50 hover:bg-purple-600/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm"
-        >
-          <ArrowLeft className="w-4 h-4" /> Volver
-        </button>
+      <main className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
+        {/* Header compacto */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+          <div>
+            <span className="text-[10px] font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block">
+              Mi Cuenta
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+              <Settings className="w-6 h-6 text-indigo-500 dark:text-indigo-400" /> Configuración
+            </h1>
+          </div>
 
-        <header className="mb-10 border-b border-slate-200 dark:border-white/10 pb-6">
-          <span className="text-[10px] font-extrabold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block mb-1">
-            Mi Cuenta
-          </span>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-            <Settings className="w-7 h-7 text-indigo-500 dark:text-indigo-400" /> Configuración
-          </h1>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-indigo-500/50 hover:bg-indigo-600/20 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-start sm:self-auto"
+          >
+            <ArrowLeft className="w-4 h-4" /> Volver
+          </button>
         </header>
 
-        {/* Tarjeta de perfil */}
-        <section className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl p-8 rounded-2xl shadow-xl mb-6 flex items-center gap-5">
-          <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-950/80 border border-indigo-300 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-300 shadow-inner shrink-0">
-            <User className="w-8 h-8 opacity-90" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">{nombre}</h3>
-            <p className="text-indigo-500 dark:text-indigo-400 font-extrabold uppercase text-[10px] tracking-wider">Estudiante ADSO</p>
-          </div>
-        </section>
+        {/* Grid de 2 columnas: todo visible, sin scroll en escritorio */}
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr] items-start">
 
-        {/* Formulario de datos */}
-        <form onSubmit={handleGuardar} className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl p-8 rounded-2xl shadow-xl mb-6 space-y-5">
-          <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-2">Datos Personales</h3>
-
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1 flex items-center gap-1.5">
-              <User className="w-3 h-3 text-indigo-500 dark:text-indigo-400" /> Nombre Completo
-            </label>
-            <input
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 text-sm shadow-inner focus:border-indigo-500/50"
-              type="text"
-            />
-          </div>
-
-          <div className="flex items-center justify-between bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-5 py-4">
-            <div className="flex items-center gap-3">
-              <Bell className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Notificaciones de progreso</span>
+          {/* ===== COLUMNA IZQUIERDA: PERFIL ===== */}
+          <section className={`${cardBase} p-7 sm:p-8`}>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-950/80 border border-indigo-300 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-300 shadow-inner shrink-0">
+                <User className="w-8 h-8 opacity-90" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">{nombre}</h3>
+                <p className="text-indigo-500 dark:text-indigo-400 font-extrabold uppercase text-[10px] tracking-wider">Estudiante ADSO</p>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setNotificaciones(!notificaciones)}
-              className={`w-11 h-6 rounded-full transition-all relative ${notificaciones ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
-            >
-              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${notificaciones ? "left-5" : "left-0.5"}`}></span>
-            </button>
+
+            <form onSubmit={handleGuardar} className="space-y-4">
+              <h4 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider flex items-center gap-1.5">
+                <User className="w-3 h-3" /> Datos Personales
+              </h4>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1 flex items-center gap-1.5">
+                  <User className="w-3 h-3 text-indigo-500 dark:text-indigo-400" /> Nombre Completo
+                </label>
+                <input
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  className="w-full px-5 py-3.5 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 text-sm shadow-inner focus:border-indigo-500/50"
+                  type="text"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 font-bold rounded-xl shadow-lg transition-all transform uppercase text-xs tracking-wider bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 text-white active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer shadow-indigo-600/30"
+              >
+                <Save className="w-4 h-4" /> {guardado ? "¡Guardado!" : "Guardar Cambios"}
+              </button>
+            </form>
+          </section>
+
+          {/* ===== COLUMNA DERECHA: NOTIFICACIONES / SEGURIDAD / SESIÓN ===== */}
+          <div className="space-y-6">
+
+            {/* Notificaciones */}
+            <section className={cardBase}>
+              <div className="p-5 sm:p-6">
+                <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-3 flex items-center gap-2">
+                  <Bell className="w-4 h-4" /> Notificaciones
+                </h3>
+                <div className="flex items-center justify-between bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <Bell className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                    <div>
+                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Notificaciones de progreso</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Avisos de avance en tus rutas e insignias</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNotificaciones(!notificaciones)}
+                    aria-pressed={notificaciones}
+                    className={`w-11 h-6 rounded-full transition-all relative shrink-0 cursor-pointer ${notificaciones ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
+                  >
+                    <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${notificaciones ? "left-5" : "left-0.5"}`}></span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {/* Seguridad */}
+            <section className={cardBase}>
+              <div className="p-5 sm:p-6">
+                <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-3 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> Seguridad
+                </h3>
+                <button
+                  onClick={() => router.push("/reset-password")}
+                  className="w-full flex items-center justify-between px-4 py-3.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-pointer group"
+                >
+                  <span className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    <Lock className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Cambiar Contraseña
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
+                    Actualizar <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </button>
+              </div>
+            </section>
+
+            {/* Sesión */}
+            <section className={`${cardBase} p-5 sm:p-6`}>
+              <h3 className="text-xs font-bold uppercase text-red-500 dark:text-red-400 tracking-wider mb-3 flex items-center gap-2">
+                <LogOut className="w-4 h-4" /> Sesión
+              </h3>
+              <button
+                onClick={logout}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-500/30 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg"
+              >
+                <LogOut className="w-4 h-4" /> Cerrar Sesión
+              </button>
+            </section>
+
           </div>
-
-          <button
-            type="submit"
-            className="w-full py-4 font-bold rounded-xl shadow-lg transition-all transform uppercase text-xs tracking-wider bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-500 hover:to-indigo-700 text-white active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer shadow-indigo-600/30"
-          >
-            <Save className="w-4 h-4" /> {guardado ? "¡Guardado!" : "Guardar Cambios"}
-          </button>
-        </form>
-
-        {/* Seguridad */}
-        <section className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl p-8 rounded-2xl shadow-xl mb-6">
-          <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-4 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Seguridad
-          </h3>
-          <button
-            onClick={() => router.push("/reset-password")}
-            className="w-full flex items-center justify-between px-5 py-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-pointer"
-          >
-            <span className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
-              <Lock className="w-4 h-4 text-indigo-500 dark:text-indigo-400" /> Cambiar Contraseña
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">Actualizar</span>
-          </button>
-        </section>
-
-        {/* Zona de salida */}
-        <section className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl p-6 rounded-2xl shadow-xl">
-          <button
-            onClick={logout}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-500/30 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg"
-          >
-            <LogOut className="w-4 h-4" /> Cerrar Sesión
-          </button>
-        </section>
-
+        </div>
       </main>
     </div>
   );
