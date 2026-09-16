@@ -42,6 +42,7 @@ function RecomendacionContent() {
   const profesionURL = searchParams.get("profesion") || searchParams.get("vocacion") || "Desarrollo de Software";
   const nivelURL = searchParams.get("nivel") || "Principiante";
   const evaluationIdURL = searchParams.get("evaluation_id") || null;
+  const puntajeURL = searchParams.get("puntaje") || null;
 
   // Estado del Plan (free vs premium)
   const isPremium = user?.plan === "premium";
@@ -334,13 +335,18 @@ function RecomendacionContent() {
               {/* Fila 1: Título Vocación, Nivel y Botón de Copiloto */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className="text-[10px] font-black uppercase tracking-[0.25em] text-sky-600 dark:text-sky-400">
                       Misión de Aprendizaje • Bloque {paginasRecursos.length > 0 ? paginaActualIndex + 1 : 1}
                     </span>
                     <span className="px-2.5 py-0.5 rounded-full bg-violet-500/10 dark:bg-violet-500/20 border border-violet-500/20 dark:border-violet-500/40 text-[9px] font-bold text-violet-700 dark:text-violet-300 uppercase tracking-wider">
                       Nivel {nivelURL}
                     </span>
+                    {puntajeURL && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/20 dark:border-amber-500/40 text-[9px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                        {puntajeURL}% Acierto
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {profesionURL}
