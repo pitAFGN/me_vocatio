@@ -21,7 +21,13 @@ export function useAuth() {
   };
 
   const googleLogin = async (email, name, accessToken) => {
-    await authService.googleSync(email, name, accessToken);
+    const data = await authService.googleSync(email, name, accessToken);
+
+    if (data.newAchievements && data.newAchievements.length > 0) {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.newAchievements));
+      }
+    }
 
     window.dispatchEvent(new Event("local-storage-update"));
 

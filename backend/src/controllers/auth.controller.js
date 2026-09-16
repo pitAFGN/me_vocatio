@@ -131,10 +131,12 @@ const verifyEmail = async (req, res) => {
 
   try {
     const resultado = await authService.verifyEmail(token);
-    await achievementService.registrarVerificacionCorreo(resultado.userId);
+    const isNew = await achievementService.registrarVerificacionCorreo(resultado.userId);
+    
     res.json({
       message: "Correo verificado exitosamente. Ya puedes iniciar sesión.",
       email: resultado.email,
+      newAchievements: isNew ? ["email_verified"] : []
     });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });

@@ -27,6 +27,12 @@ function VerifyEmailContent() {
         const data = await verifyEmail(token);
         setStatus("success");
         setMessage(data.message || "Correo verificado exitosamente.");
+        if (data.newAchievements && data.newAchievements.length > 0) {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.newAchievements));
+            window.dispatchEvent(new Event("local-storage-update"));
+          }
+        }
       } catch (err) {
         setStatus("error");
         setMessage(err.message || "El enlace es inválido o ya expiró.");

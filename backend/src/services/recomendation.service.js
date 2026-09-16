@@ -164,9 +164,40 @@ const evaluarTest = async (testId, userId, respuestas = []) => {
     [evaluation.rows[0].id, testId]
   );
   await achievementService.incrementarProgreso(userId, "diagnostics_completed");
+  
   const unlocked = await achievementService.evaluarLogros(userId);
+  
+  if (puntaje >= 80) {
+    const newlyUnlocked = await achievementService.registrarLogro(userId, "focused");
+    if (newlyUnlocked) unlocked.push("focused");
+  }
 
-  return { evaluation_id: evaluation.rows[0].id, nivel, puntaje, total_preguntas: answerKey.length, unlocked };
+  // Explorador Vocacional (3 vocaciones distintas)
+  const distinctEvals = await pool.query(
+    "SELECT COUNT(DISTINCT profession_title) as count FROM evaluations WHERE user_id = $1", 
+    [userId]
+  );
+  if (parseInt(distinctEvals.rows[0].count, 10) >= 3) {
+    const newlyUnlocked = await achievementService.registrarLogro(userId, "explorer");
+    if (newlyUnlocked) unlocked.push("explorer");
+  }
+  
+  const xpService = require("./xp.service");
+  const xpResult = await xpService.grantXp(userId, xpService.XP_ACTIONS.quiz_completed);
+  
+  if (xpResult && xpResult.unlockedAchievements?.length > 0) {
+    unlocked.push(...xpResult.unlockedAchievements);
+  }
+
+  return { 
+    evaluation_id: evaluation.rows[0].id, 
+    nivel, 
+    puntaje, 
+    total_preguntas: answerKey.length, 
+    unlocked,
+    xpAdded: xpService.XP_ACTIONS.quiz_completed,
+    xpData: xpResult
+  };
 };
 
 // Normalizar y asegurar URLs 100% funcionales evitando errores 404 o alucinaciones

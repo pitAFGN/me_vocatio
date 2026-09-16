@@ -10,7 +10,15 @@ const crear = async (req, res) => {
     const curso = await courseService.crearCurso(req.user.id, req.body);
     await achievementService.incrementarProgreso(req.user.id, "resources_created");
     const unlocked = await achievementService.evaluarLogros(req.user.id);
-    res.status(201).json({ ...curso, unlocked });
+
+    const xpService = require("../services/xp.service");
+    const xpResult = await xpService.grantXp(req.user.id, xpService.XP_ACTIONS.course_completed);
+    
+    if (xpResult && xpResult.unlockedAchievements?.length > 0) {
+      unlocked.push(...xpResult.unlockedAchievements);
+    }
+
+    res.status(201).json({ ...curso, unlocked, xpAdded: xpService.XP_ACTIONS.course_completed, xpData: xpResult });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al crear el curso" });
   }

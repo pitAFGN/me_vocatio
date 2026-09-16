@@ -40,11 +40,16 @@ export default function PlanSelectionModal({ onSelect }) {
   const handlePagarPremium = () => {
     pagarPremium({
       onExito: (transaction) => {
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(["premium_member"]));
+        }
         const params = new URLSearchParams({
           concept: "premium",
           reference: transaction.reference,
         });
         if (transaction.id) params.set("id", transaction.id);
+        
+        onSelect("premium"); // Notifica al componente padre (p. ej. cerrar el modal)
         router.push(`/pago-resultado?${params.toString()}`);
       },
       onError: (err) => {

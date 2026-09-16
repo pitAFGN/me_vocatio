@@ -1,6 +1,7 @@
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import ThemeProvider from "../components/ThemeProvider";
+import GlobalAchievementListener from "../components/GlobalAchievementListener";
 
 export const metadata = {
   title: {
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <ThemeProvider>
+        <GlobalAchievementListener />
         <Navbar />
         <main className="mt-[88px] min-h-[calc(100vh-88px)]">
           {children}

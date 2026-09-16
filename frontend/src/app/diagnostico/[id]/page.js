@@ -109,7 +109,7 @@ export default function DiagnosticoPage() {
           localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.unlocked));
         }
         router.push(
-          `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&evaluation_id=${data.evaluation_id}`
+          `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&evaluation_id=${data.evaluation_id}&puntaje=${data.puntaje}`
         );
       } else {
         alert("Hubo un error al registrar la evaluación: " + (data.error || data.mensaje || "Error desconocido"));
