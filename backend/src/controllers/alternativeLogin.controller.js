@@ -1,0 +1,39 @@
+const authService = require("../services/auth.service");
+const { setAuthCookies } = require("../utils/authCookies");
+const { storeRefreshToken } = require("../utils/sessionStore");
+
+const googleSyncController = async (req, res) => {
+  try {
+    const supabaseUser = req.supabaseUser; // Obtenido del middleware de Supabase
+    const email = supabaseUser.email;
+
+    const nombre =
+      req.body?.name ||
+      supabaseUser.user_metadata?.full_name ||
+      supabaseUser.user_metadata?.name ||
+      email?.split("@")[0] ||
+      "Usuario";
+
+    const { accessToken, refreshToken, user } = await authService.encontrarOCrearUsuarioGoogle(email, nombre);
+    
+    // Al acceder con Google, el correo est verificado. Revisamos logro.
+    const achievementService = require("../services/achievement.service");
+    const isNew = await achievementService.registrarVerificacionCorreo(user.id);
+    
+    const sessionId = setAuthCookies(res, accessToken);
+    await storeRefreshToken(sessionId, refreshToken, user.id);
+
+    return res.status(200).json({
+      message: "Sincronización con Google exitosa",
+      user,
+      newAchievements: isNew ? ["email_verified"] : []
+    });
+  } catch (error) {
+    console.error("Error al procesar el login con Google:", error);
+    return res.status(error.status || 500).json({
+      message: error.message || "Error interno al procesar el acceso con Google."
+    });
+  }
+};
+
+module.exports = { googleSyncController };

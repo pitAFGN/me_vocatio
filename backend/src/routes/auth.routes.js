@@ -1,13 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
-const { loginLimiter, registerLimiter, forgotPasswordLimiter } = require("../middlewares/rateLimiter");
+const authenticateToken = require("../middlewares/authMiddleware");
+const { googleSyncController } = require("../controllers/alternativeLogin.controller");
+const { verificarTokenSupabase } = require("../middlewares/alternativeLogin");
+const {
+  loginLimiter,
+  registerLimiter,
+  registerEmailLimiter,
+  forgotPasswordLimiter,
+  forgotPasswordEmailLimiter,
+  verifyEmailLimiter,
+  resendVerificationLimiter,
+  resendVerificationEmailLimiter,
+} = require("../middlewares/rateLimiter");
 const {
   reglasRegister,
   reglasLogin,
   reglasForgotPassword,
   reglasResetPassword,
+  reglasVerifyEmail,
+  reglasResendVerification,
 } = require("../middlewares/validarInputs");
+
+// (Si tu archivo se llama distinto en middlewares, ajusta la ruta del require)
+const { verificarCaptcha } = require("../middlewares/recaptcha");
 
 /**
  * @swagger
@@ -26,12 +43,12 @@ const {
  *               email: { type: string, example: "juan@email.com" }
  *               password: { type: string, example: "segura12" }
  *     responses:
- *       201: { description: Usuario creado exitosamente }
+ *       201: { description: Usuario creado. Se envía un correo con un magic link para verificar la cuenta }
  *       400: { description: Datos inválidos o contraseña débil }
  *       409: { description: El correo ya está registrado }
  *       429: { description: Demasiados registros, intenta más tarde }
  */
-router.post("/register", registerLimiter, reglasRegister, authController.register);
+router.post("/register", registerLimiter, registerEmailLimiter, reglasRegister, verificarCaptcha, authController.register);
 
 /**
  * @swagger
@@ -52,9 +69,39 @@ router.post("/register", registerLimiter, reglasRegister, authController.registe
  *       200: { description: Login exitoso, retorna token JWT }
  *       400: { description: Datos inválidos }
  *       401: { description: Credenciales inválidas }
+ *       403: { description: El correo aún no ha sido verificado }
  *       429: { description: Demasiados intentos, intenta en 15 minutos }
  */
 router.post("/login", loginLimiter, reglasLogin, authController.login);
+
+router.get("/me", authenticateToken, authController.me);
+router.post("/refresh", authController.refreshToken);
+router.post("/logout", authController.logout);
+
+
+/**
+ * @swagger
+ * /api/auth/google-sync:
+ *   post:
+ *     summary: Sincroniza el login con Google y devuelve un JWT interno
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, name]
+ *             properties:
+ *               email: { type: string, example: "juan@gmail.com" }
+ *               name: { type: string, example: "Juan Pérez" }
+ *     responses:
+ *       200: { description: Usuario sincronizado exitosamente con Google }
+ *       401: { description: Token de Supabase inválido o expirado }
+ *       500: { description: Error interno al procesar Google }
+ */
+router.post("/google-sync", verificarTokenSupabase, googleSyncController);
 
 /**
  * @swagger
@@ -76,7 +123,7 @@ router.post("/login", loginLimiter, reglasLogin, authController.login);
  *       404: { description: El correo no está registrado }
  *       429: { description: Demasiadas solicitudes }
  */
-router.post("/forgot-password", forgotPasswordLimiter, reglasForgotPassword, authController.forgotPassword);
+router.post("/forgot-password", forgotPasswordLimiter, forgotPasswordEmailLimiter, reglasForgotPassword, authController.forgotPassword);
 
 /**
  * @swagger
@@ -97,6 +144,52 @@ router.post("/forgot-password", forgotPasswordLimiter, reglasForgotPassword, aut
  *       200: { description: Contraseña actualizada }
  *       400: { description: Token inválido, expirado o contraseña débil }
  */
-router.post("/reset-password", reglasResetPassword, authController.resetPassword);
+router.post("/reset-password", forgotPasswordLimiter, reglasResetPassword, authController.resetPassword);
+
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   get:
+ *     summary: Verifica el correo electrónico a partir del magic link enviado al registrarse
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema: { type: string }
+ *         description: Token recibido en el enlace del correo (64 caracteres hexadecimales)
+ *     responses:
+ *       200: { description: Correo verificado exitosamente }
+ *       400: { description: Token inválido, expirado, ya usado o correo ya verificado }
+ *       429: { description: Demasiados intentos, intenta en 15 minutos }
+ */
+router.get("/verify-email", verifyEmailLimiter, reglasVerifyEmail, authController.verifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     summary: Reenvía el magic link de verificación de correo (invalida el anterior)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string, example: "juan@email.com" }
+ *     responses:
+ *       200: { description: Correo de verificación reenviado }
+ *       400: { description: Email inválido o el correo ya está verificado }
+ *       404: { description: El correo no está registrado }
+ *       429: { description: Demasiadas solicitudes }
+ */
+router.post(
+  "/resend-verification",
+  resendVerificationLimiter,
+  resendVerificationEmailLimiter,
+  reglasResendVerification,
+  authController.resendVerification
+);
 
 module.exports = router;

@@ -2,49 +2,119 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth.service";
 
 /**
- * Protege una ruta privada.
- * Si no hay token, redirige al login.
- * Retorna `loading` para evitar que la página se muestre antes de verificar.
+ * Estado reactivo de la sesión.
  *
- * Uso: const { loading } = useProtectedRoute();
+ * - `null`: aún sin verificar (SSR o primer render del cliente)
+ * - `true` / `false`: resultado tras comprobar en el cliente
+ *
+ * Escucha cambios de localStorage para mantenerse sincronizado tanto
+ * entre pestañas (`storage`) como ante eventos propios de la app
+ * (`local-storage-update`, p. ej. tras login o logout).
  */
-export function useProtectedRoute() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
+function useSesionValida() {
+  const [sesionValida, setSesionValida] = useState(null);
+  const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace("/login");
-    } else {
-      setLoading(false);
-    }
-  }, [router]);
+    let activo = true;
+    const comprobarSesion = async () => {
+      try {
+        const data = await authService.me();
+        if (activo) {
+          setUsuario(data?.user ?? null);
+          setSesionValida(true);
+        }
+      } catch {
+        try {
+          await authService.refresh();
+          const data = await authService.me();
+          if (activo) {
+            setUsuario(data?.user ?? null);
+            setSesionValida(true);
+          }
+        } catch {
+          if (activo) {
+            setUsuario(null);
+            setSesionValida(false);
+          }
+        }
+      }
+    };
+    comprobarSesion();
 
-  return { loading };
+    // Escuchar cambios de storage (entre pestañas y eventos manuales)
+    const actualizarSesion = () => comprobarSesion();
+    window.addEventListener("storage", actualizarSesion);
+    window.addEventListener("local-storage-update", actualizarSesion);
+
+    return () => {
+      window.removeEventListener("storage", actualizarSesion);
+      window.removeEventListener("local-storage-update", actualizarSesion);
+      activo = false;
+    };
+  }, []);
+
+  return { sesionValida, usuario };
 }
 
 /**
- * Protege una ruta pública (login, landing).
- * Si ya hay token, redirige al dashboard.
- * Retorna `loading` para evitar flasheos visuales.
- *
- * Uso: const { loading } = usePublicRoute();
+ * Protege rutas privadas (ej. /dashboard).
+ * Bloquea el render hasta confirmar la sesión y redirige a /login cuando el
+ * usuario no está autenticado, evitando mostrar contenido privado a visitantes
+ * sin sesión activa.
+ */
+export function useProtectedRoute() {
+  const router = useRouter();
+  const { sesionValida, usuario } = useSesionValida();
+
+  useEffect(() => {
+    if (sesionValida === false) {
+      router.replace("/login");
+    }
+  }, [sesionValida, router]);
+
+  // Bloquea el render (loading=true) mientras la sesión no esté confirmada
+  // (aún verificando `null` o inválida `false`), de modo que las páginas
+  // protegidas no muestren su contenido privado antes de redirigir.
+  return { loading: sesionValida !== true, user: usuario };
+}
+
+/**
+ * Protege rutas públicas (landing `/` y `/login`).
+ * No bloquea el render: pinta el contenido de inmediato y solo redirige al
+ * dashboard cuando ya existe una sesión válida. Así se elimina el parpadeo de
+ * "Cargando/Verificando..." y se acelera el primer pintado sin tocar los 3D.
  */
 export function usePublicRoute() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { sesionValida } = useSesionValida();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    if (sesionValida === true) {
       router.replace("/dashboard");
-    } else {
-      setLoading(false);
     }
-  }, [router]);
+  }, [sesionValida, router]);
 
-  return { loading };
+  return { loading: false };
+}
+
+/**
+ * Protege rutas de administrador (ej. /admin).
+ */
+export function useAdminRoute() {
+  const router = useRouter();
+  const { sesionValida, usuario } = useSesionValida();
+
+  useEffect(() => {
+    if (sesionValida === false) {
+      router.replace("/login");
+    } else if (sesionValida === true && usuario?.role !== 'admin') {
+      router.replace("/dashboard");
+    }
+  }, [sesionValida, usuario, router]);
+
+  return { loading: sesionValida !== true || usuario?.role !== 'admin', user: usuario };
 }

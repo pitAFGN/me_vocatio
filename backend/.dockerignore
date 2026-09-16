@@ -1,0 +1,33 @@
+# Se reinstala dentro del contenedor (npm ci); copiarlo duplicaría
+# dependencias y arrastraría binarios compilados para el SO/arquitectura
+# del host, que pueden no ser compatibles con Linux/Alpine dentro del contenedor.
+node_modules
+
+# Nunca deben viajar dentro de la imagen: contienen secretos
+# (contraseñas de BD, API keys, credenciales de correo). Se inyectan en
+# runtime vía docker-compose (env_file), no se "hornean" en la imagen.
+.env
+.env.*
+!.env.example
+
+# Metadatos de control de versiones, irrelevantes para ejecutar el backend.
+.git
+.gitignore
+
+# Tests y su configuración: no se necesitan para correr el servidor en
+# producción, y aumentan innecesariamente el tamaño de la imagen.
+__test__
+jest.config.js
+
+# Documentación: no afecta la ejecución de la app.
+README.md
+*.md
+
+# Logs y archivos temporales del sistema operativo del desarrollador.
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# El propio Dockerfile/.dockerignore no necesitan estar dentro de la imagen.
+Dockerfile
+.dockerignore

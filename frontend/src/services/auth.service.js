@@ -1,43 +1,107 @@
 import { API_URL } from "@/lib/constants";
 
+const REQUEST_TIMEOUT_MS = 6000;
+
+/**
+ * fetch con timeout para no dejar colgados los guardias de sesión
+ * si el backend tarda o no responde.
+ */
+async function fetchConTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const control = new AbortController();
+  const timer = setTimeout(() => control.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: control.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+let meEnCurso = null;
+
+/**
+ * Llama a /me con un único request en vuelo: si Navbar y los route guards lo
+ * piden al montar la misma página, se comparte el resultado en vez de duplicar.
+ */
+function obtenerUsuario() {
+  if (!meEnCurso) {
+    meEnCurso = fetchConTimeout(`${API_URL}/api/auth/me`, { credentials: "include" })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.message || "Sesión no válida");
+        return data;
+      })
+      .finally(() => {
+        meEnCurso = null;
+      });
+  }
+  return meEnCurso;
+}
+
 /**
  * Servicio de autenticación.
  * Centraliza todas las llamadas al backend relacionadas con auth.
- * Las páginas NO deben usar fetch directamente — siempre llaman a este servicio.
  */
-
 export const authService = {
-  /**
-   * Inicia sesión y retorna el token JWT.
-   */
   async login(email, password) {
     const res = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Credenciales inválidas");
-    return data; // { token }
+    if (!res.ok) throw new Error(data.error || data.message || "Credenciales inválidas");
+    return data;
   },
 
-  /**
-   * Registra un nuevo usuario.
-   */
-  async register(name, email, password) {
+  async register(name, email, password, captchaToken) {
     const res = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, captchaToken }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Error al registrar");
-    return data; // { id, name, email }
+    if (!res.ok) throw new Error(data.error || data.message || "Error al registrar");
+    return data;
   },
 
-  /**
-   * Envía el correo de recuperación de contraseña.
-   */
+  async googleSync(email, name, accessToken) {
+    const res = await fetch(`${API_URL}/api/auth/google-sync`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ email, name }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || "Error al iniciar sesión con Google");
+    return data;
+  },
+
+  async me() {
+    return obtenerUsuario();
+  },
+
+  async refresh() {
+    const res = await fetchConTimeout(`${API_URL}/api/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || "Sesión expirada");
+    return data;
+  },
+
+  async logout() {
+    const res = await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("No se pudo cerrar la sesión");
+  },
+
   async forgotPassword(email) {
     const res = await fetch(`${API_URL}/api/auth/forgot-password`, {
       method: "POST",
@@ -49,9 +113,15 @@ export const authService = {
     return data;
   },
 
-  /**
-   * Cambia la contraseña usando el token del correo.
-   */
+  async verifyEmail(token) {
+    const res = await fetch(`${API_URL}/api/auth/verify-email?token=${token}`, {
+      method: "GET",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "El enlace es inválido o expiró.");
+    return data;
+  },
+
   async resetPassword(token, newPassword) {
     const res = await fetch(`${API_URL}/api/auth/reset-password`, {
       method: "POST",

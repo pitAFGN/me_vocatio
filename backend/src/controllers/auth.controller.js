@@ -1,4 +1,8 @@
 const authService = require("../services/auth.service");
+const { verifyRefreshToken, generateAccessToken } = require("../utils/jwt");
+const achievementService = require("../services/achievement.service");
+const { setAuthCookies, clearAuthCookies, getAuthCookies, SESSION_COOKIE } = require("../utils/authCookies");
+const { getRefreshToken, storeRefreshToken, deleteRefreshToken } = require("../utils/sessionStore");
 
 /* ─────────────────────────────────────────
    REGISTER
@@ -18,7 +22,7 @@ const register = async (req, res) => {
    LOGIN
 ───────────────────────────────────────── */
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password} = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: "Faltan campos obligatorios: email, password" });
@@ -26,10 +30,63 @@ const login = async (req, res) => {
 
   try {
     const resultado = await authService.login(email, password);
-    res.json(resultado);
+    const sessionId = setAuthCookies(res, resultado.accessToken);
+    await storeRefreshToken(sessionId, resultado.refreshToken, resultado.user.id);
+    res.json({ user: resultado.user });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno" });
   }
+};
+
+/* ─────────────────────────────────────────
+   REFRESH TOKEN
+───────────────────────────────────────── */
+const refreshToken = async (req, res) => {
+  const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
+  const refreshToken = sessionId ? await getRefreshToken(sessionId) : null;
+
+  if (!refreshToken || !sessionId) {
+    return res.status(400).json({ error: "La sesión no tiene refresh token válido" });
+  }
+
+  try {
+    const decoded = verifyRefreshToken(refreshToken);
+    const newAccessToken = generateAccessToken({ id: decoded.id, email: decoded.email, role: decoded.role });
+
+    setAuthCookies(res, newAccessToken, sessionId);
+    res.json({ message: "Sesión renovada" });
+  } catch (error) {
+    await deleteRefreshToken(sessionId);
+    res.status(403).json({ error: "Refresh Token inválido o expirado" });
+  }
+};
+
+const me = async (req, res) => {
+  try {
+    const pool = require("../config/db");
+    const streakService = require("../services/streak.service");
+    
+    // Check and update streak + daily login XP
+    await streakService.checkAndUpdateStreak(req.user.id);
+
+    const result = await pool.query("SELECT id, name, email, plan, xp, level, current_streak, role FROM users WHERE id = $1", [req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: "User not found" });
+    res.json({ user: result.rows[0] });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ error: "Error fetching user data" });
+  }
+};
+
+const logout = async (req, res) => {
+  const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
+
+  if (sessionId) {
+    await deleteRefreshToken(sessionId);
+  }
+
+  clearAuthCookies(res);
+  res.json({ message: "Sesión cerrada" });
 };
 
 /* ─────────────────────────────────────────
@@ -68,4 +125,56 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, forgotPassword, resetPassword };
+/* ─────────────────────────────────────────
+   VERIFY EMAIL (Magic Link)
+───────────────────────────────────────── */
+const verifyEmail = async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: "Falta el parámetro obligatorio: token" });
+  }
+
+  try {
+    const resultado = await authService.verifyEmail(token);
+    const isNew = await achievementService.registrarVerificacionCorreo(resultado.userId);
+    
+    res.json({
+      message: "Correo verificado exitosamente. Ya puedes iniciar sesión.",
+      email: resultado.email,
+      newAchievements: isNew ? ["email_verified"] : []
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error interno" });
+  }
+};
+
+/* ─────────────────────────────────────────
+   RESEND VERIFICATION
+───────────────────────────────────────── */
+const resendVerification = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "El campo email es obligatorio" });
+  }
+
+  try {
+    await authService.resendVerification(email);
+    res.json({ message: "Correo de verificación reenviado" });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error interno" });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  refreshToken,
+  forgotPassword,
+  resetPassword,
+  verifyEmail,
+  resendVerification,
+  me,
+  logout,
+};

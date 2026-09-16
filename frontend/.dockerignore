@@ -1,0 +1,32 @@
+# Se reinstala dentro del contenedor (npm ci); igual que en el backend,
+# evita arrastrar binarios nativos del SO del desarrollador.
+node_modules
+
+# Salida de builds locales del desarrollador. La imagen genera su
+# propio .next dentro del contenedor; copiar el .next local podría
+# incluso corromper el build "standalone".
+.next
+out
+build
+
+# Nunca deben viajar dentro de la imagen.
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+
+# Tests: no se ejecutan ni se necesitan en la imagen de producción.
+test
+coverage
+
+README.md
+*.md
+
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+Dockerfile
+.dockerignore

@@ -1,134 +1,191 @@
-# 💎 MeVocatio
-### Plataforma web de orientación profesional
+# 💎 MeVocatio — Frontend
 
-MeVocatio es una aplicación web que ayuda a los usuarios a descubrir y explorar su vocación profesional mediante diagnósticos inteligentes, rutas de carrera y orientación personalizada.
-
----
-
-## Estructura del proyecto
-
-```
-mevocatio/
-├── frontend/    # Aplicación web en Next.js + React
-├── backend/     # API REST en Node.js + Express
-└── docs/        # Documentación del proyecto
-```
-
----
-
-## Documentación del proyecto
-
-La carpeta `docs/` contiene todos los documentos oficiales del proyecto:
-
-| Documento | Descripción |
-|---|---|
-| `ACTA_DE_CONSTITUCION_DEL_PROYECTO.pdf` | Acta de constitución formal del proyecto |
-| `Diagramas UML.pdf` | Diagramas de clases, secuencia y casos de uso UML |
-| `Documento de casos de uso.pdf` | Descripción detallada de los casos de uso del sistema |
-| `Documento de Historias de usuario.pdf` | Historias de usuario del producto |
-| `Documento de requerimientos.pdf` | Requerimientos funcionales y no funcionales |
-| `Documento Entidad-Relacion.pdf` | Modelo entidad-relación de la base de datos |
-| `DOCUMENTO_DE_ALCANCE_MeVOCATIO.pdf` | Alcance, límites y entregables del proyecto |
-| `Documento_de_Identificación_StakeHolders_MeVocatio.pdf` | Identificación y análisis de stakeholders |
-| `Mockups y o prototipos.pdf` | Mockups y prototipos de la interfaz |
+Aplicación web de orientación profesional desarrollada con **Next.js 16** y **React 19**, permite a los usuarios registrarse, iniciar sesión, explorar áreas vocacionales y acceder a diagnósticos de carrera.
 
 ---
 
 ## Tecnologías
 
-| Capa | Tecnologías |
+| Paquete | Uso |
 |---|---|
-| Frontend | Next.js 16, React 19, Tailwind CSS 4, Framer Motion, SweetAlert2 |
-| Backend | Node.js, Express 5, PostgreSQL, JWT, Nodemailer, Helmet, express-rate-limit |
-| Base de datos | PostgreSQL (Neon) |
+| Next.js 16 | Framework React con App Router y SSR |
+| React 19 | Librería de interfaces de usuario |
+| Tailwind CSS 4 | Estilos utilitarios |
+| Framer Motion | Animaciones del carrusel de opiniones |
+| Lucide React | Íconos |
+| SweetAlert2 | Alertas y modales de confirmación |
 
 ---
 
-## Inicialización del proyecto
+## Estructura
 
-### 1. Clonar el repositorio
+```
+src/
+├── app/                        # Enrutamiento de Next.js (App Router)
+│   ├── layout.js               # Layout global con Navbar
+│   ├── globals.css             # Estilos globales
+│   ├── page.js                 # → re-exporta pages/Home.js
+│   ├── login/page.js           # → re-exporta pages/Login.js
+│   ├── dashboard/page.js       # → re-exporta pages/Dashboard.js
+│   ├── nosotros/page.js        # → re-exporta pages/Nosotros.js
+│   ├── reset-password/page.js  # → re-exporta pages/ResetPassword.js
+│   └── vocacion/[id]/page.js   # Detalle dinámico de vocación
+│
+├── pages/                      # Pantallas principales (lógica real)
+│   ├── Home.js                 # Landing page
+│   ├── Login.js                # Login y registro en un mismo formulario
+│   ├── Dashboard.js            # Selección de área vocacional
+│   ├── Nosotros.js             # Página institucional
+│   └── ResetPassword.js        # Cambio de contraseña con token
+│
+├── components/                 # Componentes reutilizables
+│   ├── ModalOlvidePassword.js  # Modal de recuperación de contraseña
+│   ├── NavbarProfile.js        # Burbuja de perfil de usuario autenticado
+│   └── OpinionesCarrusel.js    # Carrusel animado de testimonios
+│
+├── hooks/                      # Lógica reutilizable
+│   ├── useAuth.js              # Login, registro, logout, recuperación
+│   └── useRouteGuard.js        # Protección de rutas públicas y privadas
+│
+├── services/                   # Llamadas a la API
+│   └── auth.service.js         # Fetch centralizado de todos los endpoints de auth
+│
+└── lib/                        # Utilidades
+    ├── constants.js            # URL base de la API (NEXT_PUBLIC_API_URL)
+    └── validarPassword.js      # Regex de validación de contraseña
+```
+
+---
+
+## Instalación
 
 ```bash
+# 1. Clonar el repositorio
 git clone https://github.com/SamuelMoreno19/mevocatio2
-cd mevocatio
-```
-
----
-
-### 2. Backend
-
-```bash
-cd backend
-
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus valores reales
-```
-
-Variables de entorno requeridas en `backend/.env`:
-
-```env
-DATABASE_URL=postgres://usuario:password@host:5432/nombre_db
-```
-
-Iniciar el servidor:
-
-```bash
-npm run dev    # Desarrollo
-npm start      # Producción
-```
-
-El backend corre en `http://localhost:3001`
-Documentación Swagger en `http://localhost:3001/api-docs`
-
----
-
-### 3. Frontend
-
-```bash
 cd frontend
 
-# Instalar dependencias
+# 2. Instalar dependencias
 npm install
 
-# Configurar variables de entorno
+# 3. Configurar variables de entorno
 cp .env.example .env
+# Editar .env con los valores reales
 ```
 
-Variables de entorno requeridas en `frontend/.env`:
+---
+
+## Variables de entorno
+
+Crea un archivo `.env` en la raíz del frontend:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-Iniciar la aplicación:
+---
+
+## Comandos
 
 ```bash
-npm run dev    # Desarrollo
-npm run build  # Build de producción
-npm start      # Producción (requiere build previo)
+# Desarrollo con hot reload
+npm run dev
+
+# Build de producción
+npm run build
+
+# Iniciar en producción (requiere build previo)
+npm start
+
+# Linter
+npm run lint
 ```
 
-El frontend corre en `http://localhost:3000`
+La aplicación corre por defecto en `http://localhost:3000`.
 
 ---
 
-## Orden de inicialización recomendado
+## Rutas de la aplicación
 
-```
-1. Iniciar el backend   →  cd backend  && npm start
-2. Iniciar el frontend  →  cd frontend && npm run dev
-```
-
-> Asegúrate de que el backend esté corriendo antes de iniciar el frontend, ya que la aplicación necesita la API para funcionar.
+| Ruta | Acceso | Descripción |
+|---|---|---|
+| `/` | Público | Landing page |
+| `/nosotros` | Público | Página institucional |
+| `/login` | Público | Iniciar sesión o registrarse |
+| `/login?mode=signup` | Público | Abre directamente el formulario de registro |
+| `/reset-password?token=...` | Público | Cambiar contraseña con token del correo |
+| `/dashboard` | Privado | Selección de área vocacional |
+| `/vocacion/[id]` | Privado | Detalle y diagnóstico de una vocación |
 
 ---
 
-## Repositorio
+## Flujo de autenticación
 
 ```
-https://github.com/SamuelMoreno19/mevocatio2
+Usuario ingresa credenciales
+        │
+        ├── useAuth.login()
+        ├── authService.login()     ← llama a POST /api/auth/login
+        ├── Guarda token en localStorage
+        └── Redirige a /dashboard
+
+Al entrar a ruta privada
+        │
+        └── useProtectedRoute()
+              ├── Lee token de localStorage
+              ├── Sin token → redirige a /login
+              └── Con token → permite el acceso
+
+Al entrar a ruta pública (login, landing)
+        │
+        └── usePublicRoute()
+              ├── Lee token de localStorage
+              ├── Con token → redirige a /dashboard
+              └── Sin token → permite el acceso
 ```
+
+---
+
+## Componentes principales
+
+### `useAuth` — Hook de autenticación
+Centraliza toda la lógica de sesión. Los componentes nunca llaman al API directamente.
+
+```js
+const { login, register, logout, forgotPassword, resetPassword, getToken } = useAuth();
+```
+
+### `authService` — Servicio de API
+Único punto de contacto con el backend. Si cambia la URL del API, solo se modifica `lib/constants.js`.
+
+### `NavbarProfile` — Perfil de usuario
+Solo se renderiza cuando el usuario está autenticado y se encuentra en `/dashboard` o `/vocacion/*`. Muestra un menú desplegable con acceso a recursos y cierre de sesión.
+
+### `useRouteGuard` — Protección de rutas
+Dos hooks: `useProtectedRoute` para rutas privadas y `usePublicRoute` para rutas públicas. Ambos retornan `loading: true` mientras verifican el token para evitar flasheos visuales.
+
+---
+
+## Seguridad implementada
+
+- **Validación por campo** en login y registro con mensajes de error individuales
+- **Bloqueo de clic derecho** y atajos de teclado de DevTools (`F12`, `Ctrl+Shift+I`, etc.)
+- **Detección de DevTools abierto** — redirige al inicio si se detecta la apertura
+- **Botón de submit controlado por React** — el estado `enviando` no depende del atributo `disabled` del HTML, que puede ser removido desde el inspector
+- **Errores del backend humanizados** — los mensajes de error del servidor se traducen a mensajes amigables para el usuario
+
+---
+
+## Conexión con el Backend
+
+Toda comunicación con la API pasa por `services/auth.service.js`. La URL base se define en `lib/constants.js` y se puede sobreescribir con la variable de entorno `NEXT_PUBLIC_API_URL`.
+
+| Acción | Método | Endpoint |
+|---|---|---|
+| Registro | POST | `/api/auth/register` |
+| Login | POST | `/api/auth/login` |
+| Recuperar contraseña | POST | `/api/auth/forgot-password` |
+| Cambiar contraseña | POST | `/api/auth/reset-password` |
+
+## 🎨 Vista Previa de la Interfaz (Mockups)
+¿Quieres ver cómo luce la plataforma en acción? Explora los diseños de la interfaz para versiones de escritorio y dispositivos móviles:
+👉 **[Ver todos los Mockups del Proyecto](MOCKUPS.md)**

@@ -1,29 +1,57 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/auth.service";
+import { authService } from "../services/auth.service";
+import { getSupabase } from "@/lib/supabase";
 
-/**
- * Hook de autenticación.
- * Encapsula la lógica de login, registro, logout y recuperación de contraseña.
- * Los componentes llaman a estas funciones sin saber cómo funciona el backend.
- */
 export function useAuth() {
   const router = useRouter();
 
   const login = async (email, password) => {
-    const data = await authService.login(email, password);
-    localStorage.setItem("token", data.token);
+    await authService.login(email, password);
+
+    window.dispatchEvent(new Event("local-storage-update"));
+
     router.push("/dashboard");
   };
 
-  const register = async (name, email, password) => {
-    await authService.register(name, email, password);
-    // Después de registrar, cambia al modo login
+  const register = async (name, email, password, captchaToken) => {
+    const data = await authService.register(name, email, password, captchaToken);
+    return data;
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
+  const googleLogin = async (email, name, accessToken) => {
+    const data = await authService.googleSync(email, name, accessToken);
+
+    if (data.newAchievements && data.newAchievements.length > 0) {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.newAchievements));
+      }
+    }
+
+    window.dispatchEvent(new Event("local-storage-update"));
+
+    router.replace("/dashboard");
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // La redirección también evita dejar la interfaz en estado autenticado.
+    }
+
+    try {
+      const sb = await getSupabase();
+      if (sb) {
+        await sb.auth.signOut();
+      }
+    } catch {
+      // Si falla la sesión de Supabase, el token local ya fue limpiado.
+    }
+
+    // Notificar limpieza de sesión
+    window.dispatchEvent(new Event("local-storage-update"));
     router.replace("/login");
   };
 
@@ -36,10 +64,18 @@ export function useAuth() {
     router.push("/login");
   };
 
-  const getToken = () => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
+  const verifyEmail = async (token) => {
+    return await authService.verifyEmail(token);
   };
 
-  return { login, register, logout, forgotPassword, resetPassword, getToken };
+  return {
+    login,
+    register,
+    logout,
+    forgotPassword,
+    resetPassword,
+    verifyEmail,
+    googleLogin,
+    me: authService.me,
+  };
 }
