@@ -4,7 +4,7 @@ import PublicFooter from "@/components/PublicFooter";
 
 export default function NotFoundContent() {
   return (
-    <main className="min-h-screen flex flex-col bg-gradient-to-b from-slate-100 to-slate-200 dark:from-[#040613] dark:to-[#0b1329] text-center transition-colors duration-300">
+    <main className="min-h-screen flex flex-col bg-slate-100 dark:bg-[#0b1329] text-center transition-colors duration-300">
       <div className="flex-1 flex flex-col items-center justify-center px-6">
         <div className="w-20 h-20 rounded-2xl bg-slate-900 dark:bg-[#1e293b] text-white flex items-center justify-center mb-8 shadow-xl">
           <Compass className="w-10 h-10" />

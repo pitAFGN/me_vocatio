@@ -39,7 +39,7 @@ export default function Configuracion() {
 
   if (loading || !userLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#040613] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0b1329] text-indigo-500 dark:text-indigo-400 font-bold uppercase tracking-widest text-sm transition-colors duration-300">
         Cargando perfil...
       </div>
     );
@@ -55,7 +55,7 @@ export default function Configuracion() {
     "bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-2xl shadow-xl";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 relative overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-slate-100 relative overflow-x-hidden transition-colors duration-300">
       {/* Ambient Glows a juego con Rutas de Aprendizaje */}
       <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none bg-indigo-500/10 blur-[100px]" />
       <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none bg-purple-500/10 blur-[100px]" />
@@ -74,7 +74,7 @@ export default function Configuracion() {
 
           <button
             onClick={() => router.push("/dashboard")}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-indigo-500/50 hover:bg-indigo-600/20 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-indigo-500/50 hover:bg-indigo-600/20 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm shrink-0 self-start sm:self-auto"
           >
             <ArrowLeft className="w-4 h-4" /> Volver
           </button>
@@ -96,15 +96,16 @@ export default function Configuracion() {
             </div>
 
             <form onSubmit={handleGuardar} className="space-y-4">
-              <h4 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider flex items-center gap-1.5">
+              <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider flex items-center gap-1.5">
                 <User className="w-3 h-3" /> Datos Personales
-              </h4>
+              </h3>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1 flex items-center gap-1.5">
+                <label htmlFor="nombre-completo" className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 ml-1 flex items-center gap-1.5">
                   <User className="w-3 h-3 text-indigo-500 dark:text-indigo-400" /> Nombre Completo
                 </label>
                 <input
+                  id="nombre-completo"
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   className="w-full px-5 py-3.5 bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl outline-none transition-all font-semibold text-slate-900 dark:text-slate-100 text-sm shadow-inner focus:border-indigo-500/50"
@@ -127,21 +128,22 @@ export default function Configuracion() {
             {/* Notificaciones */}
             <section className={cardBase}>
               <div className="p-5 sm:p-6">
-                <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-3 flex items-center gap-2">
+                <h2 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-3 flex items-center gap-2">
                   <Bell className="w-4 h-4" /> Notificaciones
-                </h3>
+                </h2>
                 <div className="flex items-center justify-between bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5">
                   <div className="flex items-center gap-3">
                     <Bell className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                     <div>
                       <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">Notificaciones de progreso</p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Avisos de avance en tus rutas e insignias</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Avisos de avance en tus rutas e insignias</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setNotificaciones(!notificaciones)}
                     aria-pressed={notificaciones}
+                    aria-label="Notificaciones de progreso"
                     className={`w-11 h-6 rounded-full transition-all relative shrink-0 cursor-pointer ${notificaciones ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
                   >
                     <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${notificaciones ? "left-5" : "left-0.5"}`}></span>
@@ -153,9 +155,9 @@ export default function Configuracion() {
             {/* Seguridad */}
             <section className={cardBase}>
               <div className="p-5 sm:p-6">
-                <h3 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-3 flex items-center gap-2">
+                <h2 className="text-xs font-bold uppercase text-indigo-500 dark:text-indigo-400 tracking-wider mb-3 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4" /> Seguridad
-                </h3>
+                </h2>
                 <button
                   onClick={() => router.push("/reset-password")}
                   className="w-full flex items-center justify-between px-4 py-3.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-pointer group"
@@ -172,9 +174,9 @@ export default function Configuracion() {
 
             {/* Sesión */}
             <section className={`${cardBase} p-5 sm:p-6`}>
-              <h3 className="text-xs font-bold uppercase text-red-500 dark:text-red-400 tracking-wider mb-3 flex items-center gap-2">
+              <h2 className="text-xs font-bold uppercase text-red-500 dark:text-red-400 tracking-wider mb-3 flex items-center gap-2">
                 <LogOut className="w-4 h-4" /> Sesión
-              </h3>
+              </h2>
               <button
                 onClick={logout}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-500/30 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-lg"

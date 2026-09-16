@@ -44,7 +44,7 @@ function VerifyEmailContent() {
         <div className="w-[50rem] h-[50rem] border-[70px] border-slate-300 dark:border-slate-500 rotate-45 shadow-2xl"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md bg-white dark:bg-[#1e293b] p-10 sm:p-12 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-50 duration-500 mx-4 text-center transition-colors duration-300">
+      <div className="relative z-10 w-full max-w-md bg-white dark:bg-[#1e293b] p-10 sm:p-12 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 mx-4 text-center transition-colors duration-300">
         {status === "loading" && (
           <>
             <Loader2 className="w-14 h-14 text-slate-900 dark:text-white mx-auto mb-6 animate-spin" />
@@ -103,7 +103,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-100 dark:bg-[#1e293b] flex items-center justify-center text-slate-900 dark:text-white font-black italic uppercase tracking-widest text-xs transition-colors duration-300">
+        <div className="min-h-screen bg-slate-100 dark:bg-[#0f172a] flex items-center justify-center text-slate-900 dark:text-white font-black italic uppercase tracking-widest text-xs transition-colors duration-300">
           Cargando Portal...
         </div>
       }

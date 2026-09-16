@@ -41,7 +41,7 @@ export default async function VocacionesPorCategoria({ params }) {
 
   if (!group) {
     return (
-      <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] flex flex-col items-center justify-center p-6 text-center text-slate-900 dark:text-white font-sans">
+      <main className="min-h-screen bg-slate-50 dark:bg-[#0b1329] flex flex-col items-center justify-center p-6 text-center text-slate-900 dark:text-white font-sans">
         <h1 className="text-2xl font-bold mb-2">Categoría no encontrada</h1>
         <p className="text-indigo-600 dark:text-indigo-200/70 text-sm mb-6">
           La categoría que buscas no existe o fue movida.
@@ -60,7 +60,7 @@ export default async function VocacionesPorCategoria({ params }) {
   const IconoGrupo = group.icon;
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] p-6 sm:p-8 pt-24 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0b1329] p-6 sm:p-8 pt-24 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
       {/* Luces decorativas */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />

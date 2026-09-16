@@ -37,7 +37,7 @@ export default async function VocationDetail({ params }) {
 
     if (!profession) {
         return (
-            <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] flex flex-col items-center justify-center p-6 text-center text-slate-900 dark:text-white font-sans transition-colors duration-300">
+            <main className="min-h-screen bg-slate-50 dark:bg-[#0b1329] flex flex-col items-center justify-center p-6 text-center text-slate-900 dark:text-white font-sans transition-colors duration-300">
                 <h1 className="text-2xl font-bold mb-2">Vocación no encontrada</h1>
                 <p className="text-indigo-600 dark:text-indigo-200/70 text-sm mb-6">La ruta o profesión que buscas no existe o fue movida.</p>
                 <Link
@@ -60,7 +60,7 @@ export default async function VocationDetail({ params }) {
         .filter(Boolean);
 
     return (
-        <main className="min-h-screen bg-slate-50 dark:bg-[#0f172a] p-6 sm:p-8 pt-24 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
+        <main className="min-h-screen bg-slate-50 dark:bg-[#0b1329] p-6 sm:p-8 pt-24 relative overflow-hidden font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
             {/* Luces decorativas sutiles de fondo */}
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />

@@ -94,7 +94,7 @@ export default function SidebarNav({ logout }) {
             </aside>
 
             {/* 2. BARRA DE NAVEGACIÓN INFERIOR PARA CELULARES (Exclusiva mobile) */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-[#040613]/90 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2.5 z-50 flex items-center justify-around shadow-2xl transition-colors duration-300">
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 dark:bg-[#0b1329]/90 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 px-4 py-2.5 z-50 flex items-center justify-around shadow-2xl transition-colors duration-300">
                 <Link href="/dashboard" className={`p-2 rounded-xl flex flex-col items-center gap-1 ${pathname === "/dashboard" ? "text-indigo-500 dark:text-indigo-400 bg-slate-100 dark:bg-white/5" : "text-slate-400"}`}>
                     <LayoutDashboard className="w-5 h-5" />
                     <span className="text-[9px] font-medium">Panel</span>
