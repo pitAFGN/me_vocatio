@@ -2,15 +2,61 @@ const pool = require("../config/db");
 
 const STORE_TTL_SECONDS = 7 * 24 * 60 * 60;
 
-/**
- * Guarda el refresh token de una sesión en PostgreSQL.
- *
- * @param {string} sessionId UUID de la cookie de sesión.
- * @param {string} refreshToken Token JWT de refresco.
- * @param {string} [userId] Id del usuario al que pertenece la sesión.
- */
-const storeRefreshToken = async (sessionId, refreshToken, userId = null) => {
-  if (!sessionId || !refreshToken) {
+let redisClient = null;
+let redisAvailable = false;
+let redisRetryAt = 0; // no intentar Redis de nuevo antes de esta marca de tiempo
+const REDIS_CONNECT_TIMEOUT_MS = 500;
+const REDIS_RETRY_GAP_MS = 30000;
+
+const buildRedisClient = () => {
+  try {
+    const { createClient } = require("redis");
+    const client = createClient({
+      url: process.env.REDIS_URL || "redis://localhost:6379",
+      socket: {
+        connectTimeout: REDIS_CONNECT_TIMEOUT_MS,
+        reconnectStrategy: () => false, // que falle rápido; reintentamos nosotros mismo
+      },
+    });
+
+    client.on("error", () => {
+      redisAvailable = false;
+    });
+
+    return client;
+  } catch {
+    return null;
+  }
+};
+
+const getRedis = async () => {
+  if (Date.now() < redisRetryAt) {
+    return null;
+  }
+
+  if (!redisClient) {
+    redisClient = buildRedisClient();
+    if (!redisClient) {
+      return null;
+    }
+  }
+
+  try {
+    await redisClient.connect();
+    redisAvailable = true;
+    return redisClient;
+  } catch {
+    // Redis no está disponible: descartamos el cliente (puede estar a medias)
+    // y activamos un "periodo de gracia" para no pagar el timeout en cada request.
+    redisClient = null;
+    redisAvailable = false;
+    redisRetryAt = Date.now() + REDIS_RETRY_GAP_MS;
+    return null;
+  }
+};
+
+const storeRefreshToken = async (sessionId, refreshToken, userId) => {
+  if (!sessionId || !refreshToken || !userId) {
     return null;
   }
 

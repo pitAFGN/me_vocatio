@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Sparkles,
   X,
@@ -323,9 +325,25 @@ export default function ResourceAiModal({
                       </div>
 
                       {/* Texto del Resumen Completo */}
-                      <div className="text-slate-300 leading-relaxed whitespace-pre-line text-xs sm:text-sm">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ ...props }) => (
+                            <p className="text-slate-300 leading-relaxed text-xs sm:text-sm mb-3 last:mb-0" {...props} />
+                          ),
+                          ol: ({ ...props }) => (
+                            <ol className="list-decimal list-inside space-y-1.5 text-slate-300 text-xs sm:text-sm mb-3 last:mb-0" {...props} />
+                          ),
+                          li: ({ ...props }) => (
+                            <li className="pl-1 leading-relaxed" {...props} />
+                          ),
+                          strong: ({ ...props }) => (
+                            <strong className="font-bold text-violet-200" {...props} />
+                          ),
+                        }}
+                      >
                         {msg.data.resumen_completo}
-                      </div>
+                      </ReactMarkdown>
 
                       {/* Bloques de Impacto Vocacional y Tiempo */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">

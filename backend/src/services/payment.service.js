@@ -334,6 +334,7 @@ const aplicarEstadoTransaccion = async (transaction) => {
     if (nuevoEstado === "pagado") {
       await pool.query(
         `UPDATE users SET plan = 'premium' WHERE id = $1`,
+        `UPDATE users SET plan = 'premium', updated_at = NOW() WHERE id = $1`,
         [pago.user_id]
       );
       await achievementService.registrarCompraPremium(pago.user_id);

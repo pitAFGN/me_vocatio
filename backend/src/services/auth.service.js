@@ -10,6 +10,25 @@ require("dotenv").config();
 const EMAIL_VERIFICATION_EXPIRES_HOURS =
   Number(process.env.EMAIL_VERIFICATION_EXPIRES_HOURS) || 24;
 
+const normalizarNombreRegistro = (name) => {
+  const nombre = String(name || "").trim().replace(/\s+/g, " ").toLocaleLowerCase("es");
+  if (!nombre) return nombre;
+
+  return nombre
+    .split(" ")
+    .map((palabra) => palabra.charAt(0).toLocaleUpperCase("es") + palabra.slice(1))
+    .join(" ");
+};
+
+const actualizarNombre = async (userId, name) => {
+  const nombreNormalizado = normalizarNombreRegistro(name);
+  const resultado = await pool.query(
+    "UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, plan, role",
+    [nombreNormalizado, userId]
+  );
+  return resultado.rows[0] || null;
+};
+
 /* ─────────────────────────────────────────
    REGISTER
    Respuesta genérica (anti-enumeración): no revela si el correo ya
@@ -17,6 +36,7 @@ const EMAIL_VERIFICATION_EXPIRES_HOURS =
    nuevo para no permitir mapear cuentas (M3).
 ───────────────────────────────────────── */
 const register = async (name, email, password) => {
+  const nombreNormalizado = normalizarNombreRegistro(name);
   const existe = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existe.rows.length > 0) {
     return {
@@ -32,7 +52,7 @@ const register = async (name, email, password) => {
 
   const resultado = await pool.query(
     "INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email, role",
-    [name, email, hashedPassword]
+    [nombreNormalizado, email, hashedPassword]
   );
 
   const usuario = resultado.rows[0];
@@ -378,6 +398,8 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
 // Exportamos todas las funciones juntas de manera correcta
 module.exports = {
   register,
+  actualizarNombre,
+  normalizarNombreRegistro,
   login,
   forgotPassword,
   resetPassword,
