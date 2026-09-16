@@ -241,7 +241,7 @@ function RecomendacionContent() {
   });
 
   return (
-    <div className="bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-slate-100 min-h-screen relative overflow-x-hidden">
+    <div className="bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-slate-100 min-h-screen relative overflow-x-hidden">
       {/* Ambient Glows a juego con el Dashboard */}
       <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none glow-ambient-indigo" />
       <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none glow-ambient-purple" />
@@ -630,7 +630,7 @@ export default function RecomendacionPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-white flex items-center justify-center text-sm font-bold">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-white flex items-center justify-center text-sm font-bold">
           Cargando rutas de aprendizaje...
         </div>
       }

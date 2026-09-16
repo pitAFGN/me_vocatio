@@ -130,7 +130,7 @@ export default function DiagnosticoPage() {
     return (
       <LoadingScreen
         mensaje="Cargando preguntas del test..."
-        claseFondo="bg-slate-50 dark:bg-[#040613]"
+        claseFondo="bg-slate-50 dark:bg-[#0b1329]"
         claseTexto="text-slate-900 dark:text-white"
         spinner
       />
@@ -139,7 +139,7 @@ export default function DiagnosticoPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-white p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-white p-6 text-center">
         <h2 className="text-xl font-bold text-red-500 mb-4">Ups, ocurrió un error</h2>
         <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
         <button
@@ -156,7 +156,7 @@ export default function DiagnosticoPage() {
   const total = preguntas.length;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#040613] text-slate-900 dark:text-white p-6 pt-24 max-w-3xl mx-auto font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-white p-6 pt-24 max-w-3xl mx-auto font-sans transition-colors duration-300">
       <button
         onClick={() => router.push("/dashboard")}
         className="flex items-center gap-2 px-4 py-2.5 mb-8 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-indigo-950 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm cursor-pointer"
