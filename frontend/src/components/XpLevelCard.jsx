@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Zap, Flame, Award } from "lucide-react";
+import { Zap, Flame, Award, HelpCircle } from "lucide-react";
 
 // Helpers de progresión progresiva (+200 XP por cada nivel)
 const BASE_XP = 1000;
@@ -45,6 +45,20 @@ export default function XpLevelCard({ xp = 0, level = 1 }) {
             <Zap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
           </span>
           Progreso de Nivel
+
+          <div className="relative group ml-1 flex items-center">
+            <HelpCircle className="w-4 h-4 text-slate-400 hover:text-cyan-500 cursor-help transition-colors" />
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-slate-900 text-white text-[11px] rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl border border-slate-700 pointer-events-none">
+              <p className="font-bold mb-1.5 text-cyan-400 uppercase tracking-wider text-[9px]">Cómo ganar experiencia:</p>
+              <ul className="space-y-1 text-slate-300 normal-case tracking-normal">
+                <li>• Completar un test diagnóstico: <strong className="text-cyan-300">250 XP</strong></li>
+                <li>• Completar todos los módulos de un recurso: <strong className="text-cyan-300">150 XP</strong></li>
+                <li>• Crear y publicar un nuevo curso: <strong className="text-cyan-300">500 XP</strong></li>
+                <li>• Acceder diariamente: <strong className="text-cyan-300">100 XP</strong></li>
+              </ul>
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-r border-b border-slate-700"></div>
+            </div>
+          </div>
         </span>
 
         <div className="flex items-center gap-2.5">
