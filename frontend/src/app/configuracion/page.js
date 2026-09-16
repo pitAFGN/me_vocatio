@@ -10,13 +10,16 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Configuracion() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, forgotPassword } = useAuth();
   const { loading } = useProtectedRoute();
 
   const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
   const [notificaciones, setNotificaciones] = useState(true);
   const [guardado, setGuardado] = useState(false);
   const [userLoaded, setUserLoaded] = useState(false);
+  const [enviandoReset, setEnviandoReset] = useState(false);
+  const [resetEnviado, setResetEnviado] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -25,6 +28,7 @@ export default function Configuracion() {
         const res = await authService.me();
         if (res?.user) {
           setNombre(res.user.name || "");
+          setEmail(res.user.email || "");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -53,6 +57,22 @@ export default function Configuracion() {
 
   const cardBase =
     "bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl rounded-2xl shadow-xl";
+
+  const handleCambiarContrasena = async () => {
+    if (!email || enviandoReset) return;
+    setEnviandoReset(true);
+    setResetEnviado(false);
+    try {
+      await forgotPassword(email);
+      setResetEnviado(true);
+      setTimeout(() => setResetEnviado(false), 6000);
+    } catch (error) {
+      console.error("Error enviando correo de recuperación:", error);
+      alert("No se pudo enviar el correo. Intenta de nuevo en unos minutos.");
+    } finally {
+      setEnviandoReset(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-slate-100 relative overflow-x-hidden transition-colors duration-300">

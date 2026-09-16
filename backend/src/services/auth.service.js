@@ -174,52 +174,36 @@ const forgotPassword = async (email) => {
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
 
-  await transporter.sendMail({
-    from: `"MeVocatio" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Recuperar contraseña — MeVocatio",
-    html: `
-      <div style="font-family:Segoe UI, Arial, sans-serif; background:#0f172a; padding:40px 20px;">
-        <div style="max-width:480px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden;">
-          <div style="background:#0f172a; padding:28px 32px; text-align:center;">
-            <span style="color:#ffffff; font-size:22px; font-weight:700; letter-spacing:0.5px;">MeVocatio</span>
-          </div>
-          <div style="padding:32px;">
-            <h2 style="color:#0f172a; margin:0 0 12px;">Recuperar contraseña 🔒</h2>
-            <p style="color:#475569; font-size:15px; line-height:1.6; margin:0 0 24px;">
-              Hola${user.name ? ` ${user.name}` : ""}, recibimos una solicitud para cambiar tu contraseña. Haz clic en el botón para crear una nueva.
-            </p>
-            <div style="text-align:center; margin:0 0 24px;">
-              <a href="${resetLink}"
-                 style="background:#8b5cf6; color:#ffffff; padding:14px 32px; text-decoration:none; border-radius:8px; font-weight:600; font-size:15px; display:inline-block;">
-                 Cambiar contraseña
-              </a>
-            </div>
-            <p style="color:#94a3b8; font-size:13px; line-height:1.5; margin:0;">
-              Este enlace expira en 15 minutos y solo puede usarse una vez. Si no solicitaste este cambio, puedes ignorar este mensaje con confianza.
-            </p>
-          </div>
-        </div>
-        <p style="text-align:center; color:#64748b; font-size:12px; margin-top:20px;">
-          MeVocatio — Orientación vocacional para encontrar tu camino
-        </p>
-      </div>
-    `,
-  });
   try {
     await transporter.sendMail({
       from: `"MeVocatio" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Recuperar contraseña",
+      subject: "Recuperar contraseña — MeVocatio",
       html: `
-        <div style="font-family:sans-serif;">
-          <h2>Recuperar contraseña</h2>
-          <p>Hola${user.name ? ` ${user.name}` : ""}, haz clic en el botón para cambiar tu contraseña. El enlace expira en 15 minutos y solo puede ser usado una vez.</p>
-          <a href="${resetLink}"
-             style="background:#1e293b;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-             Cambiar contraseña
-          </a>
-          <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+        <div style="font-family:Segoe UI, Arial, sans-serif; background:#0f172a; padding:40px 20px;">
+          <div style="max-width:480px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden;">
+            <div style="background:#0f172a; padding:28px 32px; text-align:center;">
+              <span style="color:#ffffff; font-size:22px; font-weight:700; letter-spacing:0.5px;">MeVocatio</span>
+            </div>
+            <div style="padding:32px;">
+              <h2 style="color:#0f172a; margin:0 0 12px;">Recuperar contraseña 🔒</h2>
+              <p style="color:#475569; font-size:15px; line-height:1.6; margin:0 0 24px;">
+                Hola${user.name ? ` ${user.name}` : ""}, recibimos una solicitud para cambiar tu contraseña. Haz clic en el botón para crear una nueva.
+              </p>
+              <div style="text-align:center; margin:0 0 24px;">
+                <a href="${resetLink}"
+                   style="background:#8b5cf6; color:#ffffff; padding:14px 32px; text-decoration:none; border-radius:8px; font-weight:600; font-size:15px; display:inline-block;">
+                   Cambiar contraseña
+                </a>
+              </div>
+              <p style="color:#94a3b8; font-size:13px; line-height:1.5; margin:0;">
+                Este enlace expira en 15 minutos y solo puede usarse una vez. Si no solicitaste este cambio, puedes ignorar este mensaje con confianza.
+              </p>
+            </div>
+          </div>
+          <p style="text-align:center; color:#64748b; font-size:12px; margin-top:20px;">
+            MeVocatio — Orientación vocacional para encontrar tu camino
+          </p>
         </div>
       `,
     });

@@ -59,7 +59,11 @@ export async function abrirCheckoutWompi(widget, onResultado) {
     amountInCents: widget.amountInCents,
     reference: widget.reference,
     publicKey: widget.publicKey,
-    redirectUrl: widget.redirectUrl,
+    // NOTA: no pasamos "redirectUrl" a propósito. Si se pasa, Wompi hace una
+    // redirección de página completa a esa URL en cuanto termina la transacción,
+    // en vez de (o antes de) invocar el callback de abajo. Como ya manejamos
+    // el resultado con ese callback (bootstrapTransport: "postmessage" lo trae
+    // sin salir de la página), dejamos que sea la única fuente de verdad.
     signature: { integrity: widget.signature },
     bootstrapTransport: "postmessage",
   });

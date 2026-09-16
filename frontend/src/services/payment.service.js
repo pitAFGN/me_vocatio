@@ -56,6 +56,13 @@ export const paymentService = {
     return requestJson(`${API_URL}/api/pagos/${id}/reconsultar`);
   },
 
+  async reconsultarEstadoPorReferencia(reference, wompiTransactionId) {
+    const query = wompiTransactionId ? `?id=${encodeURIComponent(wompiTransactionId)}` : "";
+    return requestJson(
+      `${API_URL}/api/pagos/referencia/${encodeURIComponent(reference)}/reconsultar${query}`
+    );
+  },
+
   async cancelar(id) {
     return requestJson(`${API_URL}/api/pagos/${id}`, { method: "DELETE" });
   },

@@ -51,6 +51,19 @@ const reconsultarEstado = async (req, res) => {
   }
 };
 
+const reconsultarEstadoPorReferencia = async (req, res) => {
+  try {
+    const pago = await paymentService.reconsultarEstadoPorReferencia(
+      req.params.reference,
+      req.user.id,
+      req.query.id
+    );
+    res.json(pago);
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message || "Error al consultar el pago" });
+  }
+};
+
 /* ─────────────────────────────────────────
    CANCELAR UN PAGO PENDIENTE
 ───────────────────────────────────────── */
@@ -118,6 +131,7 @@ module.exports = {
   misPagos,
   obtenerPorId,
   reconsultarEstado,
+  reconsultarEstadoPorReferencia,
   cancelar,
   evento,
 };

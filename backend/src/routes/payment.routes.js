@@ -13,6 +13,11 @@ router.post("/premium", authenticateToken, paymentController.crearPagoPremium);
 router.get("/mios", authenticateToken, paymentController.misPagos);
 router.get("/:id", authenticateToken, paymentController.obtenerPorId);
 router.get("/:id/reconsultar", authenticateToken, paymentController.reconsultarEstado);
+router.get(
+  "/referencia/:reference/reconsultar",
+  authenticateToken,
+  paymentController.reconsultarEstadoPorReferencia
+);
 router.delete("/:id", authenticateToken, paymentController.cancelar);
 
 module.exports = router;
