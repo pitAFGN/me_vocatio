@@ -28,6 +28,14 @@ const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({
   connectionString,
   ssl: resolverSSL(connectionString),
+
+  // Evitan que una conexión "zombi" (socket muerto tras una desconexión
+  // previa con Neon) deje una consulta esperando para siempre sin error.
+  connectionTimeoutMillis: 10000, // máximo para establecer una conexión nueva
+  query_timeout: 15000,           // máximo para que una consulta responda
+  statement_timeout: 15000,       // límite del lado de Postgres para la misma consulta
+  idleTimeoutMillis: 30000,       // recicla conexiones inactivas en vez de dejarlas envejecer
+  keepAlive: true,                // detecta más rápido si el socket TCP murió
 });
 
 pool.on("error", (err) => {

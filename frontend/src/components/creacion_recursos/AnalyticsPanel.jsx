@@ -46,13 +46,13 @@ export default function AnalyticsPanel({
 
   if (!isPremium) {
     return (
-      <section className="rounded-3xl border border-slate-800 bg-slate-900/60 p-5">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900/60">
         <div className="rounded-2xl border border-dashed border-violet-500/30 bg-violet-500/5 p-6 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
+          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-700 dark:text-violet-300/80">
             Premium requerido
           </p>
-          <h2 className="mt-3 text-2xl font-black text-white">Analíticas avanzadas</h2>
-          <p className="mt-2 text-sm text-slate-300">
+          <h2 className="mt-3 text-2xl font-black text-slate-900 dark:text-white">Analíticas avanzadas</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
             Actualiza a Premium para ver el embudo de abandono en vivo, tiempo de estudio y retención por lección.
           </p>
           <button
@@ -144,18 +144,18 @@ export default function AnalyticsPanel({
   const peakText = peakDay ? `Pico: ${daysFull[peakDay]}` : "Sin actividad";
 
   return (
-    <section className="rounded-3xl border border-violet-500/30 bg-slate-900/80 p-5 backdrop-blur-sm relative overflow-hidden">
+    <section className="rounded-3xl border border-violet-500/30 bg-white p-5 backdrop-blur-sm relative overflow-hidden dark:bg-slate-900/80">
       {/* Fondo decorativo */}
       <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-violet-600/10 blur-[50px]"></div>
       
       {/* Encabezado Analíticas */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between relative z-10">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-700 dark:text-violet-300/80">
             Analíticas de Rendimiento
           </p>
           <div className="flex items-center gap-3 mt-1">
-            <h2 className="text-xl font-black text-white">Métricas de Alumnos</h2>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Métricas de Alumnos</h2>
             {isRealData && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -170,7 +170,7 @@ export default function AnalyticsPanel({
           <select 
             value={selectedCourseId}
             onChange={(e) => setSelectedCourseId(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-violet-500 transition-colors cursor-pointer"
+            className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-violet-500 transition-colors cursor-pointer"
           >
             <option value="">Todos mis cursos</option>
             {liveData.courses.map(course => (
@@ -187,16 +187,16 @@ export default function AnalyticsPanel({
         {displayMetrics.map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.label} className="rounded-2xl border border-slate-800 bg-slate-950/60 p-3.5 transition-all hover:border-violet-500/20">
+            <div key={metric.label} className="rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60 p-3.5 transition-all hover:border-violet-500/20">
               <div className="flex items-center justify-between">
-                <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 truncate">
+                <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-600 dark:text-slate-400 truncate">
                   {metric.label}
                 </p>
                 <Icon className="w-3.5 h-3.5 text-violet-400 shrink-0" />
               </div>
               <div className="mt-2.5 flex items-end justify-between">
-                <span className="text-xl font-black text-white">{metric.value}</span>
-                <span className="text-[10px] font-bold text-emerald-400">{metric.delta}</span>
+                <span className="text-xl font-black text-slate-900 dark:text-white">{metric.value}</span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">{metric.delta}</span>
               </div>
             </div>
           );
@@ -204,12 +204,12 @@ export default function AnalyticsPanel({
       </div>
 
       {/* Actividad de los últimos 7 días */}
-      <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 relative z-10">
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60 p-4 relative z-10">
         <div className="flex items-center justify-between mb-2.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             Actividad (Últimos 7 días)
           </h3>
-          <span className="text-[9px] font-bold text-violet-300 bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20">
+          <span className="text-[9px] font-bold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-500/10 px-2 py-0.5 rounded border border-violet-500/20">
             {peakText}
           </span>
         </div>
@@ -218,24 +218,24 @@ export default function AnalyticsPanel({
             <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
               <div 
                 className={`w-full rounded-t-md transition-all duration-500 ${
-                  bar.peak ? 'bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'bg-slate-800 group-hover:bg-violet-600/50'
+                  bar.peak ? 'bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]' : 'bg-slate-300 dark:bg-slate-800 group-hover:bg-violet-600/50'
                 }`} 
                 style={{ height: bar.h }} 
               />
-              <span className={`text-[8px] font-bold ${bar.peak ? 'text-violet-300' : 'text-slate-500'}`}>{bar.day}</span>
+              <span className={`text-[8px] font-bold ${bar.peak ? 'text-violet-700 dark:text-violet-300' : 'text-slate-500'}`}>{bar.day}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* Embudo de Abandono (Drop-off Funnel) */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 relative z-10">
+      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60 p-4 relative z-10">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-200">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-800 dark:text-slate-200">
               Embudo de retención
             </h3>
-            <p className="text-[10px] text-slate-400 mt-0.5">
+            <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">
               {isRealData
                 ? (selectedCourseId ? "Deserción por lección de este curso" : "Tasa general de tus cursos")
                 : (resources.length > 0 
@@ -244,7 +244,7 @@ export default function AnalyticsPanel({
               }
             </p>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-300 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">
             Drop-off
           </span>
         </div>
@@ -252,11 +252,11 @@ export default function AnalyticsPanel({
         <div className="space-y-3">
           {dynamicFunnel.map((item) => (
             <div key={item.step}>
-              <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-300">
+              <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                 <span className="truncate max-w-[200px]">{item.step}</span>
-                <span className="font-bold text-violet-300">{item.value}%</span>
+                <span className="font-bold text-violet-700 dark:text-violet-300">{item.value}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-800/80">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800/80">
                 <div 
                   className={`h-full rounded-full transition-all duration-500 ${item.color}`} 
                   style={{ width: `${item.value}%` }} 
@@ -274,30 +274,30 @@ export default function AnalyticsPanel({
         {/* Tip pedagógico de IA / Analítica */}
         <div className="mt-4 rounded-xl border border-violet-500/20 bg-violet-500/5 p-3 flex items-start gap-2.5">
           <Sparkles className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-slate-300 leading-relaxed">
-            <strong className="text-violet-200 font-semibold">Consejo pedagógico: </strong>
-            Los cursos que combinan lecciones cortas con enlaces prácticos aumentan la retención final en más de un <span className="text-emerald-400 font-bold">25%</span>.
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            <strong className="text-violet-700 dark:text-violet-200 font-semibold">Consejo pedagógico: </strong>
+            Los cursos que combinan lecciones cortas con enlaces prácticos aumentan la retención final en más de un <span className="text-emerald-700 dark:text-emerald-400 font-bold">25%</span>.
           </p>
         </div>
       </div>
 
       {/* Estudiantes Recientes */}
-      <div className="mt-5 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 relative z-10">
+      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60 p-4 relative z-10">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-200">
+            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-800 dark:text-slate-200">
               Estudiantes recientes
             </h3>
-            <p className="text-[10px] text-slate-400 mt-0.5">Avance en tiempo real</p>
+            <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">Avance en tiempo real</p>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-300">
+          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
             Feed
           </span>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-slate-800">
-          <table className="min-w-full text-left text-xs text-slate-200">
-            <thead className="bg-slate-900 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+          <table className="min-w-full text-left text-xs text-slate-700 dark:text-slate-200">
+            <thead className="bg-slate-100 dark:bg-slate-900 text-[10px] uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
               <tr>
                 <th className="px-3 py-2.5 font-semibold">Alumno</th>
                 <th className="px-3 py-2.5 font-semibold">Curso</th>
@@ -307,15 +307,15 @@ export default function AnalyticsPanel({
             <tbody>
               {studentsList.length > 0 ? (
                 studentsList.map((student, idx) => (
-                  <tr key={`${student.name}-${idx}`} className="border-t border-slate-850 bg-slate-950/40 hover:bg-slate-900/50 transition-colors">
+                  <tr key={`${student.name}-${idx}`} className="border-t border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-950/40 hover:bg-slate-100 dark:hover:bg-slate-900/50 transition-colors">
                     <td className="px-3 py-2.5">
-                      <div className="font-semibold text-white truncate max-w-[110px]">{student.name}</div>
+                      <div className="font-semibold text-slate-900 dark:text-white truncate max-w-[110px]">{student.name}</div>
                     </td>
-                    <td className="px-3 py-2.5 text-slate-300 truncate max-w-[110px]">{student.course}</td>
+                    <td className="px-3 py-2.5 text-slate-600 dark:text-slate-300 truncate max-w-[110px]">{student.course}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-slate-300 font-bold">{student.progress}</span>
-                        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-300">
+                        <span className="text-slate-700 dark:text-slate-300 font-bold">{student.progress}</span>
+                        <span className="rounded-full border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                           {student.status}
                         </span>
                       </div>

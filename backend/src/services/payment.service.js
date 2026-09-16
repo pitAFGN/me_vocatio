@@ -189,6 +189,54 @@ const reconsultarEstado = async (id, userId) => {
 };
 
 /* ─────────────────────────────────────────
+   OBTENER UN PAGO POR SU REFERENCIA
+   (solo el dueño puede verlo). Se usa cuando el
+   frontend solo tiene la "reference" a mano, por
+   ejemplo justo después de que Wompi redirige a
+   /pago-resultado?reference=... y todavía no
+   conocemos el id interno del pago.
+───────────────────────────────────────── */
+const obtenerPagoPorReferencia = async (reference, userId) => {
+  const resultado = await pool.query("SELECT * FROM payments WHERE reference = $1", [reference]);
+
+  if (resultado.rows.length === 0) {
+    throw { status: 404, message: "El pago no existe" };
+  }
+  if (resultado.rows[0].user_id !== userId) {
+    throw { status: 403, message: "No tienes permiso para ver este pago" };
+  }
+  return resultado.rows[0];
+};
+
+/* ─────────────────────────────────────────
+   RE-CONSULTAR EL ESTADO DE UN PAGO POR REFERENCIA
+   Mismo propósito que reconsultarEstado, pero
+   identificando el pago por "reference" en vez de
+   por "id" (Wompi no documenta consultar transacciones
+   por referencia directamente, así que si aún no
+   tenemos wompi_transaction_id guardado, devolvemos
+   el pago tal cual está y el frontend puede reintentar
+   en unos segundos, dándole tiempo al webhook).
+───────────────────────────────────────── */
+const reconsultarEstadoPorReferencia = async (reference, userId, wompiTransactionIdDesdeWidget) => {
+  const pago = await obtenerPagoPorReferencia(reference, userId);
+
+  // El webhook aún no nos dio un id de transacción. Como respaldo, usamos el
+  // id que el propio widget de Wompi entregó en el navegador justo al
+  // terminar el pago (GET /transactions/{id} sí está oficialmente documentado
+  // por Wompi, a diferencia de filtrar por "reference").
+  const wompiTransactionId = pago.wompi_transaction_id || wompiTransactionIdDesdeWidget;
+  if (!wompiTransactionId) {
+    return pago;
+  }
+
+  const transaccion = await wompi.consultarTransaccion(wompiTransactionId);
+  await aplicarEstadoTransaccion(transaccion);
+
+  return obtenerPagoPorReferencia(reference, userId);
+};
+
+/* ─────────────────────────────────────────
    CANCELAR UN PAGO PENDIENTE
    (no se "elimina" el registro por temas contables/
     trazabilidad, se marca como cancelado)
@@ -285,7 +333,7 @@ const aplicarEstadoTransaccion = async (transaction) => {
   if (pago.concept === "premium") {
     if (nuevoEstado === "pagado") {
       await pool.query(
-        `UPDATE users SET plan = 'premium', updated_at = NOW() WHERE id = $1`,
+        `UPDATE users SET plan = 'premium' WHERE id = $1`,
         [pago.user_id]
       );
       await achievementService.registrarCompraPremium(pago.user_id);
@@ -314,6 +362,8 @@ module.exports = {
   listarPagosPorUsuario,
   obtenerPagoPorId,
   reconsultarEstado,
+  obtenerPagoPorReferencia,
+  reconsultarEstadoPorReferencia,
   cancelarPago,
   yaFueProcesado,
   validarChecksumEvento,

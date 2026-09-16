@@ -274,7 +274,7 @@ export default function CreacionRecursosPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#070b17] text-slate-100 relative">
+    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b17] dark:text-slate-100 relative transition-colors duration-300">
       {/* Toast Notification */}
       <Toast
         message={toast.message}
@@ -295,10 +295,10 @@ export default function CreacionRecursosPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-300/80">
+            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-300/80">
               Creador / Recursos
             </p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-4xl">
               Gestión de recursos y cursos
             </h1>
           </div>
@@ -308,7 +308,7 @@ export default function CreacionRecursosPage() {
               <div className="relative group">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center justify-between bg-slate-900/80 border border-slate-700 text-slate-200 text-[11px] font-bold uppercase tracking-wider rounded-xl px-4 py-2.5 outline-none focus:border-violet-500 hover:border-violet-400/60 hover:bg-slate-800 transition-all cursor-pointer shadow-lg shadow-black/20 w-full sm:w-[180px]"
+                  className="flex items-center justify-between bg-white dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-bold uppercase tracking-wider rounded-xl px-4 py-2.5 outline-none focus:border-violet-500 hover:border-violet-400/60 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer shadow-lg shadow-slate-900/10 dark:shadow-black/20 w-full sm:w-[180px]"
                 >
                   <span className="truncate">
                     {editingCourseId ? "Editando..." : "+ Nuevo Curso"}
@@ -324,18 +324,18 @@ export default function CreacionRecursosPage() {
                       className="fixed inset-0 z-40"
                       onClick={() => setIsDropdownOpen(false)}
                     />
-                    <div className="absolute top-full mt-2 w-full sm:w-[220px] rounded-xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black overflow-hidden z-50">
+                    <div className="absolute top-full mt-2 w-full sm:w-[220px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-900/20 dark:shadow-black overflow-hidden z-50">
                       <button
                         onClick={() => {
                           handleCargarCursoParaEditar("");
                           setIsDropdownOpen(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-xs font-bold text-violet-300 hover:bg-slate-800 transition-colors uppercase tracking-wider border-b border-slate-800"
+                        className="w-full text-left px-4 py-3 text-xs font-bold text-violet-700 dark:text-violet-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors uppercase tracking-wider border-b border-slate-200 dark:border-slate-800"
                       >
                         + Crear nuevo curso
                       </button>
                       <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                        <div className="px-3 pt-3 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                          <div className="px-3 pt-3 pb-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-500">
                           Mis Cursos
                         </div>
                         {myCourses.map(course => (
@@ -345,7 +345,7 @@ export default function CreacionRecursosPage() {
                               handleCargarCursoParaEditar(course.id);
                               setIsDropdownOpen(false);
                             }}
-                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors truncate ${editingCourseId === course.id ? "bg-violet-600/20 text-violet-300 border-l-2 border-violet-500" : "text-slate-300 hover:bg-slate-800 border-l-2 border-transparent"}`}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors truncate ${editingCourseId === course.id ? "bg-violet-600/20 text-violet-700 dark:text-violet-300 border-l-2 border-violet-500" : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border-l-2 border-transparent"}`}
                           >
                             {course.title}
                           </button>
@@ -359,7 +359,7 @@ export default function CreacionRecursosPage() {
 
             <Link
               href="/dashboard"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-800 hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/80 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-700 dark:text-slate-200 transition-colors hover:border-violet-400/60 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               <span>Volver</span>

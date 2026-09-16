@@ -2,7 +2,7 @@ require("dotenv").config();
 
 /*
   Wompi tiene dos ambientes con URLs distintas:
-    - Sandbox (pruebas):    https://api-sandbox.co.uat.wompi.dev/v1
+    - Sandbox (pruebas):    https://sandbox.wompi.co/v1
     - Producción (real):    https://production.wompi.co/v1
   Cuál usar depende de la variable WOMPI_ENV en el .env ('sandbox' o 'production').
 */
@@ -89,7 +89,13 @@ const consultarTransaccion = async (wompiTransactionId) => {
   return datos.data; // { id, status, reference, amount_in_cents, ... }
 };
 
+const consultarTransaccionPorReferencia = async (reference) => {
+  const datos = await wompiFetch(`/transactions?reference=${encodeURIComponent(reference)}`);
+  return datos.data?.[0] || null;
+};
+
 module.exports = {
   BASE_URL,
   consultarTransaccion,
+  consultarTransaccionPorReferencia,
 };

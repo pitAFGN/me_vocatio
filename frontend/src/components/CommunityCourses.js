@@ -5,6 +5,15 @@ import { Sparkles, PlayCircle, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/constants";
 
+const COURSE_THEME_CLASSES = {
+  "bg-slate-950": "bg-slate-100 dark:bg-slate-950",
+  "bg-violet-900/80": "bg-violet-100 dark:bg-violet-900/80",
+  "bg-gradient-to-br from-sky-900 via-indigo-950 to-slate-950":
+    "bg-gradient-to-br from-sky-100 via-indigo-100 to-slate-100 dark:bg-gradient-to-br dark:from-sky-900 dark:via-indigo-950 dark:to-slate-950",
+  "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950":
+    "bg-gradient-to-br from-slate-100 via-violet-100 to-indigo-100 dark:bg-gradient-to-br dark:from-slate-900 dark:via-violet-950 dark:to-indigo-950",
+};
+
 export default function CommunityCourses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,35 +75,35 @@ export default function CommunityCourses() {
             <div
               key={course.id}
               onClick={() => router.push(`/curso/${course.id}`)}
-              className={`snap-start shrink-0 w-[260px] sm:w-[280px] rounded-2xl ${course.background_style || 'bg-slate-900'} border border-white/10 p-5 shadow-lg flex flex-col gap-3 relative overflow-hidden transition-transform hover:-translate-y-1 cursor-pointer`}
+              className={`snap-start shrink-0 w-[260px] sm:w-[280px] rounded-2xl ${COURSE_THEME_CLASSES[course.background_style] || "bg-white dark:bg-slate-900"} border border-slate-200 dark:border-white/10 p-5 shadow-lg flex flex-col gap-3 relative overflow-hidden transition-transform hover:-translate-y-1 cursor-pointer`}
             >
               {badges && badges.length > 0 && (
                 <div className="absolute top-0 right-0 p-3 flex gap-1">
                   {badges.map(b => (
-                    <span key={b} className="bg-violet-500/20 text-violet-200 border border-violet-500/40 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
+                    <span key={b} className="bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-200 border border-violet-300 dark:border-violet-500/40 text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">
                       {b}
                     </span>
                   ))}
                 </div>
               )}
               
-              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white mb-2 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-white/10 border border-violet-200 dark:border-white/20 flex items-center justify-center text-violet-700 dark:text-white mb-2 shadow-inner">
                 <PlayCircle className="w-5 h-5" />
               </div>
               
               <div>
-                <h3 className="text-sm font-bold text-white line-clamp-1">{course.title}</h3>
-                <p className="text-xs text-slate-300 mt-1.5 line-clamp-2 leading-relaxed opacity-90">{course.description}</p>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{course.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 line-clamp-2 leading-relaxed opacity-90">{course.description}</p>
               </div>
               
-              <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+              <div className="mt-auto pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[9px] text-white font-bold border border-white/20">
+                  <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[9px] text-slate-700 dark:text-white font-bold border border-slate-300 dark:border-white/20">
                     {(course.instructor_name || "U").substring(0,2).toUpperCase()}
                   </div>
-                  <span className="text-[10px] text-slate-300 font-medium">Por {course.instructor_name || "Usuario"}</span>
+                  <span className="text-[10px] text-slate-600 dark:text-slate-300 font-medium">Por {course.instructor_name || "Usuario"}</span>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md">
+                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-1 rounded-md">
                   <Users className="w-3 h-3" />
                   {course.lessons_count || 0} lecciones
                 </div>

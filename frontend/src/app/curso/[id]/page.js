@@ -18,6 +18,15 @@ import {
 } from "lucide-react";
 import { API_URL } from "@/lib/constants";
 
+const COURSE_THEME_CLASSES = {
+  "bg-slate-950": "bg-slate-100 dark:bg-slate-950",
+  "bg-violet-900/80": "bg-violet-100 dark:bg-violet-900/80",
+  "bg-gradient-to-br from-sky-900 via-indigo-950 to-slate-950":
+    "bg-gradient-to-br from-sky-100 via-indigo-100 to-slate-100 dark:bg-gradient-to-br dark:from-sky-900 dark:via-indigo-950 dark:to-slate-950",
+  "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950":
+    "bg-gradient-to-br from-slate-100 via-violet-100 to-indigo-100 dark:bg-gradient-to-br dark:from-slate-900 dark:via-violet-950 dark:to-indigo-950",
+};
+
 export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -175,15 +184,15 @@ export default function CourseDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070b17] flex items-center justify-center">
-        <div className="animate-pulse text-violet-400 font-bold">Cargando curso...</div>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070b17] flex items-center justify-center">
+        <div className="animate-pulse text-violet-700 dark:text-violet-400 font-bold">Cargando curso...</div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-[#070b17] flex flex-col items-center justify-center text-white">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#070b17] flex flex-col items-center justify-center text-slate-900 dark:text-white">
         <h2 className="text-2xl font-bold mb-4">Curso no encontrado</h2>
         <button onClick={() => router.push("/dashboard")} className="px-6 py-2 bg-violet-600 rounded-xl font-bold cursor-pointer">
           Volver al Inicio
@@ -205,16 +214,18 @@ export default function CourseDetailPage() {
   // Encontrar la primera lección no vista para el botón "Continuar"
   const nextLesson = course.lessons?.find(l => !visitedLessons.includes(l.id));
 
+  const courseTheme = COURSE_THEME_CLASSES[course.background_style] || "bg-white dark:bg-slate-900";
+
   return (
-    <main className="min-h-screen bg-[#070b17] text-slate-100 pb-20">
+    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b17] dark:text-slate-100 pb-20 transition-colors duration-300">
       {/* Hero Section */}
-      <section className={`relative pt-24 pb-20 px-4 ${course.background_style || 'bg-slate-900'} overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      <section className={`relative pt-24 pb-20 px-4 ${courseTheme} overflow-hidden`}>
+        <div className="absolute inset-0 bg-white/10 dark:bg-black/40 backdrop-blur-sm"></div>
         
         <div className="relative mx-auto max-w-4xl z-10 flex flex-col items-center text-center">
           <button 
             onClick={() => router.push("/dashboard")}
-            className="absolute -top-12 left-0 flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-bold bg-white/10 px-4 py-2 rounded-full backdrop-blur-md border border-white/10 cursor-pointer"
+            className="absolute -top-12 left-0 flex items-center gap-2 text-slate-700 dark:text-white/70 hover:text-slate-950 dark:hover:text-white transition-colors text-sm font-bold bg-white/60 dark:bg-white/10 px-4 py-2 rounded-full backdrop-blur-md border border-slate-300 dark:border-white/10 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Volver
           </button>
@@ -222,25 +233,25 @@ export default function CourseDetailPage() {
           {badges && badges.length > 0 && (
             <div className="flex gap-2 justify-center mb-6">
               {badges.map((b) => (
-                <span key={b} className="bg-white/20 border border-white/40 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-lg">
+                <span key={b} className="bg-white/70 dark:bg-white/20 border border-slate-300 dark:border-white/40 text-slate-800 dark:text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-lg">
                   {b}
                 </span>
               ))}
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 drop-shadow-xl tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 drop-shadow-xl tracking-tight">
             {course.title}
           </h1>
           
-          <p className="text-lg text-slate-200 mb-8 max-w-2xl drop-shadow-md">
+          <p className="text-lg text-slate-700 dark:text-slate-200 mb-8 max-w-2xl drop-shadow-md">
             {course.description}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-300 bg-black/30 px-6 py-3 rounded-2xl backdrop-blur-md border border-white/10">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-black/30 px-6 py-3 rounded-2xl backdrop-blur-md border border-slate-300 dark:border-white/10">
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-violet-400" />
-              <span>Creado por <strong className="text-white">{course.instructor_name || "Comunidad"}</strong></span>
+              <span>Creado por <strong className="text-slate-900 dark:text-white">{course.instructor_name || "Comunidad"}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-violet-400" />
@@ -264,25 +275,25 @@ export default function CourseDetailPage() {
       <section className="mx-auto max-w-4xl px-4 mt-10">
         
         {/* Barra de Progreso del Alumno */}
-        <div className="mb-8 rounded-3xl border border-violet-500/30 bg-slate-900/80 p-5 backdrop-blur-md">
+        <div className="mb-8 rounded-3xl border border-violet-300 dark:border-violet-500/30 bg-white dark:bg-slate-900/80 p-5 backdrop-blur-md">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-400">Tu Progreso de Aprendizaje</span>
-              <h3 className="text-lg font-black text-white">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-400">Tu Progreso de Aprendizaje</span>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 {completedLessonsCount} de {totalLessons} recursos vistos
               </h3>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="text-xl font-black text-violet-300">{progressPercent}%</span>
+              <span className="text-xl font-black text-violet-700 dark:text-violet-300">{progressPercent}%</span>
               {isCourseCompleted && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 text-xs font-bold text-emerald-300">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   <Check className="w-3.5 h-3.5" /> Completado
                 </span>
               )}
             </div>
           </div>
 
-          <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+          <div className="h-2.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700/50">
             <div 
               className="h-full bg-gradient-to-r from-violet-600 via-indigo-500 to-emerald-400 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${progressPercent}%` }}
@@ -291,9 +302,9 @@ export default function CourseDetailPage() {
 
           {/* Siguiente recurso recomendado */}
           {nextLesson && (
-            <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-800/80">
-              <span className="text-xs text-slate-400 truncate max-w-[280px] sm:max-w-md">
-                Siguiente: <strong className="text-white">{nextLesson.title}</strong>
+            <div className="mt-4 flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800/80">
+              <span className="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[280px] sm:max-w-md">
+                Siguiente: <strong className="text-slate-900 dark:text-white">{nextLesson.title}</strong>
               </span>
               <button
                 onClick={() => markLessonAsVisited(nextLesson.id, nextLesson.video_url)}
@@ -309,15 +320,15 @@ export default function CourseDetailPage() {
         {/* Lista de Lecciones */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-black text-white">Estructura del Curso</h2>
-            <p className="text-slate-400 text-sm mt-0.5">{totalLessons} recursos disponibles</p>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">Estructura del Curso</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-0.5">{totalLessons} recursos disponibles</p>
           </div>
         </div>
 
         <div className="space-y-3">
           {(!course.lessons || course.lessons.length === 0) ? (
-            <div className="bg-white/5 border border-white/10 p-10 rounded-2xl text-center">
-              <p className="text-slate-400">Este curso aún no tiene lecciones publicadas.</p>
+            <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 p-10 rounded-2xl text-center">
+              <p className="text-slate-600 dark:text-slate-400">Este curso aún no tiene lecciones publicadas.</p>
             </div>
           ) : (
             course.lessons.map((lesson, index) => {
@@ -333,36 +344,36 @@ export default function CourseDetailPage() {
                   onClick={() => markLessonAsVisited(lesson.id, lessonUrl)}
                   className={`border p-4 sm:p-5 rounded-2xl flex items-center justify-between transition-all group cursor-pointer ${
                     isVisited
-                      ? 'border-emerald-500/30 bg-emerald-950/10 hover:bg-emerald-950/20'
+                      ? 'border-emerald-300 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/10 hover:bg-emerald-100 dark:hover:bg-emerald-950/20'
                       : isCurrent
-                      ? 'border-violet-500/50 bg-violet-950/20 shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                      : 'border-slate-800 bg-slate-900/50 hover:bg-slate-800/80'
+                      ? 'border-violet-400 dark:border-violet-500/50 bg-violet-50 dark:bg-violet-950/20 shadow-[0_0_20px_rgba(139,92,246,0.15)]'
+                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/80'
                   }`}
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center font-black transition-all ${
                       isVisited 
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                        ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                         : isCurrent
                         ? 'bg-violet-500 text-white shadow-md shadow-violet-500/30'
-                        : 'bg-slate-800 text-slate-400 border border-slate-700 group-hover:text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 group-hover:text-slate-900 dark:group-hover:text-white'
                     }`}>
                       {isVisited ? "✓" : index + 1}
                     </div>
                     <div className="min-w-0">
-                      <h3 className={`font-bold truncate text-sm sm:text-base ${isVisited ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                      <h3 className={`font-bold truncate text-sm sm:text-base ${isVisited ? 'text-slate-900 dark:text-white' : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white'}`}>
                         {lesson.title}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-slate-400 font-medium">
+                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                           {lesson.content || "Recurso"}
                         </span>
                         {isVisited ? (
-                          <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                             ✓ Visto
                           </span>
                         ) : isCurrent ? (
-                          <span className="text-[10px] font-bold text-violet-300 bg-violet-500/20 px-2 py-0.5 rounded border border-violet-500/30">
+                          <span className="text-[10px] font-bold text-violet-700 dark:text-violet-300 bg-violet-100 dark:bg-violet-500/20 px-2 py-0.5 rounded border border-violet-500/30">
                             Siguiente
                           </span>
                         ) : null}
@@ -380,7 +391,7 @@ export default function CourseDetailPage() {
                         }}
                         className={`font-bold text-xs px-3.5 py-2 rounded-xl border flex items-center gap-1.5 transition-all cursor-pointer ${
                           isVisited 
-                            ? 'text-slate-300 bg-slate-800 hover:bg-slate-700 border-slate-700' 
+                            ? 'text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-700'
                             : 'text-white bg-violet-600 hover:bg-violet-500 border-violet-500 shadow-md shadow-violet-600/20'
                         }`}
                       >
@@ -388,7 +399,7 @@ export default function CourseDetailPage() {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </button>
                     ) : (
-                      <span className="text-slate-500 text-xs">Sin enlace</span>
+                      <span className="text-slate-600 dark:text-slate-500 text-xs">Sin enlace</span>
                     )}
                   </div>
                 </div>
@@ -398,17 +409,17 @@ export default function CourseDetailPage() {
         </div>
 
         {/* SECCIÓN DE VALORACIÓN Y COMENTARIOS AL FINAL DEL FLUJO */}
-        <div className="mt-10 rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-950/20 via-slate-900/90 to-slate-950 p-6 shadow-2xl backdrop-blur-md">
+        <div className="mt-10 rounded-3xl border border-amber-300 dark:border-amber-500/30 bg-gradient-to-b from-amber-50 via-white to-slate-50 dark:from-amber-950/20 dark:via-slate-900/90 dark:to-slate-950 p-6 shadow-2xl backdrop-blur-md">
           {reviewSubmitted ? (
             <div className="text-center py-6">
               <span className="text-4xl">🎉</span>
-              <h3 className="text-lg font-black text-emerald-300 mt-2">¡Gracias por tu valoración!</h3>
-              <p className="text-xs text-slate-300 mt-1 max-w-md mx-auto">
+              <h3 className="text-lg font-black text-emerald-700 dark:text-emerald-300 mt-2">¡Gracias por tu valoración!</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 max-w-md mx-auto">
                 Tu opinión se ha publicado y ayudará tanto a otros estudiantes como a que el instructor mejore su contenido.
               </p>
               <button
                 onClick={() => setReviewSubmitted(false)}
-                className="mt-4 text-xs font-bold text-slate-400 hover:text-white bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 transition-colors cursor-pointer"
+                className="mt-4 text-xs font-bold text-slate-700 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
               >
                 Editar mi valoración
               </button>
@@ -417,11 +428,11 @@ export default function CourseDetailPage() {
             <div>
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="flex items-center gap-1.5 text-amber-400 text-xs font-bold uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
                     <span>🎓</span> Calificación del Curso
                   </div>
-                  <h3 className="text-xl font-black text-white mt-1">¿Qué te pareció este curso?</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1">¿Qué te pareció este curso?</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                     Comparte tu experiencia para enriquecer la comunidad y dar feedback al instructor.
                   </p>
                 </div>
@@ -429,21 +440,21 @@ export default function CourseDetailPage() {
 
               {/* Selector de Estrellas */}
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 bg-slate-950/80 p-2 rounded-2xl border border-slate-800">
+                <div className="flex items-center gap-1 bg-white dark:bg-slate-950/80 p-2 rounded-2xl border border-slate-200 dark:border-slate-800">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
                       className={`text-2xl transition-all cursor-pointer px-1 ${
-                        star <= rating ? 'text-amber-400 scale-110 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-slate-700 hover:text-slate-500'
+                        star <= rating ? 'text-amber-500 scale-110 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'text-slate-300 dark:text-slate-700 hover:text-slate-500'
                       }`}
                     >
                       ★
                     </button>
                   ))}
                 </div>
-                <span className="text-xs font-bold text-amber-300">{ratingLabels[rating]}</span>
+                <span className="text-xs font-bold text-amber-800 dark:text-amber-300">{ratingLabels[rating]}</span>
               </div>
 
               {/* Tags de feedback rápido */}
@@ -457,8 +468,8 @@ export default function CourseDetailPage() {
                       onClick={() => handleToggleTag(tag)}
                       className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-amber-500/20 border-amber-500/50 text-amber-200 shadow-sm'
-                          : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-700'
+                          ? 'bg-amber-100 dark:bg-amber-500/20 border-amber-500/50 text-amber-800 dark:text-amber-200 shadow-sm'
+                          : 'bg-slate-100 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
                     >
                       {tag}
@@ -474,7 +485,7 @@ export default function CourseDetailPage() {
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Escribe tu opinión sobre el contenido, la claridad o qué fue lo que más te gustó..."
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950/90 p-3.5 text-xs text-white placeholder-slate-500 outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-all resize-none"
+                  className="w-full rounded-2xl border border-slate-300 bg-white p-3.5 text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 transition-all resize-none dark:border-slate-700 dark:bg-slate-950/90 dark:text-white dark:placeholder-slate-500"
                 />
               </div>
 
@@ -484,7 +495,7 @@ export default function CourseDetailPage() {
 
               {/* Botón Enviar */}
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-[11px] text-slate-500 hidden sm:inline">
+                  <span className="text-[11px] text-slate-600 dark:text-slate-500 hidden sm:inline">
                   Tu reseña se registrará en las analíticas públicas del curso
                 </span>
                 <button
@@ -502,13 +513,13 @@ export default function CourseDetailPage() {
 
         {/* Reseñas de la Comunidad */}
         {reviewsData.reviews?.length > 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-800 bg-slate-900/60 p-6">
+          <div className="mt-10 rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/60 p-6">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-white">Opiniones de la Comunidad</h3>
-                <p className="text-xs text-slate-400">{reviewsData.totalReviews} estudiantes han valorado este curso</p>
+                <h3 className="text-base font-black text-slate-900 dark:text-white">Opiniones de la Comunidad</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400">{reviewsData.totalReviews} estudiantes han valorado este curso</p>
               </div>
-              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-amber-300 font-bold text-xs">
+              <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl text-amber-800 dark:text-amber-300 font-bold text-xs">
                 <Star className="w-3.5 h-3.5 fill-amber-300" />
                 <span>{reviewsData.averageRating} / 5.0</span>
               </div>
@@ -516,15 +527,15 @@ export default function CourseDetailPage() {
 
             <div className="space-y-3">
               {reviewsData.reviews.map((rev) => (
-                <div key={rev.id} className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
+                <div key={rev.id} className="rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40 p-4">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-xs text-white">{rev.user_name || "Estudiante"}</span>
+                    <span className="font-bold text-xs text-slate-900 dark:text-white">{rev.user_name || "Estudiante"}</span>
                     <div className="flex items-center text-amber-400 text-xs">
                       {"★".repeat(rev.rating || 5)}
                     </div>
                   </div>
                   {rev.comment && (
-                    <p className="text-xs text-slate-300 leading-relaxed">{rev.comment}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">{rev.comment}</p>
                   )}
                   <span className="text-[10px] text-slate-500 mt-2 block">
                     {new Date(rev.created_at).toLocaleDateString()}

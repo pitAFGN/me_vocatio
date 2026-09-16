@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import usePayment from "@/hooks/usePayment";
 
@@ -23,6 +24,7 @@ const plans = [
 
 export default function PlanSelectionModal({ onSelect }) {
   const { pagarPremium, cargando } = usePayment();
+  const router = useRouter();
   const [selected, setSelected] = useState(null);
 
   const mostrarAlerta = async (titulo, texto, icono) => {
@@ -37,9 +39,13 @@ export default function PlanSelectionModal({ onSelect }) {
 
   const handlePagarPremium = () => {
     pagarPremium({
-      onExito: () => {
-        mostrarAlerta("¡Pago exitoso!", "Has adquirido el Plan Premium.", "success");
-        onSelect("premium");
+      onExito: (transaction) => {
+        const params = new URLSearchParams({
+          concept: "premium",
+          reference: transaction.reference,
+        });
+        if (transaction.id) params.set("id", transaction.id);
+        router.push(`/pago-resultado?${params.toString()}`);
       },
       onError: (err) => {
         mostrarAlerta("Error", err, "error");
