@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import PlanSelector from "@/components/creacion_recursos/PlanSelector";
 import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
 import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCustomizationPanel";
@@ -46,11 +47,8 @@ const backgroundOptions = [
 const badgeOptions = ["Elite", "Top 10%", "Nuevo", "Bestseller", "En tendencia"];
 
 export default function CreacionRecursosPage() {
-  const [plan, setPlan] = useState(() => {
-    if (typeof window === "undefined") return "free";
-    const savedPlan = window.localStorage.getItem("mevocatio_plan");
-    return savedPlan === "premium" ? "premium" : "free";
-  });
+  const { user } = useProtectedRoute();
+  const isPremium = user?.plan === "premium";
 
   // UI States
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
@@ -73,9 +71,9 @@ export default function CreacionRecursosPage() {
     nombre: "",
     url: "",
     descripcion: "",
+    categoria: "Desarrollo",
   });
 
-  const isPremium = plan === "premium";
   // Cargar mis cursos para poder editarlos
   useEffect(() => {
     const fetchMisCursos = async () => {
@@ -172,10 +170,7 @@ export default function CreacionRecursosPage() {
     }
   };
 
-  const cambiarPlan = (nextPlan) => {
-    setPlan(nextPlan);
-    window.localStorage.setItem("mevocatio_plan", nextPlan);
-  };
+
 
   const openResourceModal = () => {
     if (!isPremium && recursos.length >= FREE_RESOURCE_LIMIT) {
@@ -229,10 +224,15 @@ export default function CreacionRecursosPage() {
       return;
     }
 
+    if (recursos.length === 0) {
+      setToast({ message: "No puedes publicar un curso vacío. Agrega al menos un recurso.", type: "error" });
+      return;
+    }
+
     const payload = {
       title: curso.nombre,
       description: curso.descripcion,
-      category: "Desarrollo",
+      category: curso.categoria || "Desarrollo",
       background_style: selectedBackground,
       badges: selectedBadges,
       lessons_list: recursos.map((r) => ({
@@ -374,7 +374,7 @@ export default function CreacionRecursosPage() {
           </div>
         </div>
 
-        <PlanSelector plan={plan} setPlan={cambiarPlan} />
+        <PlanSelector isPremium={isPremium} onUpgrade={() => setMostrarPlanModal(true)} />
 
         <div className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-6">
@@ -424,8 +424,10 @@ export default function CreacionRecursosPage() {
       {mostrarPlanModal && (
         <PlanSelectionModal
           onSelect={(selectedPlan) => {
-            cambiarPlan(selectedPlan);
             setMostrarPlanModal(false);
+            if (selectedPlan === "premium") {
+              window.location.reload();
+            }
           }}
         />
       )}

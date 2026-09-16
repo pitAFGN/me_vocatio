@@ -4,7 +4,7 @@ const pool = require("../config/db");
    CREAR CURSO
 ───────────────────────────────────────── */
 const crearCurso = async (instructorId, datos) => {
-  const { title, description, category, level, duration_hours, modality, background_style, badges, lessons_list } = datos;
+  const { title, description, category, level, duration_hours, background_style, badges, lessons_list } = datos;
 
   // Iniciar transacción
   const client = await pool.connect();
@@ -13,8 +13,8 @@ const crearCurso = async (instructorId, datos) => {
 
     // Insertar curso
     const resultCurso = await client.query(
-      `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, modality, background_style, badges)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, background_style, badges)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
       [
         instructorId,
@@ -23,7 +23,6 @@ const crearCurso = async (instructorId, datos) => {
         category,
         level || "Principiante",
         duration_hours || null,
-        modality || "Virtual",
         background_style || "bg-slate-950",
         JSON.stringify(badges || [])
       ]
@@ -152,7 +151,7 @@ const actualizarCurso = async (id, instructorId, datos) => {
     throw { status: 403, message: "No tienes permiso para editar este curso" };
   }
 
-  const { title, description, category, level, duration_hours, modality, status, background_style, badges, lessons_list } = datos;
+  const { title, description, category, level, duration_hours, status, background_style, badges, lessons_list } = datos;
   const actual = cursoExistente.rows[0];
 
   const client = await pool.connect();
@@ -162,9 +161,9 @@ const actualizarCurso = async (id, instructorId, datos) => {
     const resultado = await client.query(
       `UPDATE courses
        SET title = $1, description = $2, category = $3, level = $4,
-           duration_hours = $5, modality = $6, status = $7, 
-           background_style = $8, badges = $9, updated_at = NOW()
-       WHERE id = $10
+           duration_hours = $5, status = $6, 
+           background_style = $7, badges = $8, updated_at = NOW()
+       WHERE id = $9
        RETURNING *`,
       [
         title ?? actual.title,
@@ -172,7 +171,6 @@ const actualizarCurso = async (id, instructorId, datos) => {
         category ?? actual.category,
         level ?? actual.level,
         duration_hours ?? actual.duration_hours,
-        modality ?? actual.modality,
         status ?? actual.status,
         background_style ?? actual.background_style,
         badges ? JSON.stringify(badges) : actual.badges,

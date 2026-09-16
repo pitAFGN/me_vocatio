@@ -56,7 +56,7 @@ export default function NavbarProfile() {
     };
 
     const handleMisRecursos = () => {
-        router.push('/dashboard');
+        router.push('/mis-rutas');
         setIsMenuOpen(false);
     };
 

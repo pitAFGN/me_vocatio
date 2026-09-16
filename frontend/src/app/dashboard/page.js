@@ -25,23 +25,26 @@ const PlanSelectionModal = dynamic(
 export default function ExecutiveDashboard() {
   const router = useRouter();
   const { logout } = useAuth();
-  const { loading } = useProtectedRoute();
+  const { user, loading } = useProtectedRoute();
 
   const [mostrarPlanModal, setMostrarPlanModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const plan = localStorage.getItem("mevocatio_plan");
-      if (!plan) {
+    if (user && user.plan !== 'premium') {
+      const modalVisto = localStorage.getItem("mevocatio_plan_modal_seen");
+      if (!modalVisto) {
         setMostrarPlanModal(true);
       }
     }
-  }, []);
+  }, [user]);
 
-  const handlePlanSelect = (plan) => {
-    localStorage.setItem("mevocatio_plan", plan);
+  const handlePlanSelect = (selectedPlan) => {
+    localStorage.setItem("mevocatio_plan_modal_seen", "true");
     setMostrarPlanModal(false);
+    if (selectedPlan === 'premium') {
+      window.location.reload();
+    }
   };
 
   const [profileData, setProfileData] = useState({

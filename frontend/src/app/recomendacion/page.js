@@ -29,9 +29,12 @@ import ResourceAiModal from "@/components/ResourceAiModal";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
 import ResourceCard from "@/components/ResourceCard";
 
+import { useProtectedRoute } from "@/hooks/useRouteGuard";
+
 function RecomendacionContent() {
   const router = useRouter();
   const { logout, me } = useAuth();
+  const { user } = useProtectedRoute();
   const searchParams = useSearchParams();
   const peticionInicialRealizada = useRef(false);
 
@@ -41,15 +44,7 @@ function RecomendacionContent() {
   const evaluationIdURL = searchParams.get("evaluation_id") || null;
 
   // Estado del Plan (free vs premium)
-  const [plan, setPlan] = useState("free");
-  const isPremium = plan === "premium";
-
-  useEffect(() => {
-    const savedPlan = window.localStorage.getItem("mevocatio_plan");
-    if (savedPlan === "premium") {
-      setPlan("premium");
-    }
-  }, []);
+  const isPremium = user?.plan === "premium";
 
   const [cargando, setCargando] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -104,11 +99,10 @@ function RecomendacionContent() {
   }, [me]);
 
   const cambiarPlan = (nuevoPlan) => {
-    setPlan(nuevoPlan);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("mevocatio_plan", nuevoPlan);
-    }
     setIsPlanModalOpen(false);
+    if (nuevoPlan === 'premium') {
+      window.location.reload();
+    }
   };
 
   // Función temporal de prueba para simular el desbloqueo de una insignia
@@ -317,11 +311,12 @@ function RecomendacionContent() {
               )}
 
               <button
-                onClick={() => setIsPlanModalOpen(true)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all cursor-pointer shadow-md ${
+                disabled={isPremium}
+                onClick={() => !isPremium && setIsPlanModalOpen(true)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold transition-all shadow-md ${
                   isPremium
-                    ? "bg-gradient-to-r from-violet-600/30 to-indigo-600/30 border-violet-500/50 text-violet-700 dark:text-violet-200 hover:border-violet-500 dark:hover:border-violet-400 shadow-violet-500/10 dark:hover:shadow-violet-500/20"
-                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-slate-300 hover:text-slate-900 dark:hover:border-slate-400 dark:hover:text-white"
+                    ? "bg-gradient-to-r from-violet-600/30 to-indigo-600/30 border-violet-500/50 text-violet-700 dark:text-violet-200 cursor-default"
+                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-slate-300 hover:text-slate-900 dark:hover:border-slate-400 dark:hover:text-white cursor-pointer"
                 }`}
               >
                 {isPremium ? (

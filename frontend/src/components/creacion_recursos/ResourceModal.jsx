@@ -13,10 +13,12 @@ export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNu
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [selectedType, setSelectedType] = useState("Video");
+  const [urlError, setUrlError] = useState("");
 
   // Al abrir el modal, pre-cargar los datos si estamos editando
   useEffect(() => {
     if (isOpen) {
+      setUrlError("");
       if (editingResource) {
         setTitle(editingResource.title || "");
         setUrl(editingResource.url || "");
@@ -33,10 +35,25 @@ export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNu
 
   const handleAction = () => {
     if (!title.trim()) return;
-    if (editingResource && onEdit) {
-      onEdit(editingResource.id, title.trim(), selectedType, url.trim());
+    
+    // Validate URL if one was provided
+    const trimmedUrl = url.trim();
+    if (trimmedUrl) {
+      try {
+        new URL(trimmedUrl);
+        setUrlError("");
+      } catch (e) {
+        setUrlError("Por favor ingresa una URL válida que incluya https://");
+        return;
+      }
     } else {
-      onAdd(title.trim(), selectedType, url.trim());
+      setUrlError("");
+    }
+
+    if (editingResource && onEdit) {
+      onEdit(editingResource.id, title.trim(), selectedType, trimmedUrl);
+    } else {
+      onAdd(title.trim(), selectedType, trimmedUrl);
     }
     onClose();
   };
@@ -76,21 +93,30 @@ export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNu
               <span>URL o Enlace del Recurso</span>
               <span className="text-[9px] text-violet-400 font-normal">Recomendado</span>
             </label>
-            <div className="relative">
-              <Globe className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && title.trim() && handleAction()}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900/50 pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-violet-500 focus:bg-slate-900"
-                placeholder="https://youtube.com/watch?v=... o enlace de material"
-              />
+              <div className="relative">
+                <Globe className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    if (urlError) setUrlError("");
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && title.trim() && handleAction()}
+                  className={`w-full rounded-xl border ${urlError ? 'border-red-500' : 'border-slate-700'} bg-slate-900/50 pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition focus:border-violet-500 focus:bg-slate-900`}
+                  placeholder="https://youtube.com/watch?v=... o enlace de material"
+                />
+              </div>
+              {urlError ? (
+                <p className="mt-1.5 text-[10px] text-red-400">
+                  {urlError}
+                </p>
+              ) : (
+                <p className="mt-1.5 text-[10px] text-slate-500">
+                  Pega aquí el enlace de YouTube, Drive, GitHub o documentación de esta lección.
+                </p>
+              )}
             </div>
-            <p className="mt-1.5 text-[10px] text-slate-500">
-              Pega aquí el enlace de YouTube, Drive, GitHub o documentación de esta lección.
-            </p>
-          </div>
 
           <div>
             <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">

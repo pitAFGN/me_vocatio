@@ -57,6 +57,25 @@ export default function CourseBasicForm({ curso, setCurso, isPremium, onUpgrade 
         </div>
         <div>
           <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
+            Categoría
+          </label>
+          <select
+            value={curso.categoria || "Desarrollo"}
+            disabled={!isPremium}
+            onChange={(e) => setCurso({ ...curso, categoria: e.target.value })}
+            className={`${inputClass} cursor-pointer appearance-none`}
+          >
+            <option value="Desarrollo">Desarrollo (Programación, Web, Apps)</option>
+            <option value="Diseño">Diseño (UX/UI, Gráfico, 3D)</option>
+            <option value="Marketing">Marketing (SEO, Redes, Ventas)</option>
+            <option value="Negocios">Negocios (Finanzas, Liderazgo, Emprendimiento)</option>
+            <option value="Audio y Video">Audio y Video (Producción, Edición)</option>
+            <option value="Ciberseguridad">Ciberseguridad (Redes, Hacking Ético)</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-400">
             Descripción breve
             <span className="lowercase text-slate-500 font-normal tracking-normal ml-2">(Mín. 20 caracteres)</span>
           </label>
