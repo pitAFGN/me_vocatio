@@ -4,7 +4,7 @@ const pool = require("../config/db");
    CREAR CURSO
 ───────────────────────────────────────── */
 const crearCurso = async (instructorId, datos) => {
-  const { title, description, category, level, duration_hours, background_style, badges, lessons_list } = datos;
+  const { title, description, category, level, duration_hours, background_style, badges, lessons_list, status } = datos;
 
   // Iniciar transacción
   const client = await pool.connect();
@@ -13,8 +13,8 @@ const crearCurso = async (instructorId, datos) => {
 
     // Insertar curso
     const resultCurso = await client.query(
-      `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, background_style, badges)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, background_style, badges, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         instructorId,
@@ -24,7 +24,8 @@ const crearCurso = async (instructorId, datos) => {
         level || "Principiante",
         duration_hours || null,
         background_style || "bg-slate-950",
-        JSON.stringify(badges || [])
+        JSON.stringify(badges || []),
+        status || "activo"
       ]
     );
 
