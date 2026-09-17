@@ -1,4 +1,13 @@
 const pool = require("../config/db");
+const { enviarCursoAprobado, enviarCursoRechazado } = require("../services/email.service");
+
+const estadoLegible = (status) => {
+  if (status === "activo" || status === "published") return "Activo";
+  if (status === "revision") return "En revisión";
+  if (status === "rechazado") return "Rechazado";
+  if (status === "inactivo") return "Inactivo";
+  return "Borrador";
+};
 
 const getStats = async (req, res) => {
   try {
@@ -31,6 +40,7 @@ const getResources = async (req, res) => {
       SELECT c.*, u.name as instructor_name 
       FROM courses c 
       LEFT JOIN users u ON c.instructor_id = u.id 
+      WHERE c.status <> 'rechazado'
       ORDER BY c.created_at DESC
     `);
     // Mapear los nombres de columnas para que encajen con la tabla del frontend
@@ -38,7 +48,9 @@ const getResources = async (req, res) => {
       id: course.id,
       titulo: course.title,
       vocacion: course.category,
-      estado: (course.status === 'activo' || course.status === 'published') ? 'Activo' : 'Borrador',
+      estado: estadoLegible(course.status),
+      status: course.status,
+      rejection_reason: course.rejection_reason || null,
       instructor_name: course.instructor_name || 'Desconocido'
     }));
 
@@ -85,6 +97,89 @@ const deleteResource = async (req, res) => {
   } catch (error) {
     console.error("Error deleting resource:", error);
     res.status(500).json({ error: "Error interno al eliminar el recurso" });
+  }
+};
+
+const aprobarCurso = async (req, res) => {
+  const courseId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+    return res.status(400).json({ error: "Identificador de curso inválido" });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE courses SET status = 'activo', rejection_reason = NULL, approved_at = NOW(), updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [courseId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Recurso no encontrado" });
+    }
+
+    const curso = result.rows[0];
+    const instructorRes = await pool.query("SELECT name, email FROM users WHERE id = $1", [curso.instructor_id]);
+    const instructor = instructorRes.rows[0];
+
+    if (instructor) {
+      await enviarCursoAprobado({
+        to: instructor.email,
+        name: instructor.name,
+        courseTitle: curso.title,
+        courseId: curso.id,
+      });
+    }
+
+    res.json({ success: true, message: "Curso aprobado y publicado correctamente", data: curso });
+  } catch (error) {
+    console.error("Error approving course:", error);
+    res.status(500).json({ error: "Error interno al aprobar el curso" });
+  }
+};
+
+const rechazarCurso = async (req, res) => {
+  const courseId = parseInt(req.params.id, 10);
+  if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+    return res.status(400).json({ error: "Identificador de curso inválido" });
+  }
+
+  const { motivo } = req.body;
+  if (motivo !== undefined && (typeof motivo !== "string" || motivo.trim().length > 1000)) {
+    return res.status(400).json({ error: "El motivo debe ser un texto de máximo 1000 caracteres" });
+  }
+  const motivoFinal = typeof motivo === "string" && motivo.trim() ? motivo.trim() : null;
+
+  try {
+    const result = await pool.query(
+      `UPDATE courses SET status = 'rechazado', rejection_reason = $2, approved_at = NULL, updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [courseId, motivoFinal]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Recurso no encontrado" });
+    }
+
+    const curso = result.rows[0];
+    const instructorRes = await pool.query("SELECT name, email FROM users WHERE id = $1", [curso.instructor_id]);
+    const instructor = instructorRes.rows[0];
+
+    if (instructor) {
+      await enviarCursoRechazado({
+        to: instructor.email,
+        name: instructor.name,
+        courseTitle: curso.title,
+        courseId: curso.id,
+        motivo: motivoFinal || "El curso no cumplió con los requisitos de la revisión editorial.",
+      });
+    }
+
+    res.json({ success: true, message: "Curso rechazado. Se notificó al autor por correo.", data: curso });
+  } catch (error) {
+    console.error("Error rejecting course:", error);
+    res.status(500).json({ error: "Error interno al rechazar el curso" });
   }
 };
 
@@ -186,6 +281,8 @@ module.exports = {
   getResources,
   updateResource,
   deleteResource,
+  aprobarCurso,
+  rechazarCurso,
   getUsers,
   updateUser,
   getDashboardMetrics,

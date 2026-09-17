@@ -17,15 +17,7 @@ import {
   Check
 } from "lucide-react";
 import { API_URL } from "@/lib/constants";
-
-const COURSE_THEME_CLASSES = {
-  "bg-slate-950": "bg-slate-100 dark:bg-slate-950",
-  "bg-violet-900/80": "bg-violet-100 dark:bg-violet-900/80",
-  "bg-gradient-to-br from-sky-900 via-indigo-950 to-slate-950":
-    "bg-gradient-to-br from-sky-100 via-indigo-100 to-slate-100 dark:bg-gradient-to-br dark:from-sky-900 dark:via-indigo-950 dark:to-slate-950",
-  "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950":
-    "bg-gradient-to-br from-slate-100 via-violet-100 to-indigo-100 dark:bg-gradient-to-br dark:from-slate-900 dark:via-violet-950 dark:to-indigo-950",
-};
+import { resolveCourseBackground } from "@/lib/courseThemes";
 
 export default function CourseDetailPage() {
   const params = useParams();
@@ -78,7 +70,7 @@ export default function CourseDetailPage() {
   useEffect(() => {
     const fetchCourseData = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/courses/${params.id}`);
+        const res = await fetch(`${API_URL}/api/courses/${params.id}`, { credentials: "include" });
         if (!res.ok) throw new Error("No se pudo cargar el curso");
         const data = await res.json();
         
@@ -207,12 +199,24 @@ export default function CourseDetailPage() {
   // Encontrar la primera lección no vista para el botón "Continuar"
   const nextLesson = course.lessons?.find(l => !visitedLessons.includes(l.id));
 
-  const courseTheme = COURSE_THEME_CLASSES[course.background_style] || "bg-white dark:bg-slate-900";
+  const courseBg = resolveCourseBackground(course.background_style);
+  const courseTheme = courseBg.className;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b17] dark:text-slate-100 pb-20 transition-colors duration-300">
       {/* Hero Section */}
       <section className={`relative pt-24 pb-20 px-4 ${courseTheme} overflow-hidden`}>
+        {courseBg.isImage && (
+          <>
+            <img
+              src={courseBg.url}
+              alt=""
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-slate-950/55"></div>
+          </>
+        )}
         <div className="absolute inset-0 bg-white/10 dark:bg-black/40 backdrop-blur-sm"></div>
         
         <div className="relative mx-auto max-w-4xl z-10 flex flex-col items-center text-center">
@@ -233,11 +237,11 @@ export default function CourseDetailPage() {
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 drop-shadow-xl tracking-tight">
+          <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black mb-6 drop-shadow-xl tracking-tight ${courseBg.isImage ? "text-white" : "text-slate-900 dark:text-white"}`}>
             {course.title}
           </h1>
           
-          <p className="text-lg text-slate-700 dark:text-slate-200 mb-8 max-w-2xl drop-shadow-md">
+          <p className={`text-lg mb-8 max-w-2xl drop-shadow-md ${courseBg.isImage ? "text-slate-100" : "text-slate-700 dark:text-slate-200"}`}>
             {course.description}
           </p>
 

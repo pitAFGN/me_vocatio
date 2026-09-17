@@ -8,28 +8,67 @@ import SidebarNav from "@/components/SidebarNav";
 import LoadingScreen from "@/components/LoadingScreen";
 import Toast from "@/components/Toast";
 import { API_URL } from "@/lib/constants";
-import { LayoutDashboard, Users, BookOpen, CreditCard, Search, Plus, Edit, Trash2, ArrowUpRight, CheckCircle2, TrendingUp, AlertTriangle } from "lucide-react";
+import { resolveCourseBackground } from "@/lib/courseThemes";
+import CourseCard from "@/components/CourseCard";
+import { LayoutDashboard, Users, BookOpen, CreditCard, Search, Plus, Edit, Trash2, ArrowUpRight, CheckCircle2, TrendingUp, AlertTriangle, X, Eye, ExternalLink } from "lucide-react";
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
+
+function EstadoBadge({ status, estado }) {
+  const s = status || (estado === "Activo" ? "activo" : "borrador");
+  if (s === "activo" || s === "published") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-500/20">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
+      </span>
+    );
+  }
+  if (s === "revision") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-200 dark:border-amber-500/20">
+        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> En revisión
+      </span>
+    );
+  }
+  if (s === "rechazado") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-500/20">
+        <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Rechazado
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-500/20">
+      <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Borrador
+    </span>
+  );
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
   const { logout } = useAuth();
   const { loading, user } = useAdminRoute();
-  
+
   const [activeTab, setActiveTab] = useState("recursos");
   const [stats, setStats] = useState(null);
   const [recursos, setRecursos] = useState([]);
   const [recursosLoading, setRecursosLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState({ message: "", type: "success" });
-  
+
   // States for Recursos
   const [editingCourse, setEditingCourse] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deletingCourse, setDeletingCourse] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [rejectCourse, setRejectCourse] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [previewCourse, setPreviewCourse] = useState(null);
+  const [previewData, setPreviewData] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   // States for Usuarios
   const [usuarios, setUsuarios] = useState([]);
@@ -213,8 +252,7 @@ export default function AdminDashboard() {
         credentials: "include",
         body: JSON.stringify({
           title: editingCourse.titulo,
-          category: editingCourse.vocacion,
-          status: editingCourse.estado === 'Activo' ? 'published' : 'borrador' // o los valores que manejes
+          category: editingCourse.vocacion
         })
       });
       if (res.ok) {
@@ -228,6 +266,77 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error(err);
       setToast({ message: "Error de conexión al servidor.", type: "error" });
+    }
+  };
+
+  const handleAprobarCurso = async (course) => {
+    try {
+      const res = await fetch(`${API_URL}/api/admin/courses/${course.id}/aprobar`, {
+        method: "POST",
+        credentials: "include"
+      });
+      if (res.ok) {
+        fetchResources();
+        setToast({ message: `Curso "${course.titulo}" aprobado y publicado.`, type: "success" });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setToast({ message: err.error || "Error al aprobar el curso.", type: "error" });
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({ message: "Error de conexión al aprobar.", type: "error" });
+    }
+  };
+
+  const openRejectModal = (course) => {
+    setRejectCourse(course);
+    setRejectReason(course.rejection_reason || "");
+    setIsRejectModalOpen(true);
+  };
+
+  const openPreview = async (course) => {
+    setPreviewCourse(course);
+    setIsPreviewModalOpen(true);
+    setPreviewData(null);
+    setPreviewLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/courses/${course.id}`, {
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("No se pudo cargar el contenido");
+      const data = await res.json();
+      setPreviewData(data);
+    } catch (err) {
+      console.error(err);
+      setToast({ message: "No se pudo cargar el contenido del curso.", type: "error" });
+      setIsPreviewModalOpen(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleRechazarCurso = async () => {
+    if (!rejectCourse) return;
+    try {
+      const res = await fetch(`${API_URL}/api/admin/courses/${rejectCourse.id}/rechazar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
+        body: JSON.stringify({ motivo: rejectReason })
+      });
+      if (res.ok) {
+        fetchResources();
+        setIsRejectModalOpen(false);
+        setRejectCourse(null);
+        setRejectReason("");
+        setToast({ message: `Curso "${rejectCourse.titulo}" rechazado. Autor notificado por correo.`, type: "success" });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setToast({ message: err.error || "Error al rechazar el curso.", type: "error" });
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({ message: "Error de conexión al rechazar.", type: "error" });
     }
   };
 
@@ -392,23 +501,40 @@ export default function AdminDashboard() {
                               {recurso.vocacion}
                             </td>
                             <td className="px-6 py-4">
-                              {recurso.estado === "Activo" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-500/20">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Activo
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-500/10 text-slate-700 dark:text-slate-400 text-xs font-bold border border-slate-200 dark:border-slate-500/20">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Borrador
-                                </span>
-                              )}
+                              <EstadoBadge status={recurso.status} estado={recurso.estado} />
                             </td>
                             <td className="px-6 py-4 text-right">
+                              <button 
+                                onClick={() => openPreview(recurso)}
+                                className="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
+                                title="Ver contenido"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              {(recurso.status !== "activo" && recurso.status !== "published") && (
+                                <>
+                                  <button 
+                                    onClick={() => handleAprobarCurso(recurso)}
+                                    className="inline-flex items-center justify-center p-2 rounded-lg text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+                                    title="Aprobar y publicar"
+                                  >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  </button>
+                                  <button 
+                                    onClick={() => openRejectModal(recurso)}
+                                    className="inline-flex items-center justify-center p-2 rounded-lg text-red-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors ml-1"
+                                    title="Rechazar con motivo"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </>
+                              )}
                               <button 
                                 onClick={() => {
                                   setEditingCourse({...recurso});
                                   setIsEditModalOpen(true);
                                 }}
-                                className="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors"
+                                className="inline-flex items-center justify-center p-2 rounded-lg text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors ml-1"
                                 title="Editar"
                               >
                                 <Edit className="w-4 h-4" />
@@ -720,17 +846,6 @@ export default function AdminDashboard() {
                     className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Estado</label>
-                  <select 
-                    value={editingCourse.estado} 
-                    onChange={(e) => setEditingCourse({...editingCourse, estado: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white"
-                  >
-                    <option value="Activo">Activo / Publicado</option>
-                    <option value="Borrador">Borrador / Pendiente</option>
-                  </select>
-                </div>
                 <div className="flex gap-3 justify-end mt-6">
                   <button 
                     type="button" 
@@ -760,7 +875,7 @@ export default function AdminDashboard() {
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Eliminar Curso</h3>
               </div>
               <p className="text-slate-600 dark:text-slate-400 text-sm mb-6 leading-relaxed">
-                ¿Estás seguro de que deseas eliminar permanentemente el curso <span className="font-bold text-slate-900 dark:text-white">"{deletingCourse.titulo}"</span>? Esta acción no se puede deshacer.
+                ¿Estás seguro de que deseas eliminar permanentemente el curso <span className="font-bold text-slate-900 dark:text-white">“{deletingCourse.titulo}”</span>? Esta acción no se puede deshacer.
               </p>
               <div className="flex gap-3 justify-end">
                 <button 
@@ -774,6 +889,211 @@ export default function AdminDashboard() {
                   className="px-4 py-2 rounded-xl text-sm font-medium bg-red-500 text-white hover:bg-red-600 shadow-sm transition-colors"
                 >
                   Sí, Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Vista Previa (Revisión Editorial) */}
+        {isPreviewModalOpen && previewCourse && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl relative max-h-[85vh] overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/10 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 text-indigo-500">
+                    <Eye className="w-5 h-5" />
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Revisión del curso</h3>
+                  </div>
+                  <EstadoBadge status={previewData?.status || previewCourse.status} estado={previewCourse.estado} />
+                </div>
+                <button 
+                  onClick={() => setIsPreviewModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
+                {previewLoading ? (
+                  <div className="text-center py-12 text-slate-500 animate-pulse text-sm font-bold">Cargando contenido...</div>
+                ) : previewData ? (
+                  <>
+                    <div>
+                      <p className="text-2xl font-black text-slate-900 dark:text-white leading-tight">{previewData.title}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1.5">
+                        Autor: <strong className="text-slate-900 dark:text-white">{previewData.instructor_name || "Comunidad"}</strong> · 
+                        Categoría: {previewData.category} · 
+                        Nivel: {previewData.level || "Principiante"} · 
+                        Duración: {previewData.duration_hours ? `${previewData.duration_hours} h` : "A tu ritmo"}
+                      </p>
+                    </div>
+
+                    {(() => {
+                      const bg = resolveCourseBackground(previewData.background_style);
+                      return (
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-2">
+                            Carta del curso (vista de estudiantes)
+                          </p>
+                          <CourseCard curso={previewData} className="w-full sm:w-[280px]" />
+                          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 break-all">
+                            Fondo: <code className="text-slate-700 dark:text-slate-300 font-semibold">{previewData.background_style || "bg-slate-950"}</code>
+                            {bg.isImage && <span className="text-amber-600 dark:text-amber-400 font-bold"> · imagen</span>}
+                          </p>
+                        </div>
+                      );
+                    })()}
+
+                    {(() => {
+                      try {
+                        const b = typeof previewData.badges === "string" ? JSON.parse(previewData.badges) : previewData.badges;
+                        return Array.isArray(b) && b.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {b.map((x) => (
+                              <span key={x} className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-300/60 dark:border-violet-500/30">
+                                {x}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null;
+                      } catch {
+                        return null;
+                      }
+                    })()}
+
+                    {previewData.status === "rechazado" && previewData.rejection_reason && (
+                      <div className="rounded-xl border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-950/30 p-4">
+                        <p className="text-xs font-black uppercase tracking-wider text-red-700 dark:text-red-400 mb-1">Motivo del último rechazo</p>
+                        <p className="text-sm text-red-800 dark:text-red-200">{previewData.rejection_reason}</p>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-1.5">Descripción</p>
+                      <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                        {previewData.description || "Sin descripción"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 mb-2">
+                        Estructura ({previewData.lessons?.length || 0} recursos)
+                      </p>
+                      {!previewData.lessons || previewData.lessons.length === 0 ? (
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Este curso no tiene lecciones.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {previewData.lessons.map((lesson, i) => {
+                            const lessonUrl = lesson.video_url
+                              ? (lesson.video_url.startsWith("http") ? lesson.video_url : `https://${lesson.video_url}`)
+                              : null;
+                            return (
+                              <div key={lesson.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-white/10 p-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <span className={`w-7 h-7 shrink-0 rounded-lg text-xs font-black flex items-center justify-center ${lesson.is_active === false ? "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400" : "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300"}`}>
+                                    {i + 1}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{lesson.title}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                      {lesson.content || "Recurso"}
+                                      {lesson.is_active === false && <span className="text-red-500 font-bold"> · Inactiva</span>}
+                                    </p>
+                                  </div>
+                                </div>
+                                {lessonUrl ? (
+                                  <a
+                                    href={lessonUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0 cursor-pointer"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" /> Abrir
+                                  </a>
+                                ) : (
+                                  <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">Sin enlace</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-200 dark:border-white/10 shrink-0">
+                {!previewLoading && previewCourse.status !== "activo" && previewCourse.status !== "published" ? (
+                  <>
+                    <button 
+                      onClick={() => { setIsPreviewModalOpen(false); openRejectModal(previewCourse); }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-red-500 text-white hover:bg-red-600 shadow-sm transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4" /> Rechazar con motivo
+                    </button>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => setIsPreviewModalOpen(false)}
+                        className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        onClick={() => { handleAprobarCurso(previewCourse); setIsPreviewModalOpen(false); }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-500 shadow-sm transition-colors cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-4 h-4" /> Aprobar y publicar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <button 
+                    onClick={() => setIsPreviewModalOpen(false)}
+                    className="ml-auto px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    Cerrar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Rechazo de Curso */}
+        {isRejectModalOpen && rejectCourse && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+              <div className="flex items-center gap-3 text-red-500 mb-4">
+                <AlertTriangle className="w-6 h-6" />
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">Rechazar Curso</h3>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                El curso <span className="font-bold text-slate-900 dark:text-white">“{rejectCourse.titulo}”</span> no se publicará
+                en el catálogo. El autor recibirá por correo el motivo del rechazo.
+              </p>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Escribe el motivo del rechazo..."
+                rows={4}
+                maxLength={1000}
+                className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 focus:outline-none focus:border-red-500 text-slate-900 dark:text-white text-sm"
+              />
+              <div className="flex gap-3 justify-end mt-6">
+                <button 
+                  onClick={() => setIsRejectModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleRechazarCurso}
+                  className="px-4 py-2 rounded-xl text-sm font-medium bg-red-500 text-white hover:bg-red-600 shadow-sm transition-colors"
+                >
+                  Confirmar Rechazo
                 </button>
               </div>
             </div>
