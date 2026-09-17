@@ -267,7 +267,12 @@ export default function CreacionRecursosPage() {
 
         if (!res.ok) {
           const errData = await res.json();
-          setToast({ message: `Error: ${errData.error || errData.message || "Datos inválidos"}`, type: "error" });
+          if (errData.code === "PREMIUM_REQUIRED") {
+            setToast({ message: errData.message || "Esta función es exclusiva del plan premium.", type: "error" });
+            setMostrarPlanModal(true);
+          } else {
+            setToast({ message: `Error: ${errData.error || errData.message || "Datos inválidos"}`, type: "error" });
+          }
           return;
         }
 

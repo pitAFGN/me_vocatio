@@ -4,15 +4,17 @@ const courseController = require("../controllers/course.controller");
 const authenticateToken = require("../middlewares/authMiddleware");
 const { reglasCrearCurso, reglasActualizarCurso } = require("../middlewares/validarInputs");
 
+const requirePremium = authenticateToken.requirePremium;
+
 /* ─── Rutas públicas: cualquiera puede ver el catálogo ─── */
 router.get("/", courseController.listar);
 
 /* ─── Rutas privadas: requieren estar logueado ───
    OJO: "/mios" y "/instructor/analytics" deben ir ANTES de "/:id" para que no lo confunda con un id */
 router.get("/mios", authenticateToken, courseController.misCursos);
-router.get("/instructor/analytics", authenticateToken, courseController.analiticasInstructor);
+router.get("/instructor/analytics", authenticateToken, requirePremium, courseController.analiticasInstructor);
 
-router.post("/", authenticateToken, reglasCrearCurso, courseController.crear);
+router.post("/", authenticateToken, requirePremium, reglasCrearCurso, courseController.crear);
 router.put("/:id", authenticateToken, reglasActualizarCurso, courseController.actualizar);
 router.delete("/:id", authenticateToken, courseController.eliminar);
 

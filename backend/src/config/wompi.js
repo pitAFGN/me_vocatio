@@ -4,10 +4,35 @@ require("dotenv").config();
   Wompi tiene dos ambientes con URLs distintas:
     - Sandbox (pruebas):    https://sandbox.wompi.co/v1
     - Producción (real):    https://production.wompi.co/v1
-  Cuál usar depende de la variable WOMPI_ENV en el .env ('sandbox' o 'production').
+
+  El entorno se resuelve así (en orden de prioridad):
+    1. WOMPI_ENV explícito en el .env ('sandbox' o 'production').
+    2. Si falta, se infiere del prefijo de las llaves configuradas
+       (prv_prod_/pub_prod_ => producción; prv_test_/pub_test_ => sandbox).
+  Esto evita operar llaves de producción contra la URL de sandbox (o a la
+  inversa) cuando WOMPI_ENV no está definido.
 */
+const inferirEnvDesdeLlaves = () => {
+  const publicKey = process.env.WOMPI_PUBLIC_KEY || "";
+  const privateKey = process.env.WOMPI_PRIVATE_KEY || "";
+
+  if (privateKey.startsWith("prv_test_") || publicKey.startsWith("pub_test_")) {
+    return "sandbox";
+  }
+  if (privateKey.startsWith("prv_prod_") || publicKey.startsWith("pub_prod_")) {
+    return "production";
+  }
+  return "sandbox";
+};
+
+const WOMPI_ENV = (() => {
+  const explicito = (process.env.WOMPI_ENV || "").toLowerCase();
+  if (explicito === "production" || explicito === "sandbox") return explicito;
+  return inferirEnvDesdeLlaves();
+})();
+
 const BASE_URL =
-  process.env.WOMPI_ENV === "production"
+  WOMPI_ENV === "production"
     ? "https://production.wompi.co/v1"
     : "https://sandbox.wompi.co/v1";
 
@@ -19,7 +44,7 @@ if (!process.env.WOMPI_PRIVATE_KEY || !process.env.WOMPI_INTEGRITY_SECRET) {
 
 // ── Validación de consistencia entre WOMPI_ENV y los prefijos de las llaves ──
 (function validarConsistenciaWompi() {
-  const env = (process.env.WOMPI_ENV || "").toLowerCase();
+  const env = WOMPI_ENV;
   const publicKey = process.env.WOMPI_PUBLIC_KEY || "";
   const privateKey = process.env.WOMPI_PRIVATE_KEY || "";
   const integritySecret = process.env.WOMPI_INTEGRITY_SECRET || "";
@@ -50,7 +75,9 @@ if (!process.env.WOMPI_PRIVATE_KEY || !process.env.WOMPI_INTEGRITY_SECRET) {
   check(eventsSecret, "test_events_", "prod_events_", "WOMPI_EVENTS_SECRET");
 
   console.log(
-    `✅  Wompi configurado para ambiente: ${env.toUpperCase()} — URL base: ${BASE_URL}`
+    `✅  Wompi configurado para ambiente: ${env.toUpperCase()}${
+      process.env.WOMPI_ENV ? "" : " (inferido de las llaves)"
+    } — URL base: ${BASE_URL}`
   );
 })();
 

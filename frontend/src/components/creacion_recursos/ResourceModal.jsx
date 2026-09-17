@@ -36,18 +36,18 @@ export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNu
   const handleAction = () => {
     if (!title.trim()) return;
     
-    // Validate URL if one was provided
     const trimmedUrl = url.trim();
-    if (trimmedUrl) {
-      try {
-        new URL(trimmedUrl);
-        setUrlError("");
-      } catch (e) {
-        setUrlError("Por favor ingresa una URL válida que incluya https://");
-        return;
-      }
-    } else {
+    if (!trimmedUrl) {
+      setUrlError("La URL del recurso es obligatoria.");
+      return;
+    }
+
+    try {
+      new URL(trimmedUrl);
       setUrlError("");
+    } catch (e) {
+      setUrlError("Por favor ingresa una URL válida que incluya https://");
+      return;
     }
 
     if (editingResource && onEdit) {
@@ -89,9 +89,8 @@ export default function ResourceModal({ isOpen, onClose, onAdd, onEdit, lessonNu
           </div>
 
           <div>
-            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400 flex items-center justify-between">
-              <span>URL o Enlace del Recurso</span>
-              <span className="text-[9px] text-violet-400 font-normal">Recomendado</span>
+            <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 dark:text-slate-400">
+              URL o Enlace del Recurso *
             </label>
             <div className="relative">
               <Globe className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />

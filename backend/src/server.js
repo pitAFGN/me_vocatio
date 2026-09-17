@@ -56,8 +56,15 @@ app.use(csrfOrigin(allowedOrigins, { bypassPaths: ["/api/wompi/eventos"] }));
 
 app.use(express.json({ limit: "1mb" }));
 
-/* ─── Documentación Swagger ─── */
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+/* ─── Documentación Swagger ───
+   Solo se expone la documentación fuera de producción (o si SWAGGER_ENABLED=true):
+   en producción no debe quedar pública la referencia de la API. ─── */
+const swaggerEnabled =
+  process.env.SWAGGER_ENABLED === "true" || process.env.NODE_ENV !== "production";
+
+if (swaggerEnabled) {
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+}
 
 /* ─── Rutas ─── */
 app.use("/api/auth", authRoutes);
@@ -96,7 +103,9 @@ const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, async () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`Documentación en    http://localhost:${PORT}/api-docs`);
+  if (swaggerEnabled) {
+    console.log(`Documentación en    http://localhost:${PORT}/api-docs`);
+  }
 
   try {
     await pool.query("SELECT NOW()");
