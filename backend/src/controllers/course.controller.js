@@ -51,7 +51,7 @@ const obtenerPorId = async (req, res) => {
     if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
       return res.status(400).json({ error: "Identificador de curso inválido" });
     }
-    const curso = await courseService.obtenerCursoPorId(courseId);
+    const curso = await courseService.obtenerCursoPorId(courseId, req.user);
     res.json(curso);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al obtener el curso" });

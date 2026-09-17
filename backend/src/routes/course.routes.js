@@ -35,6 +35,6 @@ router.post("/:id/progress", authenticateToken, courseController.updateProgress)
 /* ─────────────────────────────────────────
    Ruta pública: detalle de un curso (va al final por el ":id")
 ───────────────────────────────────────── */
-router.get("/:id", courseController.obtenerPorId);
+router.get("/:id", authenticateToken.optionalAuth, courseController.obtenerPorId);
 
 module.exports = router;

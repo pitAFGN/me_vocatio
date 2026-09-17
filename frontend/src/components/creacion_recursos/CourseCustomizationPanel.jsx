@@ -1,3 +1,5 @@
+import { resolveCourseBackground } from "@/lib/courseThemes";
+
 export default function CourseCustomizationPanel({
   isPremium,
   backgroundOptions,
@@ -8,6 +10,13 @@ export default function CourseCustomizationPanel({
   toggleBadge,
   curso,
 }) {
+  const normalizarUrl = (valor) => {
+    const v = valor.trim();
+    if (/^https?:\/\//i.test(v)) return v;
+    if (/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(v)) return `https://${v}`;
+    return v;
+  };
+
   return (
     <section
       className={`rounded-3xl border p-5 transition-colors duration-300 ${
@@ -65,6 +74,25 @@ export default function CourseCustomizationPanel({
 
         <div>
           <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
+            Imagen de fondo (opcional)
+          </label>
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              disabled={!isPremium}
+              value={/[\/.]/.test(selectedBackground) ? selectedBackground : ""}
+              onChange={(e) => setSelectedBackground(normalizarUrl(e.target.value))}
+              placeholder="https://dominio.com/imagen-de-fondo.jpg"
+              className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/70 px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40"
+            />
+          </div>
+          <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+            Se verá como fondo de la carta. Evita imágenes ofensivas o ajenas al curso; el admin la revisará antes de publicar.
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
             Insignias / logros
           </label>
           <div className="flex flex-wrap gap-2">
@@ -90,32 +118,50 @@ export default function CourseCustomizationPanel({
         </div>
 
         <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/60 p-4">
-          <div className={`rounded-2xl border border-slate-300 dark:border-slate-700 p-4 ${selectedBackground}`}>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-violet-700 dark:text-violet-200/80">
-                  Curso destacado
-                </p>
-                <h3 className="mt-2 text-2xl font-black text-white">{curso.nombre || "Mi curso"}</h3>
-              </div>
-              <div className="rounded-full border border-violet-300/30 bg-violet-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-800 dark:text-violet-100">
-                Actualizado
-              </div>
-            </div>
+          {(() => {
+            const bg = resolveCourseBackground(selectedBackground);
+            return (
+              <div
+                className={`rounded-2xl border border-slate-300 dark:border-slate-700 p-4 relative overflow-hidden ${bg.className}`}
+              >
+                {bg.isImage && (
+                  <>
+                    <img
+                      src={bg.url}
+                      alt=""
+                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/55"></div>
+                  </>
+                )}
+                <div className={`flex items-center justify-between gap-3 ${bg.isImage ? "relative z-10" : ""}`}>
+                  <div>
+                    <p className={`text-[10px] font-bold uppercase tracking-[0.28em] ${bg.isImage ? "text-violet-200/90" : "text-violet-700 dark:text-violet-200/80"}`}>
+                      Curso destacado
+                    </p>
+                    <h3 className={`mt-2 text-2xl font-black ${bg.isImage ? "text-white" : "text-slate-900 dark:text-white"}`}>{curso.nombre || "Mi curso"}</h3>
+                  </div>
+                  <div className="rounded-full border border-violet-300/30 bg-violet-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-800 dark:text-violet-100">
+                    Actualizado
+                  </div>
+                </div>
 
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-200/90">{curso.descripcion}</p>
+                <p className={`mt-3 text-sm ${bg.isImage ? "relative z-10 text-slate-200" : "text-slate-600 dark:text-slate-200/90"}`}>{curso.descripcion}</p>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              {selectedBadges.map((badge) => (
-                <span
-                  key={badge}
-                  className="rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-violet-800 dark:text-violet-100"
-                >
-                  {badge}
-                </span>
-              ))}
-            </div>
-          </div>
+                <div className={`mt-5 flex flex-wrap gap-2 ${bg.isImage ? "relative z-10" : ""}`}>
+                  {selectedBadges.map((badge) => (
+                    <span
+                      key={badge}
+                      className="rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-1 text-[9px] font-black uppercase tracking-[0.2em] text-violet-800 dark:text-violet-100"
+                    >
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </section>

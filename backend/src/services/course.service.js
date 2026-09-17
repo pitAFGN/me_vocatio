@@ -1,20 +1,31 @@
 const pool = require("../config/db");
 
+const MSG_CURSO_DUPLICADO =
+  "Ya tienes un curso con este mismo título (o una variante muy similar) pendiente de revisión o rechazado. Edita ese curso desde tu lista en lugar de crear uno nuevo.";
+
+const lanzarSiDuplicado = (error) => {
+  if (error && error.code === "23505") {
+    throw { status: 409, message: MSG_CURSO_DUPLICADO, code: "CURSO_PENDING_DUPLICADO" };
+  }
+  throw error;
+};
+
 /* ─────────────────────────────────────────
    CREAR CURSO
 ───────────────────────────────────────── */
 const crearCurso = async (instructorId, datos) => {
-  const { title, description, category, level, duration_hours, background_style, badges, lessons_list, status } = datos;
+  const { title, description, category, level, duration_hours, background_style, badges, lessons_list } = datos;
 
   // Iniciar transacción
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // Insertar curso
+    // Insertar curso. Todo curso nuevo queda en "revision": el admin debe
+    // aprobarlo desde el panel antes de que se publique en el catálogo.
     const resultCurso = await client.query(
       `INSERT INTO courses (instructor_id, title, description, category, level, duration_hours, background_style, badges, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'revision')
        RETURNING *`,
       [
         instructorId,
@@ -25,7 +36,6 @@ const crearCurso = async (instructorId, datos) => {
         duration_hours || null,
         background_style || "bg-slate-950",
         JSON.stringify(badges || []),
-        status || "activo"
       ]
     );
 
@@ -56,7 +66,7 @@ const crearCurso = async (instructorId, datos) => {
     return nuevoCurso;
   } catch (error) {
     await client.query("ROLLBACK");
-    throw error;
+    lanzarSiDuplicado(error);
   } finally {
     client.release();
   }
@@ -101,7 +111,7 @@ const listarCursos = async ({ search, category, level } = {}) => {
 /* ─────────────────────────────────────────
    OBTENER UN CURSO POR ID (público)
 ───────────────────────────────────────── */
-const obtenerCursoPorId = async (id) => {
+const obtenerCursoPorId = async (id, viewer = null) => {
   const resultado = await pool.query(
     `SELECT c.*, u.name AS instructor_name, u.email AS instructor_email
      FROM courses c
@@ -115,6 +125,26 @@ const obtenerCursoPorId = async (id) => {
   }
 
   const curso = resultado.rows[0];
+
+  // Flujo editorial: solo los cursos activos/publicados son públicos.
+  // El autor (o un admin) pueden ver el suyo en cualquier estado; el resto
+  // recibe 404 para que los borradores/revisiones no se filtren.
+  const esPublico = curso.status === "activo" || curso.status === "published";
+  if (!esPublico) {
+    let permitido = false;
+    if (viewer && viewer.id) {
+      const esAutor = String(viewer.id) === String(curso.instructor_id);
+      if (esAutor) {
+        permitido = true;
+      } else {
+        const rolRes = await pool.query("SELECT role FROM users WHERE id = $1", [viewer.id]);
+        permitido = rolRes.rows[0]?.role === "admin";
+      }
+    }
+    if (!permitido) {
+      throw { status: 404, message: "El curso no existe" };
+    }
+  }
 
   // Fetch the lessons for this course
   const lessonsResult = await pool.query(
@@ -179,6 +209,19 @@ const actualizarCurso = async (id, instructorId, datos) => {
   const { title, description, category, level, duration_hours, status, background_style, badges, lessons_list } = datos;
   const actual = cursoExistente.rows[0];
 
+  // Un autor nunca publica directo: "activo"/"published" solo los asigna el admin
+  // al aprobar (flujo editorial). Excepción: un curso que YA fue aprobado
+  // (approved_at) puede ocultarse ('inactivo') o volver a mostrarse ('activo'):
+  // es el borrado lógico del autor. Un 'activo' sin historial de aprobación se
+  // ignora para no saltarse el flujo editorial.
+  const ESTADOS_AUTOR = new Set(["borrador", "draft", "revision", "inactivo"]);
+  let statusFinal = actual.status;
+  if (status && ESTADOS_AUTOR.has(status)) {
+    statusFinal = status === "draft" ? "borrador" : status;
+  } else if (status === "activo" && actual.approved_at) {
+    statusFinal = "activo";
+  }
+
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -196,9 +239,15 @@ const actualizarCurso = async (id, instructorId, datos) => {
         category ?? actual.category,
         level ?? actual.level,
         duration_hours ?? actual.duration_hours,
-        status ?? actual.status,
+        statusFinal,
         background_style ?? actual.background_style,
-        badges ? JSON.stringify(badges) : actual.badges,
+        // Los badges llegan desde pg ya parseados (array JS) o como string JSON:
+        // siempre hay que entregarlos como JSON válido o PostgreSQL tira 22P02.
+        (() => {
+          const v = badges !== undefined ? badges : actual.badges;
+          if (v === null || v === undefined) return null;
+          return typeof v === "string" ? v : JSON.stringify(v);
+        })(),
         id,
       ]
     );
@@ -271,7 +320,7 @@ const actualizarCurso = async (id, instructorId, datos) => {
     return resultado.rows[0];
   } catch (error) {
     await client.query("ROLLBACK");
-    throw error;
+    lanzarSiDuplicado(error);
   } finally {
     client.release();
   }
