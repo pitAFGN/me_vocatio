@@ -69,13 +69,6 @@ export default function CourseDetailPage() {
       if (saved) {
         setVisitedLessons(JSON.parse(saved));
       }
-      
-      // Registrar inscripción en backend silenciosamente
-      fetch(`${API_URL}/api/courses/${params.id}/enroll`, {
-        method: "POST",
-        credentials: "include"
-      }).catch(e => console.error(e));
-      
     } catch (e) {
       console.error(e);
     }

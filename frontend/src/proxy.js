@@ -12,6 +12,7 @@ const protectedRoutes = [
   "/favoritos",
   "/configuracion",
   "/admin",
+  "/pago-resultado",
 ];
 
 const secretKey = () => new TextEncoder().encode(process.env.JWT_ACCESS_SECRET || "");

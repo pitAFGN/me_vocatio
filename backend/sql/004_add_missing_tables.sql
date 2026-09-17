@@ -1,7 +1,11 @@
 -- ─────────────────────────────────────────────────────────
 -- Migración: Tablas faltantes de MeVocatio
 --   (evaluaciones, contenido de cursos, inscripciones,
---    progreso, categorías, reseñas, perfiles, notificaciones)
+--    progreso, reseñas)
+--   NOTA: las secciones de categories, evaluation_questions,
+--   evaluation_answers, user_profiles y notifications fueron
+--   eliminadas porque esas tablas fueron borradas en la
+--   migración 013 (estaban sin uso en el backend).
 -- ─────────────────────────────────────────────────────────
 -- Ejecutar desde la carpeta backend/:
 --   node sql/run-migration.js 004_add_missing_tables.sql
@@ -25,63 +29,7 @@ CREATE TABLE IF NOT EXISTS evaluations (
 CREATE INDEX IF NOT EXISTS idx_evaluations_user_id ON evaluations (user_id);
 
 -- ═══════════════════════════════════════════════════════
--- 2) EVALUATION_QUESTIONS
---    Las preguntas que genera la IA (Groq) para cada test,
---    guardadas para no perderlas y poder revisarlas después.
--- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS evaluation_questions (
-  id SERIAL PRIMARY KEY,
-  evaluation_id INTEGER NOT NULL REFERENCES evaluations(id) ON DELETE CASCADE,
-  enunciado TEXT NOT NULL,
-  dificultad VARCHAR(20) NOT NULL DEFAULT 'Intermedio', -- Principiante | Intermedio | Avanzado
-  opciones JSONB NOT NULL,          -- ej: ["Opción A", "Opción B", "Opción C", "Opción D"]
-  opcion_correcta_idx INTEGER NOT NULL,
-  puntos INTEGER NOT NULL DEFAULT 1,
-  orden INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_evaluation_questions_evaluation_id
-  ON evaluation_questions (evaluation_id);
-
--- ═══════════════════════════════════════════════════════
--- 3) EVALUATION_ANSWERS
---    Lo que respondió el usuario en cada pregunta del test.
--- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS evaluation_answers (
-  id SERIAL PRIMARY KEY,
-  evaluation_id INTEGER NOT NULL REFERENCES evaluations(id) ON DELETE CASCADE,
-  question_id INTEGER NOT NULL REFERENCES evaluation_questions(id) ON DELETE CASCADE,
-  selected_idx INTEGER NOT NULL,
-  is_correct BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (evaluation_id, question_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_evaluation_answers_evaluation_id
-  ON evaluation_answers (evaluation_id);
-
--- ═══════════════════════════════════════════════════════
--- 4) CATEGORIES
---    Hoy "courses.category" es texto libre. Con esta tabla
---    evitas duplicados como "Tecnologia" vs "Tecnología".
---    category_id es opcional (nullable) para no romper los
---    cursos que ya tengan el texto libre en "category".
--- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS categories (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL UNIQUE,
-  slug VARCHAR(120) NOT NULL UNIQUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-ALTER TABLE courses
-  ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(id);
-
-CREATE INDEX IF NOT EXISTS idx_courses_category_id ON courses (category_id);
-
--- ═══════════════════════════════════════════════════════
--- 5) LESSONS
+-- 2) LESSONS
 --    El contenido real de un curso (clases/módulos). Sin
 --    esto, un curso es solo un título y una descripción.
 -- ═══════════════════════════════════════════════════════
@@ -99,7 +47,7 @@ CREATE TABLE IF NOT EXISTS lessons (
 CREATE INDEX IF NOT EXISTS idx_lessons_course_id ON lessons (course_id);
 
 -- ═══════════════════════════════════════════════════════
--- 6) ENROLLMENTS
+-- 3) ENROLLMENTS
 --    Qué estudiante se inscribió a qué curso.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS enrollments (
@@ -115,7 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_enrollments_user_id ON enrollments (user_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments (course_id);
 
 -- ═══════════════════════════════════════════════════════
--- 7) COURSE_PROGRESS
+-- 4) COURSE_PROGRESS
 --    Qué lecciones ya completó cada estudiante inscrito.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS course_progress (
@@ -130,7 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_course_progress_enrollment_id
   ON course_progress (enrollment_id);
 
 -- ═══════════════════════════════════════════════════════
--- 8) REVIEWS
+-- 5) REVIEWS
 --    Calificación y comentario de un estudiante sobre un curso.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS reviews (
@@ -144,37 +92,5 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reviews_course_id ON reviews (course_id);
-
--- ═══════════════════════════════════════════════════════
--- 9) USER_PROFILES
---    Datos de perfil (bio, foto, titular) separados de
---    "users", que es solo para login/autenticación.
--- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS user_profiles (
-  id SERIAL PRIMARY KEY,
-  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-  headline VARCHAR(150),
-  bio TEXT,
-  avatar_url VARCHAR(500),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- ═══════════════════════════════════════════════════════
--- 10) NOTIFICATIONS
---     Avisos para el usuario ("tu curso fue aprobado", etc.)
--- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS notifications (
-  id SERIAL PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title VARCHAR(150) NOT NULL,
-  message TEXT NOT NULL,
-  type VARCHAR(50) NOT NULL DEFAULT 'general',
-  is_read BOOLEAN NOT NULL DEFAULT false,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications (user_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications (is_read);
 
 COMMIT;

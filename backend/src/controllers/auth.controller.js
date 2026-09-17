@@ -1,5 +1,5 @@
 const authService = require("../services/auth.service");
-const { verifyRefreshToken, generateAccessToken } = require("../utils/jwt");
+const { verifyRefreshToken, generateAccessToken, generateRefreshToken } = require("../utils/jwt");
 const achievementService = require("../services/achievement.service");
 const { setAuthCookies, clearAuthCookies, getAuthCookies, SESSION_COOKIE } = require("../utils/authCookies");
 const { getRefreshToken, storeRefreshToken, deleteRefreshToken } = require("../utils/sessionStore");
@@ -43,21 +43,33 @@ const login = async (req, res) => {
 ───────────────────────────────────────── */
 const refreshToken = async (req, res) => {
   const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
-  const refreshToken = sessionId ? await getRefreshToken(sessionId) : null;
-
-  if (!refreshToken || !sessionId) {
-    return res.status(400).json({ error: "La sesión no tiene refresh token válido" });
-  }
 
   try {
+    const refreshToken = sessionId ? await getRefreshToken(sessionId) : null;
+
+    if (!refreshToken || !sessionId) {
+      return res.status(400).json({ error: "La sesión no tiene refresh token válido" });
+    }
+
     const decoded = verifyRefreshToken(refreshToken);
+
+    // Rotación del refresh token: cada renovación emite un refresh token nuevo
+    // y desecha el anterior (el que quedó guardado en BD deja de servir).
+    const newRefreshToken = generateRefreshToken({ id: decoded.id, role: decoded.role });
     const newAccessToken = generateAccessToken({ id: decoded.id, email: decoded.email, role: decoded.role });
 
+    await storeRefreshToken(sessionId, newRefreshToken, decoded.id);
     setAuthCookies(res, newAccessToken, sessionId);
     res.json({ message: "Sesión renovada" });
   } catch (error) {
-    await deleteRefreshToken(sessionId);
-    res.status(403).json({ error: "Refresh Token inválido o expirado" });
+    if (sessionId) {
+      try {
+        await deleteRefreshToken(sessionId);
+      } catch (dbErr) {
+        console.error("Error al borrar el refresh token:", dbErr);
+      }
+    }
+    res.status(403).json({ error: "Refresh Token inválido, expirado o error interno" });
   }
 };
 
@@ -92,12 +104,16 @@ const actualizarNombre = async (req, res) => {
 const logout = async (req, res) => {
   const { [SESSION_COOKIE]: sessionId } = getAuthCookies(req);
 
-  if (sessionId) {
-    await deleteRefreshToken(sessionId);
+  try {
+    if (sessionId) {
+      await deleteRefreshToken(sessionId);
+    }
+  } catch (error) {
+    console.error("Error al borrar sesión durante logout:", error);
+  } finally {
+    clearAuthCookies(res);
+    res.json({ message: "Sesión cerrada" });
   }
-
-  clearAuthCookies(res);
-  res.json({ message: "Sesión cerrada" });
 };
 
 /* ─────────────────────────────────────────
