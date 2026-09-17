@@ -8,7 +8,7 @@ const contentSecurityPolicy = [
   // 'unsafe-inline' en script/style: Next.js inyecta scripts y estilos inline
   // (RSC payload, dev overlay). El markdown de la IA se escapa por defecto
   // (react-markdown sin rehypeRaw), así que no hay vector de XSS conocido.
-  "script-src 'self' 'unsafe-inline' https://checkout.wompi.co https://www.google.com https://www.gstatic.com",
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://checkout.wompi.co https://www.google.com https://www.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://checkout.wompi.co",
   `img-src 'self' data: blob: ${apiOrigin} https:`,
   "font-src 'self' data:",
