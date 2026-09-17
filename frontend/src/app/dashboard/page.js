@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Bell } from "lucide-react";
-
 import { useAuth } from "@/hooks/useAuth";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { VOCATION_GROUPS, getVocationsForGroup } from "@/lib/vocationGroups";
@@ -15,7 +13,6 @@ import LoadingScreen from "@/components/LoadingScreen";
 import SidebarNav from "@/components/SidebarNav";
 import DashboardHome from "@/components/DashboardHome";
 import LevelUpModal from "@/components/LevelUpModal";
-import AchievementToast from "@/components/AchievementToast";
 
 const PlanSelectionModal = dynamic(
   () => import("@/components/PlanSelectionModal"),
@@ -39,12 +36,9 @@ export default function ExecutiveDashboard() {
     }
   }, [user]);
 
-  const handlePlanSelect = (selectedPlan) => {
+  const handlePlanSelect = () => {
     localStorage.setItem("mevocatio_plan_modal_seen", "true");
     setMostrarPlanModal(false);
-    if (selectedPlan === 'premium') {
-      window.location.reload();
-    }
   };
 
   const [profileData, setProfileData] = useState({
@@ -81,7 +75,6 @@ export default function ExecutiveDashboard() {
 
   const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState(1);
-  const [newAchievements, setNewAchievements] = useState([]);
 
   const handleAddXp = async () => {
     try {
@@ -108,7 +101,9 @@ export default function ExecutiveDashboard() {
         }
 
         if (data.unlockedAchievements && data.unlockedAchievements.length > 0) {
-          setNewAchievements(data.unlockedAchievements);
+          window.dispatchEvent(
+            new CustomEvent("achievement-unlocked", { detail: data.unlockedAchievements })
+          );
         }
       }
     } catch (err) {

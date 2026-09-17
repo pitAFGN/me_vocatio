@@ -39,8 +39,9 @@ export default function PlanSelectionModal({ onSelect }) {
   const handlePagarPremium = () => {
     pagarPremium({
       onExito: (transaction) => {
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && transaction.status === "APPROVED") {
           window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(["premium_member"]));
+          window.dispatchEvent(new Event("local-storage-update"));
         }
         const params = new URLSearchParams({
           concept: "premium",

@@ -9,14 +9,12 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function MisRutasPage() {
   const router = useRouter();
-  const { logout, loading: authLoading } = useAuth();
+  const { logout } = useAuth();
   const [evaluations, setEvaluations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (authLoading) return;
-    
     const fetchEvaluations = async () => {
       try {
         const response = await fetch(`${API_URL}/api/users/evaluations`, {
@@ -37,7 +35,7 @@ export default function MisRutasPage() {
     };
     
     fetchEvaluations();
-  }, [authLoading]);
+  }, []);
 
   return (
     <div className="bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-slate-100 min-h-screen relative overflow-x-hidden">

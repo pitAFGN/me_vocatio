@@ -212,6 +212,8 @@ export default function CourseDetailPage() {
   const isCourseCompleted = totalLessons > 0 && completedLessonsCount >= totalLessons;
 
   // Encontrar la primera lección no vista para el botón "Continuar"
+  const normalizarUrl = (url) => (url && !url.startsWith("http") ? `https://${url}` : url) || null;
+
   const nextLesson = course.lessons?.find(l => !visitedLessons.includes(l.id));
 
   const courseTheme = COURSE_THEME_CLASSES[course.background_style] || "bg-white dark:bg-slate-900";
@@ -307,7 +309,7 @@ export default function CourseDetailPage() {
                 Siguiente: <strong className="text-slate-900 dark:text-white">{nextLesson.title}</strong>
               </span>
               <button
-                onClick={() => markLessonAsVisited(nextLesson.id, nextLesson.video_url)}
+                onClick={() => markLessonAsVisited(nextLesson.id, normalizarUrl(nextLesson.video_url))}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-violet-600/20 transition-all cursor-pointer"
               >
                 <span>Continuar</span>
@@ -333,9 +335,7 @@ export default function CourseDetailPage() {
           ) : (
             course.lessons.map((lesson, index) => {
               const isVisited = visitedLessons.includes(lesson.id);
-              const lessonUrl = lesson.video_url 
-                ? (lesson.video_url.startsWith("http") ? lesson.video_url : `https://${lesson.video_url}`) 
-                : null;
+              const lessonUrl = normalizarUrl(lesson.video_url);
               const isCurrent = nextLesson?.id === lesson.id;
 
               return (

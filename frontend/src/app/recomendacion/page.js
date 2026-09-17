@@ -24,7 +24,6 @@ import { useResourceFavorites, recursoId } from "@/hooks/useResourceFavorites";
 import "./RecomendacionPage.css";
 
 import SidebarNav from "@/components/SidebarNav";
-import AchievementToast from "@/components/AchievementToast";
 import ResourceAiModal from "@/components/ResourceAiModal";
 import PlanSelectionModal from "@/components/PlanSelectionModal";
 import ResourceCard from "@/components/ResourceCard";
@@ -50,7 +49,6 @@ function RecomendacionContent() {
   const [cargando, setCargando] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState(null);
-  const [newAchievements, setNewAchievements] = useState([]);
   const [userRole, setUserRole] = useState(null);
 
   const [paginasRecursos, setPaginasRecursos] = useState([]);
@@ -68,17 +66,6 @@ function RecomendacionContent() {
 
   // Favoritos de recursos (Rutas de Aprendizaje)
   const { savedResourceIds, toggleResourceSave } = useResourceFavorites();
-
-  useEffect(() => {
-    const savedAchievements = localStorage.getItem("mevocatio_new_achievements");
-    if (!savedAchievements) return;
-
-    try {
-      setNewAchievements(JSON.parse(savedAchievements));
-    } catch {
-      localStorage.removeItem("mevocatio_new_achievements");
-    }
-  }, []);
 
   // Animación de pasos mientras carga la IA
   useEffect(() => {
@@ -99,11 +86,8 @@ function RecomendacionContent() {
       .catch(() => setUserRole(null));
   }, [me]);
 
-  const cambiarPlan = (nuevoPlan) => {
+  const cambiarPlan = () => {
     setIsPlanModalOpen(false);
-    if (nuevoPlan === 'premium') {
-      window.location.reload();
-    }
   };
 
   // Función temporal de prueba para simular el desbloqueo de una insignia
@@ -113,7 +97,6 @@ function RecomendacionContent() {
       window.localStorage.setItem("mevocatio_new_achievements", JSON.stringify(logrosPrueba));
       window.dispatchEvent(new Event("local-storage-update"));
     }
-    setNewAchievements(logrosPrueba);
   };
 
   const handleOpenAiAssistant = (material) => {

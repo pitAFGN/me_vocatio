@@ -491,11 +491,8 @@ export default function CreacionRecursosPage() {
 
         {mostrarPlanModal && (
           <PlanSelectionModal
-            onSelect={(selectedPlan) => {
+            onSelect={() => {
               setMostrarPlanModal(false);
-              if (selectedPlan === "premium") {
-                window.location.reload();
-              }
             }}
           />
         )}
