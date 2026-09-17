@@ -152,6 +152,30 @@ const actualizarCurso = async (id, instructorId, datos) => {
     throw { status: 403, message: "No tienes permiso para editar este curso" };
   }
 
+  // Solo usuarios premium pueden publicar/ mantener cursos publicados (M1).
+  const usuarioRes = await pool.query("SELECT plan FROM users WHERE id = $1", [instructorId]);
+  const plan = (usuarioRes.rows[0]?.plan || "free").toLowerCase();
+  const esPremium = plan === "premium";
+
+  if (!esPremium) {
+    const estadoActual = cursoExistente.rows[0].status;
+    const estadoSolicitado = datos.status || estadoActual;
+
+    if (estadoActual === "activo" || estadoActual === "published") {
+      throw { status: 403, message: "Solo los usuarios premium pueden gestionar cursos publicados.", code: "PREMIUM_REQUIRED" };
+    }
+    if (estadoSolicitado === "activo" || estadoSolicitado === "published") {
+      throw { status: 403, message: "Solo los usuarios premium pueden publicar cursos.", code: "PREMIUM_REQUIRED" };
+    }
+    // Campos de personalización exclusivos del plan premium.
+    if (datos.background_style && datos.background_style !== "bg-slate-950") {
+      throw { status: 403, message: "La personalización visual es exclusiva del plan premium.", code: "PREMIUM_REQUIRED" };
+    }
+    if (Array.isArray(datos.badges) && datos.badges.length > 0) {
+      throw { status: 403, message: "Las insignias (badges) son exclusivas del plan premium.", code: "PREMIUM_REQUIRED" };
+    }
+  }
+
   const { title, description, category, level, duration_hours, status, background_style, badges, lessons_list } = datos;
   const actual = cursoExistente.rows[0];
 
@@ -450,6 +474,29 @@ const obtenerAnaliticasInstructor = async (instructorId, courseId = null) => {
 const crearOActualizarReview = async (courseId, userId, { rating, comment }) => {
   if (!rating || rating < 1 || rating > 5) {
     throw { status: 400, message: "La calificación debe estar entre 1 y 5 estrellas" };
+  }
+
+  // El curso debe existir y estar publicado para poder valorarlo.
+  const curso = await pool.query(
+    `SELECT id, instructor_id FROM courses WHERE id = $1 AND (status = 'activo' OR status = 'published')`,
+    [courseId]
+  );
+  if (curso.rows.length === 0) {
+    throw { status: 404, message: "El curso no existe o no está disponible" };
+  }
+
+  // El instructor no puede valorar su propio curso.
+  if (curso.rows[0].instructor_id === userId) {
+    throw { status: 400, message: "No puedes valorar tu propio curso" };
+  }
+
+  // Solo los estudiantes inscritos al curso pueden dejar una reseña.
+  const inscripcion = await pool.query(
+    `SELECT id FROM enrollments WHERE user_id = $1 AND course_id = $2`,
+    [userId, courseId]
+  );
+  if (inscripcion.rows.length === 0) {
+    throw { status: 403, message: "Debes estar inscrito en el curso para valorarlo" };
   }
 
   // Verificar si ya existe una review previa de este usuario para este curso

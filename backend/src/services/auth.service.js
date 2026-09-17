@@ -133,6 +133,13 @@ const login = async (email, password) => {
   }
 
   const user = resultado.rows[0];
+
+  // Cuentas creadas únicamente con Google no tienen contraseña: no se puede
+  // comparar bcrypt contra un hash vacío (eso lanzaba un error 500).
+  if (!user.password_hash) {
+    throw { status: 401, message: "Credenciales inválidas" };
+  }
+
   const passwordValida = await bcrypt.compare(password, user.password_hash);
 
   if (!passwordValida) {
@@ -140,10 +147,9 @@ const login = async (email, password) => {
   }
 
   if (!user.email_verified) {
-    throw {
-      status: 403,
-      message: "Debes verificar tu correo electrónico antes de iniciar sesión.",
-    };
+    // Misma respuesta genérica que para credenciales inválidas (anti-enumeración):
+    // no se revela que el correo existe pero aún no está verificado.
+    throw { status: 401, message: "Credenciales inválidas" };
   }
 
   const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
@@ -278,6 +284,10 @@ const resetPassword = async (token, newPassword) => {
      WHERE id = $2`,
     [hashedPassword, user.id]
   );
+
+  // Invalidar todas las sesiones activas (refresh tokens) del usuario: después
+  // de un cambio de contraseña no debe quedar ninguna sesión previa viva.
+  await pool.query(`DELETE FROM sessions WHERE user_id = $1`, [user.id]);
 };
 
 /* ─────────────────────────────────────────
@@ -360,13 +370,22 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
 
   if (resultado.rows.length > 0) {
     user = resultado.rows[0];
-    if (!user.email_verified) {
-      await pool.query(
-        "UPDATE users SET email_verified = true, email_verified_at = NOW() WHERE id = $1",
-        [user.id]
-      );
-      user.email_verified = true;
+
+    // Seguridad: NO se permite que un login OAuth se apodere de una cuenta
+    // existente con credenciales propias (correo+contraseña). Eso permitiría
+    // que cualquiera que registre un correo en Google secuestre la cuenta de
+    // una víctima. Las cuentas OAuth ya existentes se reconocen porque no
+    // tienen password_hash y ya están verificadas.
+    const tienePassword = Boolean(user.password_hash);
+    if (tienePassword || !user.email_verified) {
+      throw {
+        status: 409,
+        message:
+          "Ya existe una cuenta con este correo y credenciales propias. Inicia sesión con tu correo y contraseña desde el formulario de acceso.",
+      };
     }
+
+    // Cuenta creada originalmente con Google: login normal.
   } else {
     const nuevoUsuario = await pool.query(
       "INSERT INTO users (name, email, password_hash, email_verified, email_verified_at) VALUES ($1, $2, $3, true, NOW()) RETURNING id, name, email, plan, xp, level, current_streak, role",

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export function proxy(request) {
   // Las rutas que queremos proteger (que requieren iniciar sesión)
-  const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias', '/mis-rutas', '/favoritos', '/configuracion', '/admin'];
+  const protectedRoutes = ['/dashboard', '/creacion_recursos', '/diagnostico', '/recomendacion', '/insignias', '/mis-rutas', '/favoritos', '/configuracion', '/admin', '/pago-resultado'];
   
   const { pathname } = request.nextUrl;
   

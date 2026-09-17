@@ -122,16 +122,8 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       }
     } catch (err) {
       const msg = err.message || "";
-      if (msg.includes("Credenciales")) setErrorGeneral("Email o contraseña incorrectos.");
+      if (msg.includes("Credenciales")) setErrorGeneral("Email o contraseña incorrectos. Si aún no has confirmado tu correo, revisa tu bandeja de entrada.");
       else if (msg.includes("registrado")) setErrorGeneral("Este email ya tiene una cuenta. Inicia sesión.");
-      else if (msg.includes("verificar tu correo") || msg.toLowerCase().includes("confirm")) {
-        mostrarAlerta({
-          text: "Tenemos tu correo, para poder ingresar confírmalo primero.",
-          icon: "warning",
-          confirmButtonColor: "#8b5cf6"
-        });
-        setErrorGeneral("Debes verificar tu correo electrónico antes de iniciar sesión.");
-      }
       else if (msg.includes("correo")) setErrorGeneral("No encontramos una cuenta con ese email.");
       else if (msg.includes("reCAPTCHA")) setErrorGeneral("Validación de reCAPTCHA inválida o expirada. Inténtalo de nuevo.");
       else setErrorGeneral(msg || "Ocurrió un error, intenta de nuevo.");

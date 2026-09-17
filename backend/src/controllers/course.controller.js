@@ -11,14 +11,7 @@ const crear = async (req, res) => {
     await achievementService.incrementarProgreso(req.user.id, "resources_created");
     const unlocked = await achievementService.evaluarLogros(req.user.id);
 
-    const xpService = require("../services/xp.service");
-    const xpResult = await xpService.grantXp(req.user.id, xpService.XP_ACTIONS.course_completed);
-    
-    if (xpResult && xpResult.unlockedAchievements?.length > 0) {
-      unlocked.push(...xpResult.unlockedAchievements);
-    }
-
-    res.status(201).json({ ...curso, unlocked, xpAdded: xpService.XP_ACTIONS.course_completed, xpData: xpResult });
+    res.status(201).json({ ...curso, unlocked });
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al crear el curso" });
   }
@@ -54,7 +47,11 @@ const misCursos = async (req, res) => {
 ───────────────────────────────────────── */
 const obtenerPorId = async (req, res) => {
   try {
-    const curso = await courseService.obtenerCursoPorId(req.params.id);
+    const courseId = parseInt(req.params.id, 10);
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+    const curso = await courseService.obtenerCursoPorId(courseId);
     res.json(curso);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al obtener el curso" });
@@ -66,7 +63,11 @@ const obtenerPorId = async (req, res) => {
 ───────────────────────────────────────── */
 const actualizar = async (req, res) => {
   try {
-    const curso = await courseService.actualizarCurso(req.params.id, req.user.id, req.body);
+    const courseId = parseInt(req.params.id, 10);
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+    const curso = await courseService.actualizarCurso(courseId, req.user.id, req.body);
     res.json(curso);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al actualizar el curso" });
@@ -78,7 +79,11 @@ const actualizar = async (req, res) => {
 ───────────────────────────────────────── */
 const eliminar = async (req, res) => {
   try {
-    const resultado = await courseService.eliminarCurso(req.params.id, req.user.id);
+    const courseId = parseInt(req.params.id, 10);
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+    const resultado = await courseService.eliminarCurso(courseId, req.user.id);
     res.json(resultado);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error interno al eliminar el curso" });
@@ -103,7 +108,11 @@ const analiticasInstructor = async (req, res) => {
 ───────────────────────────────────────── */
 const agregarReview = async (req, res) => {
   try {
-    const review = await courseService.crearOActualizarReview(req.params.id, req.user.id, req.body);
+    const courseId = parseInt(req.params.id, 10);
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+    const review = await courseService.crearOActualizarReview(courseId, req.user.id, req.body);
     res.status(201).json(review);
   } catch (error) {
     res.status(error.status || 500).json({ error: error.message || "Error al agregar reseña" });
@@ -112,7 +121,11 @@ const agregarReview = async (req, res) => {
 
 const obtenerReviews = async (req, res) => {
   try {
-    const data = await courseService.obtenerReviewsCurso(req.params.id);
+    const courseId = parseInt(req.params.id, 10);
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
+      return res.status(400).json({ error: "Identificador de curso inválido" });
+    }
+    const data = await courseService.obtenerReviewsCurso(courseId);
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener reseñas del curso" });
@@ -127,7 +140,7 @@ const enrollInCourse = async (req, res) => {
     const courseId = parseInt(req.params.id, 10);
     const userId = req.user.id;
 
-    if (!Number.isInteger(courseId) || courseId <= 0) {
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
       return res.status(400).json({ error: "Identificador de curso inválido" });
     }
 
@@ -162,7 +175,7 @@ const updateProgress = async (req, res) => {
     const lessonId = parseInt(rawLessonId, 10);
     const userId = req.user.id;
 
-    if (!Number.isInteger(courseId) || courseId <= 0) {
+    if (!Number.isInteger(courseId) || courseId <= 0 || courseId > 2147483647) {
       return res.status(400).json({ error: "Identificador de curso inválido" });
     }
     if (!Number.isInteger(lessonId) || lessonId <= 0) {
@@ -230,7 +243,6 @@ module.exports = {
   listar,
   misCursos,
   obtenerPorId,
-  crear,
   actualizar,
   eliminar,
   analiticasInstructor,

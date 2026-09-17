@@ -65,3 +65,4 @@ const checkAndUpdateStreak = async (userId) => {
 module.exports = {
   checkAndUpdateStreak
 };
+
