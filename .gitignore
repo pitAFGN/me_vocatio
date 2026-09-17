@@ -1,2 +1,6 @@
 # Internal opencode planning files
 .opencode/
+
+# Environment files (use .env.example as template)
+.env
+.env.local

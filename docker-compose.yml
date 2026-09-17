@@ -34,6 +34,12 @@ services:
         # bundle de JavaScript en tiempo de build, no en tiempo de arranque.
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
     container_name: mevocatio-frontend
+    # env_file inyecta las variables en RUNTIME: NEXT_PUBLIC_* quedan obsoletas
+    # (ya horneadas en el bundle durante el build) pero JWT_ACCESS_SECRET es
+    # necesaria para que el middleware (src/proxy.js, runtime nodejs) verifique
+    # la firma del access_token. Debe ser el mismo valor que el del backend.
+    env_file:
+      - ./frontend/.env.local
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     depends_on:

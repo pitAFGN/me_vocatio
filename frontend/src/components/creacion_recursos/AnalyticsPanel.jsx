@@ -8,9 +8,6 @@ export default function AnalyticsPanel({
   isPremium,
   onUpgrade,
   resources = [],
-  metricCards: fallbackCards,
-  funnelData: fallbackFunnel,
-  recentStudents: fallbackStudents,
 }) {
   const [liveData, setLiveData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -124,7 +121,7 @@ export default function AnalyticsPanel({
       });
     });
   } else {
-    dynamicFunnel = fallbackFunnel || [
+    dynamicFunnel = [
       { step: "Inicio del curso", value: 100, color: "bg-violet-500" },
       { step: "Lección 1", value: 85, color: "bg-purple-500" },
       { step: "Lección 2", value: 70, color: "bg-indigo-500" },
