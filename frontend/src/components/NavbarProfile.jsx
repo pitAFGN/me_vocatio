@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, FolderHeart, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,15 +13,23 @@ export default function NavbarProfile() {
     const { logout } = useAuth();
     const [user, setUser] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [checking, setChecking] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
     const isCreatePage = pathname.startsWith('/creacion_recursos');
     const showCreateButton = pathname.startsWith('/dashboard') && !isCreatePage;
 
-    useEffect(() => {
-        const checkAuth = async () => {
+    const checkAuth = useCallback(async () => {
+        try {
+            const response = await authService.me();
+            setUser(response.user);
+            setIsLoggedIn(true);
+        } catch {
+            // El access_token venció (15 min). Se intenta renovar la sesión una vez
+            // antes de mostrar "ACCESO", igual que hacen los route guards.
             try {
+                await authService.refresh();
                 const response = await authService.me();
                 setUser(response.user);
                 setIsLoggedIn(true);
@@ -29,7 +37,12 @@ export default function NavbarProfile() {
                 setUser(null);
                 setIsLoggedIn(false);
             }
-        };
+        } finally {
+            setChecking(false);
+        }
+    }, []);
+
+    useEffect(() => {
         checkAuth();
         window.addEventListener('storage', checkAuth);
         window.addEventListener('local-storage-update', checkAuth);
@@ -37,7 +50,7 @@ export default function NavbarProfile() {
             window.removeEventListener('storage', checkAuth);
             window.removeEventListener('local-storage-update', checkAuth);
         };
-    }, []);
+    }, [checkAuth, pathname]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -64,6 +77,17 @@ export default function NavbarProfile() {
         router.push('/creacion_recursos');
         setIsMenuOpen(false);
     };
+
+    // Mientras se verifica la sesión se muestra un placeholder: evita el flash
+    // del botón "ACCESO" en páginas protegidas y mientras se renueva la sesión.
+    if (checking) {
+        return (
+            <div
+                aria-hidden="true"
+                className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700"
+            />
+        );
+    }
 
     if (!isLoggedIn) {
         const isAccessActive = pathname.startsWith("/login");

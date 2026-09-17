@@ -9,7 +9,7 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/services/auth.service", () => ({
-  authService: { me: vi.fn() },
+  authService: { me: vi.fn(), refresh: vi.fn() },
 }));
 
 describe("NavbarProfile", () => {
@@ -20,6 +20,8 @@ describe("NavbarProfile", () => {
     push = vi.fn();
     useRouter.mockReturnValue({ replace, push });
     authService.me.mockReset();
+    authService.refresh.mockReset();
+    authService.refresh.mockRejectedValue(new Error("sin refresh"));
   });
 
   it("muestra el botón ACCESO si no hay sesión", async () => {
