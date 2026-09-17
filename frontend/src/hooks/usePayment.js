@@ -31,18 +31,19 @@ export function usePayment() {
       await abrirCheckoutWompi(widget, (transaction) => {
         const estado = transaction?.status;
         if (!transaction || !estado) {
-          setCargando(false);
           onCerrado?.();
           return;
         }
 
-        setCargando(false);
         if (ESTADOS_APROBADOS.includes(estado)) {
           onExito?.(transaction);
         } else {
           onError?.(`El pago no fue aprobado (${estado}).`);
         }
       });
+      
+      // Una vez que el widget se ha abierto exitosamente, ya no estamos "cargando"
+      setCargando(false);
     } catch (err) {
       setCargando(false);
       const msg = err?.message || "No se pudo abrir la pasarela de pago.";

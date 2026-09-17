@@ -25,7 +25,6 @@ const plans = [
 export default function PlanSelectionModal({ onSelect }) {
   const { pagarPremium, cargando } = usePayment();
   const router = useRouter();
-  const [selected, setSelected] = useState(null);
 
   const mostrarAlerta = async (titulo, texto, icono) => {
     const { default: Swal } = await import("sweetalert2");
@@ -100,15 +99,10 @@ export default function PlanSelectionModal({ onSelect }) {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              onClick={() => setSelected(plan.id)}
-              className={`rounded-2xl border p-5 text-left transition-all cursor-pointer hover:-translate-y-0.5 ${
-                selected === plan.id
-                  ? plan.id === "premium"
-                    ? "border-violet-500 dark:border-violet-400 bg-violet-50 dark:bg-violet-500/20 ring-2 ring-violet-500/50"
-                    : "border-indigo-500 dark:border-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 ring-2 ring-indigo-500/50"
-                  : plan.id === "premium"
-                    ? "border-violet-300 dark:border-violet-400/60 bg-violet-50/50 dark:bg-violet-500/10 hover:bg-violet-100 dark:hover:bg-violet-500/20"
-                    : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/60 hover:border-slate-300 dark:hover:border-slate-500"
+              className={`rounded-2xl border p-5 text-left transition-all ${
+                plan.id === "premium"
+                  ? "border-violet-500/50 dark:border-violet-400/50 bg-violet-50 dark:bg-violet-500/10"
+                  : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950/60"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
