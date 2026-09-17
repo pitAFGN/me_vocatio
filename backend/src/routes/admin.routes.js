@@ -12,6 +12,10 @@ router.get("/resources", authenticateToken, authorizeRoles("admin"), adminContro
 router.put("/resources/:id", authenticateToken, authorizeRoles("admin"), adminController.updateResource);
 router.delete("/resources/:id", authenticateToken, authorizeRoles("admin"), adminController.deleteResource);
 
+// Flujo editorial: aprobar / rechazar cursos
+router.post("/courses/:id/aprobar", authenticateToken, authorizeRoles("admin"), adminController.aprobarCurso);
+router.post("/courses/:id/rechazar", authenticateToken, authorizeRoles("admin"), adminController.rechazarCurso);
+
 // Usuarios
 router.get("/users", authenticateToken, authorizeRoles("admin"), adminController.getUsers);
 router.put("/users/:id", authenticateToken, authorizeRoles("admin"), adminController.updateUser);

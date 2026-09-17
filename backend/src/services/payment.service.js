@@ -347,7 +347,7 @@ const aplicarEstadoTransaccion = async (transaction) => {
 
   if (nuevoEstado === "pagado") {
     await pool.query(
-      `UPDATE courses SET payment_status = 'pagado', status = 'activo', updated_at = NOW() WHERE id = $1`,
+      `UPDATE courses SET payment_status = 'pagado', status = 'revision', updated_at = NOW() WHERE id = $1`,
       [pago.course_id]
     );
   } else if (nuevoEstado === "fallido" || nuevoEstado === "cancelado") {

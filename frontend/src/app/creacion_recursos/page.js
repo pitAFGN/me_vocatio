@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
@@ -47,6 +47,25 @@ const backgroundOptions = [
 
 const badgeOptions = ["Elite", "Top 10%", "Nuevo", "Bestseller", "En tendencia"];
 
+const estadoCursoParsed = (status) => {
+  switch (status) {
+    case "activo":
+    case "published":
+      return { texto: "Aprobado", clase: "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400" };
+    case "revision":
+      return { texto: "En revisión", clase: "bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700/50 text-amber-700 dark:text-amber-400" };
+    case "rechazado":
+      return { texto: "Rechazado", clase: "bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700/50 text-red-700 dark:text-red-400" };
+    case "borrador":
+    case "draft":
+      return { texto: "Borrador", clase: "bg-slate-200 dark:bg-slate-700/40 border-slate-400/60 dark:border-slate-600 text-slate-600 dark:text-slate-300" };
+    case "inactivo":
+      return { texto: "Inactivo (oculto)", clase: "bg-slate-200 dark:bg-slate-700/40 border-slate-400/60 dark:border-slate-600 text-slate-600 dark:text-slate-300" };
+    default:
+      return { texto: "En revisión", clase: "bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700/50 text-amber-700 dark:text-amber-400" };
+  }
+};
+
 export default function CreacionRecursosPage() {
   const { user } = useProtectedRoute();
   const isPremium = user?.plan === "premium";
@@ -61,8 +80,11 @@ export default function CreacionRecursosPage() {
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [editingResource, setEditingResource] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [courseStatus, setCourseStatus] = useState("published");
+  const [guardando, setGuardando] = useState(false);
+  const guardandoRef = useRef(false);
+  const [cursoEstado, setCursoEstado] = useState("revision");
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, courseId: null });
+  const [ocultando, setOcultando] = useState(false);
 
   // Form States
   const [recursos, setRecursos] = useState([]);
@@ -99,6 +121,7 @@ export default function CreacionRecursosPage() {
   useEffect(() => {
     fetchMisCursos();
   }, []);
+
   const handleCargarCursoParaEditar = async (courseId) => {
       if (!courseId) {
         setEditingCourseId(null);
@@ -108,7 +131,7 @@ export default function CreacionRecursosPage() {
           "bg-gradient-to-br from-slate-900 via-violet-950 to-indigo-950"
         );
         setSelectedBadges(["Elite"]);
-        setCourseStatus("published");
+        setCursoEstado("revision");
         return;
       }
 
@@ -116,7 +139,10 @@ export default function CreacionRecursosPage() {
         setToast({ message: "Cargando curso...", type: "success" });
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${courseId}`
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${courseId}`,
+          {
+            credentials: "include",
+          }
         );
 
         if (res.ok) {
@@ -124,7 +150,7 @@ export default function CreacionRecursosPage() {
 
           setEditingCourseId(data.id);
           
-          setCourseStatus(data.status === "draft" ? "draft" : "published");
+          setCursoEstado(data.status || "revision");
 
           setCurso({
             nombre: data.title || "",
@@ -173,25 +199,25 @@ export default function CreacionRecursosPage() {
           type: "error",
         });
       }
-  };
+    };
 
 
 
-  const openResourceModal = () => {
+    const openResourceModal = () => {
       if (!isPremium && recursos.length >= FREE_RESOURCE_LIMIT) {
         setMostrarPlanModal(true);
         return;
       }
       setEditingResource(null);
       setIsModalOpen(true);
-  };
+    };
 
-  const handleEditResourceOpen = (resource) => {
+    const handleEditResourceOpen = (resource) => {
       setEditingResource(resource);
       setIsModalOpen(true);
-  };
+    };
 
-  const handleAddResource = (title, type, url) => {
+    const handleAddResource = (title, type, url) => {
       setRecursos((prev) => [
         ...prev,
         {
@@ -202,35 +228,40 @@ export default function CreacionRecursosPage() {
           isActive: true
         },
       ]);
-  };
+    };
 
-  const handleEditResourceSubmit = (id, title, type, url) => {
+    const handleEditResourceSubmit = (id, title, type, url) => {
       setRecursos((prev) => prev.map(r => r.id === id ? { ...r, title, type, url } : r));
       setEditingResource(null);
-  };
+    };
 
-  const handleToggleResourceActive = (id) => {
+    const handleToggleResourceActive = (id) => {
       setRecursos((prev) => prev.map(r => r.id === id ? { ...r, isActive: !r.isActive } : r));
-  };
+    };
 
-  const handleRemoveResource = (id) => {
+    const handleRemoveResource = (id) => {
       setRecursos((prev) => prev.filter((item) => item.id !== id));
-  };
+    };
 
-  const toggleBadge = (badge) => {
+    const toggleBadge = (badge) => {
       setSelectedBadges((prev) =>
         prev.includes(badge) ? prev.filter((item) => item !== badge) : [...prev, badge]
       );
-  };
+    };
 
-  const handleGuardarCurso = async () => {
+    const handleGuardarCurso = async () => {
+      if (guardandoRef.current) return;
+      guardandoRef.current = true;
+
       if (!curso.nombre || !curso.descripcion) {
         setToast({ message: "Llena el nombre y descripción del curso.", type: "error" });
+        guardandoRef.current = false;
         return;
       }
 
       if (recursos.length === 0) {
         setToast({ message: "No puedes publicar un curso vacío. Agrega al menos un recurso.", type: "error" });
+        guardandoRef.current = false;
         return;
       }
 
@@ -247,10 +278,12 @@ export default function CreacionRecursosPage() {
           video_url: r.url || "",
           is_active: r.isActive
         })),
-        status: courseStatus
+        ...(editingCourseId && cursoEstado === "rechazado" ? { status: "revision" } : {}),
       };
 
       try {
+        setGuardando(true);
+
         const url = editingCourseId
           ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${editingCourseId}`
           : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses`;
@@ -275,19 +308,29 @@ export default function CreacionRecursosPage() {
           return;
         }
 
-        const msg = courseStatus === "draft" ? "borrador guardado" : (editingCourseId ? "actualizado" : "publicado");
-        setToast({ message: `¡Curso ${msg} exitosamente!`, type: "success" });
-        
-        if (!editingCourseId) {
-            // Recargar lista si era nuevo
-            fetchMisCursos();
+        const esNuevo = !editingCourseId;
+        setCursoEstado(esNuevo || cursoEstado === "rechazado" ? "revision" : cursoEstado);
+
+        if (esNuevo) {
+          const creado = await res.json();
+          setEditingCourseId(creado.id);
+          setToast({ message: "Tu curso quedó en revisión ⏳ Ya estás editándolo: cada cambio que guardes actualiza este mismo curso (no se duplica). Te avisaremos por correo cuando sea aprobado.", type: "success" });
+        } else if (cursoEstado === "rechazado") {
+          setToast({ message: "Curso reenviado a revisión ⏳ Te avisaremos por correo cuando sea aprobado.", type: "success" });
+        } else {
+          setToast({ message: "Curso actualizado correctamente", type: "success" });
         }
+
+        fetchMisCursos();
 
       } catch (error) {
         console.error("Fetch error:", error);
         setToast({ message: "Hubo un error de conexión.", type: "error" });
+      } finally {
+        guardandoRef.current = false;
+        setGuardando(false);
       }
-  };
+    };
 
     const handleEliminarCurso = async (courseIdToDelete) => {
       const id = courseIdToDelete || editingCourseId;
@@ -317,7 +360,56 @@ export default function CreacionRecursosPage() {
       }
     };
 
-  return (
+    const estadoActual = estadoCursoParsed(cursoEstado);
+
+    // Borrado lógico: el autor solo puede ocultar/mostrar cursos que YA fueron
+    // aprobados por el admin (approved_at). Nunca antes de la aprobación.
+    const cursoEnEdicion = myCourses.find((c) => c.id === editingCourseId);
+    const aprobadoPreviamente = !!cursoEnEdicion?.approved_at;
+    const esVisible = cursoEstado === "activo" || cursoEstado === "published";
+    const puedeAlternarVisibilidad =
+      editingCourseId && aprobadoPreviamente && (esVisible || cursoEstado === "inactivo");
+
+    const handleAlternarVisibilidad = async () => {
+      if (!editingCourseId || !aprobadoPreviamente || ocultando) return;
+
+      const objetivo = esVisible ? "inactivo" : "activo";
+      setOcultando(true);
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${editingCourseId}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: objetivo }),
+          }
+        );
+
+        if (!res.ok) {
+          const errData = await res.json();
+          setToast({ message: `Error: ${errData.error || errData.message || "No se pudo cambiar la visibilidad"}`, type: "error" });
+          return;
+        }
+
+        const data = await res.json();
+        setCursoEstado(data.status || objetivo);
+        await fetchMisCursos();
+        setToast({
+          message: objetivo === "activo"
+            ? "Curso visible en el catálogo ✅"
+            : "Curso oculto del catálogo (borrado lógico) 🙈",
+          type: "success",
+        });
+      } catch (e) {
+        console.error("Error toggling visibility:", e);
+        setToast({ message: "Hubo un error de conexión.", type: "error" });
+      } finally {
+        setOcultando(false);
+      }
+    };
+
+    return (
       <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b17] dark:text-slate-100 relative transition-colors duration-300">
         {/* Toast Notification */}
         <Toast
@@ -400,7 +492,7 @@ export default function CreacionRecursosPage() {
                                 className={`flex-1 text-left px-4 py-2.5 text-xs truncate ${editingCourseId === course.id ? "text-violet-700 dark:text-violet-300" : "text-slate-700 dark:text-slate-300"}`}
                               >
                                 {course.title}
-                                {course.status === 'draft' && <span className="ml-2 text-[9px] font-bold uppercase text-amber-500">(Borrador)</span>}
+                                {(() => { const e = estadoCursoParsed(course.status); return <span className={`ml-2 inline-block px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase border ${e.clase}`}>{e.texto}</span>; })()}
                               </button>
                               <button
                                 onClick={(e) => {
@@ -430,13 +522,40 @@ export default function CreacionRecursosPage() {
                 <span>Volver</span>
               </Link>
 
-              <button
-                onClick={() => setCourseStatus(prev => prev === "published" ? "draft" : "published")}
-                className={`rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] border active:scale-95 transition-all text-center ${courseStatus === "draft" ? "bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700/50 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50" : "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50"}`}
-                title="Haz clic para cambiar el estado"
+              <span
+                className={`rounded-full px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] border text-center ${estadoActual.clase}`}
+                title="Tu curso pasa por revisión editorial antes de publicarse"
               >
-                {courseStatus === "draft" ? "Estado: Borrador" : "Estado: Activo"}
-              </button>
+                Estado: {estadoActual.texto}
+              </span>
+
+              {puedeAlternarVisibilidad && (
+                <label
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/80 px-3 py-1.5 cursor-pointer select-none"
+                  title={esVisible ? "Ocultar del catálogo (borrado lógico)" : "Volver a mostrar en el catálogo"}
+                >
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={esVisible}
+                    onChange={handleAlternarVisibilidad}
+                    disabled={ocultando}
+                  />
+                  <span className="relative h-4 w-7 rounded-full bg-slate-300 dark:bg-slate-700 transition-colors peer-checked:bg-emerald-500 after:absolute after:left-0.5 after:top-0.5 after:h-3 after:w-3 after:rounded-full after:bg-white after:transition-transform after:content-[''] peer-checked:after:translate-x-3" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                    {ocultando ? "Guardando..." : esVisible ? "Visible" : "Oculto"}
+                  </span>
+                </label>
+              )}
+
+              {editingCourseId && (
+                <button
+                  onClick={() => handleCargarCursoParaEditar(null)}
+                  className="rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300 hover:border-violet-400/60 hover:text-violet-500 transition-colors text-center"
+                >
+                  Nuevo Curso
+                </button>
+              )}
 
               <button
                 onClick={() => handleGuardarCurso()}
@@ -496,11 +615,14 @@ export default function CreacionRecursosPage() {
 
         {mostrarPlanModal && (
           <PlanSelectionModal
-            onSelect={() => {
+            onSelect={(selectedPlan) => {
               setMostrarPlanModal(false);
+              if (selectedPlan === "premium") {
+                window.location.reload();
+              }
             }}
           />
         )}
       </main>
-  );
+    );
 }
