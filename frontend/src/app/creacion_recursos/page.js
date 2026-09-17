@@ -99,7 +99,6 @@ export default function CreacionRecursosPage() {
   useEffect(() => {
     fetchMisCursos();
   }, []);
-
   const handleCargarCursoParaEditar = async (courseId) => {
       if (!courseId) {
         setEditingCourseId(null);
@@ -174,25 +173,25 @@ export default function CreacionRecursosPage() {
           type: "error",
         });
       }
-    };
+  };
 
 
 
-    const openResourceModal = () => {
+  const openResourceModal = () => {
       if (!isPremium && recursos.length >= FREE_RESOURCE_LIMIT) {
         setMostrarPlanModal(true);
         return;
       }
       setEditingResource(null);
       setIsModalOpen(true);
-    };
+  };
 
-    const handleEditResourceOpen = (resource) => {
+  const handleEditResourceOpen = (resource) => {
       setEditingResource(resource);
       setIsModalOpen(true);
-    };
+  };
 
-    const handleAddResource = (title, type, url) => {
+  const handleAddResource = (title, type, url) => {
       setRecursos((prev) => [
         ...prev,
         {
@@ -203,28 +202,28 @@ export default function CreacionRecursosPage() {
           isActive: true
         },
       ]);
-    };
+  };
 
-    const handleEditResourceSubmit = (id, title, type, url) => {
+  const handleEditResourceSubmit = (id, title, type, url) => {
       setRecursos((prev) => prev.map(r => r.id === id ? { ...r, title, type, url } : r));
       setEditingResource(null);
-    };
+  };
 
-    const handleToggleResourceActive = (id) => {
+  const handleToggleResourceActive = (id) => {
       setRecursos((prev) => prev.map(r => r.id === id ? { ...r, isActive: !r.isActive } : r));
-    };
+  };
 
-    const handleRemoveResource = (id) => {
+  const handleRemoveResource = (id) => {
       setRecursos((prev) => prev.filter((item) => item.id !== id));
-    };
+  };
 
-    const toggleBadge = (badge) => {
+  const toggleBadge = (badge) => {
       setSelectedBadges((prev) =>
         prev.includes(badge) ? prev.filter((item) => item !== badge) : [...prev, badge]
       );
-    };
+  };
 
-    const handleGuardarCurso = async () => {
+  const handleGuardarCurso = async () => {
       if (!curso.nombre || !curso.descripcion) {
         setToast({ message: "Llena el nombre y descripción del curso.", type: "error" });
         return;
@@ -283,7 +282,7 @@ export default function CreacionRecursosPage() {
         console.error("Fetch error:", error);
         setToast({ message: "Hubo un error de conexión.", type: "error" });
       }
-    };
+  };
 
     const handleEliminarCurso = async (courseIdToDelete) => {
       const id = courseIdToDelete || editingCourseId;
@@ -313,7 +312,7 @@ export default function CreacionRecursosPage() {
       }
     };
 
-    return (
+  return (
       <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b17] dark:text-slate-100 relative transition-colors duration-300">
         {/* Toast Notification */}
         <Toast
@@ -498,5 +497,5 @@ export default function CreacionRecursosPage() {
           />
         )}
       </main>
-    );
+  );
 }
