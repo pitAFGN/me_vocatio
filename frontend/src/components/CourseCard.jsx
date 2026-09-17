@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PlayCircle, Users } from "lucide-react";
 import { resolveCourseBackground } from "@/lib/courseThemes";
 
@@ -24,10 +25,11 @@ export default function CourseCard({ curso, onClick, className = "" }) {
     >
       {bg.isImage && (
         <>
-          <img
+          <Image
             src={bg.url}
             alt=""
-            loading="lazy"
+            fill
+            unoptimized
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-slate-950/55"></div>

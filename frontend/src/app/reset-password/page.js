@@ -34,7 +34,7 @@ function ResetPasswordContent() {
       return;
     }
     if (!validarPassword(password)) {
-      setError("La contraseña debe tener mínimo 7 caracteres y al menos 2 números.");
+      setError("La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.");
       return;
     }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { 
   ArrowLeft, 
   PlayCircle, 
@@ -210,10 +211,11 @@ export default function CourseDetailPage() {
       <section className={`relative pt-24 pb-20 px-4 ${courseTheme} overflow-hidden`}>
         {courseBg.isImage && (
           <>
-            <img
+            <Image
               src={courseBg.url}
               alt=""
-              loading="lazy"
+              fill
+              unoptimized
               className="absolute inset-0 w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-slate-950/55"></div>

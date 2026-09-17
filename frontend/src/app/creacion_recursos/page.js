@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
+import { API_URL } from "@/lib/constants";
 import PlanSelector from "@/components/creacion_recursos/PlanSelector";
 import CourseBasicForm from "@/components/creacion_recursos/CourseBasicForm";
 import CourseCustomizationPanel from "@/components/creacion_recursos/CourseCustomizationPanel";
@@ -15,28 +16,6 @@ import ResourceModal from "@/components/creacion_recursos/ResourceModal";
 import ConfirmModal from "@/components/ConfirmModal";
 
 const FREE_RESOURCE_LIMIT = 3;
-
-const metricCards = [
-  { label: "Estudiantes totales", value: "2.4K", delta: "+12.4%" },
-  { label: "Tasa de finalización", value: "78%", delta: "+6.1%" },
-  { label: "Tiempo de estudio", value: "4h 32m", delta: "+1h 10m" },
-];
-
-const funnelData = [
-  { step: "Inicio del curso", value: 100, color: "bg-violet-500" },
-  { step: "Lección 1", value: 82, color: "bg-purple-500" },
-  { step: "Lección 2", value: 68, color: "bg-indigo-500" },
-  { step: "Lección 3", value: 57, color: "bg-fuchsia-500" },
-  { step: "Lección 4", value: 39, color: "bg-violet-400" },
-  { step: "Finalización", value: 24, color: "bg-slate-500" },
-];
-
-const recentStudents = [
-  { name: "Ana García", course: "UX Research", progress: "91%", status: "Activa" },
-  { name: "Mateo Ruiz", course: "Product Design", progress: "74%", status: "En curso" },
-  { name: "Sofía López", course: "Marketing Digital", progress: "88%", status: "Activa" },
-  { name: "Daniel Cruz", course: "Data Storytelling", progress: "63%", status: "En curso" },
-];
 
 const backgroundOptions = [
   { name: "Oscuro", className: "bg-slate-950" },
@@ -102,7 +81,7 @@ export default function CreacionRecursosPage() {
   const fetchMisCursos = async () => {
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/mios`,
+        `${API_URL}/api/courses/mios`,
         {
           credentials: "include",
         }
@@ -139,7 +118,7 @@ export default function CreacionRecursosPage() {
         setToast({ message: "Cargando curso...", type: "success" });
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${courseId}`,
+          `${API_URL}/api/courses/${courseId}`,
           {
             credentials: "include",
           }
@@ -285,8 +264,8 @@ export default function CreacionRecursosPage() {
         setGuardando(true);
 
         const url = editingCourseId
-          ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${editingCourseId}`
-          : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses`;
+          ? `${API_URL}/api/courses/${editingCourseId}`
+          : `${API_URL}/api/courses`;
 
         const res = await fetch(url, {
           method: editingCourseId ? "PUT" : "POST",
@@ -337,7 +316,7 @@ export default function CreacionRecursosPage() {
       if (!id) return;
 
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${id}`;
+        const url = `${API_URL}/api/courses/${id}`;
         const res = await fetch(url, {
           method: "DELETE",
           credentials: "include",
@@ -377,7 +356,7 @@ export default function CreacionRecursosPage() {
       setOcultando(true);
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/courses/${editingCourseId}`,
+          `${API_URL}/api/courses/${editingCourseId}`,
           {
             method: "PUT",
             credentials: "include",
@@ -605,9 +584,6 @@ export default function CreacionRecursosPage() {
                 isPremium={isPremium}
                 onUpgrade={() => setMostrarPlanModal(true)}
                 resources={recursos}
-                metricCards={metricCards}
-                funnelData={funnelData}
-                recentStudents={recentStudents}
               />
             </div>
           </div>

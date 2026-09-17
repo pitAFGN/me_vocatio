@@ -40,7 +40,6 @@ const getResources = async (req, res) => {
       SELECT c.*, u.name as instructor_name 
       FROM courses c 
       LEFT JOIN users u ON c.instructor_id = u.id 
-      WHERE c.status <> 'rechazado'
       ORDER BY c.created_at DESC
     `);
     // Mapear los nombres de columnas para que encajen con la tabla del frontend

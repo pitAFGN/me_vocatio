@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { resolveCourseBackground } from "@/lib/courseThemes";
 
 export default function CourseCustomizationPanel({
@@ -126,10 +127,11 @@ export default function CourseCustomizationPanel({
               >
                 {bg.isImage && (
                   <>
-                    <img
+                    <Image
                       src={bg.url}
                       alt=""
-                      loading="lazy"
+                      fill
+                      unoptimized
                       className="absolute inset-0 w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-slate-950/55"></div>
