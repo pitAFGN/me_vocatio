@@ -304,13 +304,14 @@ const validarChecksumEvento = (body) => {
 
 /**
  * Aplica el estado de una transacción de Wompi a nuestro pago y curso.
- * status puede ser: APPROVED, DECLINED, VOIDED, ERROR, PENDING
+ * status puede ser: APPROVED, APPROVED_PENDING, DECLINED, VOIDED, ERROR, PENDING
  */
 const aplicarEstadoTransaccion = async (transaction) => {
   const { id, status, reference } = transaction;
 
   const mapaEstados = {
     APPROVED: "pagado",
+    APPROVED_PENDING: "pendiente",
     DECLINED: "fallido",
     ERROR: "fallido",
     VOIDED: "cancelado",
@@ -333,7 +334,6 @@ const aplicarEstadoTransaccion = async (transaction) => {
   if (pago.concept === "premium") {
     if (nuevoEstado === "pagado") {
       await pool.query(
-        `UPDATE users SET plan = 'premium' WHERE id = $1`,
         `UPDATE users SET plan = 'premium', updated_at = NOW() WHERE id = $1`,
         [pago.user_id]
       );

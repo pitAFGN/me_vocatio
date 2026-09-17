@@ -122,7 +122,7 @@ export default async function VocationDetail({ params }) {
                         {/* Acciones */}
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                             <Link
-                                href={`/recomendacion?profesion=${profession.slug}`}
+                                href={`/recomendacion?profesion=${encodeURIComponent(profession.title)}`}
                                 className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-600/30 cursor-pointer flex-1"
                             >
                                 <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />

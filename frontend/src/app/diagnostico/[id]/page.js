@@ -107,6 +107,7 @@ export default function DiagnosticoPage() {
       if (data.exito && data.evaluation_id) {
         if (Array.isArray(data.unlocked) && data.unlocked.length > 0) {
           localStorage.setItem("mevocatio_new_achievements", JSON.stringify(data.unlocked));
+          window.dispatchEvent(new Event("local-storage-update"));
         }
         router.push(
           `/recomendacion?profesion=${encodeURIComponent(profession.title)}&nivel=${encodeURIComponent(data.nivel)}&evaluation_id=${data.evaluation_id}&puntaje=${data.puntaje}`

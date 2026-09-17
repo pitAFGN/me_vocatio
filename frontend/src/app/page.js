@@ -1,6 +1,5 @@
 import Link from "next/link";
 import PublicFooter from "@/components/PublicFooter";
-import LandingRouteGuard from "@/components/landing/LandingRouteGuard";
 import LandingStars from "@/components/landing/LandingStars";
 import LandingDiamante from "@/components/landing/LandingDiamante";
 import { Search, BarChart3, Award, ArrowRight } from "lucide-react";

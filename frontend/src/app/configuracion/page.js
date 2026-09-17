@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
+import { authService } from "@/services/auth.service";
 
 export default function Configuracion() {
   const router = useRouter();
@@ -20,12 +21,10 @@ export default function Configuracion() {
   const [guardandoNombre, setGuardandoNombre] = useState(false);
   const [userLoaded, setUserLoaded] = useState(false);
   const [enviandoReset, setEnviandoReset] = useState(false);
-  const [resetEnviado, setResetEnviado] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { authService } = await import("@/services/auth.service");
         const res = await authService.me();
         if (res?.user) {
           setNombre(res.user.name || "");
@@ -56,7 +55,6 @@ export default function Configuracion() {
 
     setGuardandoNombre(true);
     try {
-      const { authService } = await import("@/services/auth.service");
       const response = await authService.updateName(nombre);
       setNombre(response.user.name);
       setGuardado(true);
@@ -80,7 +78,6 @@ export default function Configuracion() {
   const handleCambiarContrasena = async () => {
     if (!email || enviandoReset) return;
     setEnviandoReset(true);
-    setResetEnviado(false);
     try {
       await forgotPassword(email);
       const { default: Swal } = await import("sweetalert2");

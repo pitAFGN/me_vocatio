@@ -22,22 +22,24 @@ describe("NavbarProfile", () => {
     authService.me.mockReset();
   });
 
-  it("no renderiza nada si no hay sesión aunque esté en zona privada", async () => {
+  it("muestra el botón ACCESO si no hay sesión", async () => {
     authService.me.mockRejectedValue(new Error("No autorizado"));
     usePathname.mockReturnValue("/dashboard");
-    const { container } = render(<NavbarProfile />);
+    render(<NavbarProfile />);
 
     await waitFor(() => expect(authService.me).toHaveBeenCalled());
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByRole("link", { name: "ACCESO" })).toBeInTheDocument();
   });
 
-  it("no renderiza nada si hay sesión pero la ruta no es privada", async () => {
+  it("muestra el menú de perfil si hay sesión en una ruta pública", async () => {
     authService.me.mockResolvedValue({ user: { id: 1 } });
     usePathname.mockReturnValue("/nosotros");
-    const { container } = render(<NavbarProfile />);
+    render(<NavbarProfile />);
 
     await waitFor(() => expect(authService.me).toHaveBeenCalled());
-    expect(container).toBeEmptyDOMElement();
+    expect(
+      screen.getByRole("button", { name: "Menú de perfil" })
+    ).toBeInTheDocument();
   });
 
   it("muestra el botón de crear recurso si hay sesión y la ruta es /dashboard", async () => {
@@ -56,7 +58,12 @@ describe("NavbarProfile", () => {
     render(<NavbarProfile />);
 
     await waitFor(() => expect(authService.me).toHaveBeenCalled());
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Crear recurso" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Menú de perfil" })
+    ).toBeInTheDocument();
   });
 
   it("navega a /creacion_recursos al hacer click en 'Crear recurso'", async () => {

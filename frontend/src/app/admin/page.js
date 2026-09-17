@@ -9,7 +9,7 @@ import SidebarNav from "@/components/SidebarNav";
 import LoadingScreen from "@/components/LoadingScreen";
 import Toast from "@/components/Toast";
 import { API_URL } from "@/lib/constants";
-import { LayoutDashboard, Users, BookOpen, CreditCard, Search, Plus, Edit, Trash2, ArrowUpRight, CheckCircle2, TrendingUp, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, CreditCard, Search, Plus, Edit, Trash2, CheckCircle2, TrendingUp, AlertTriangle } from "lucide-react";
 
 const MetricsDashboard = dynamic(
   () => import("@/components/admin/MetricsDashboard"),
@@ -32,7 +32,6 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [recursos, setRecursos] = useState([]);
   const [recursosLoading, setRecursosLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [toast, setToast] = useState({ message: "", type: "success" });
   
   // States for Recursos
@@ -224,7 +223,7 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           title: editingCourse.titulo,
           category: editingCourse.vocacion,
-          status: editingCourse.estado === 'Activo' ? 'published' : 'borrador' // o los valores que manejes
+          status: editingCourse.estado === 'Activo' ? 'published' : 'draft'
         })
       });
       if (res.ok) {
@@ -702,7 +701,7 @@ export default function AdminDashboard() {
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Eliminar Curso</h3>
               </div>
               <p className="text-slate-600 dark:text-slate-400 text-sm mb-6 leading-relaxed">
-                ¿Estás seguro de que deseas eliminar permanentemente el curso <span className="font-bold text-slate-900 dark:text-white">"{deletingCourse.titulo}"</span>? Esta acción no se puede deshacer.
+                {`¿Estás seguro de que deseas eliminar permanentemente el curso `}<span className="font-bold text-slate-900 dark:text-white">{`"${deletingCourse.titulo}"`}</span>{`? Esta acción no se puede deshacer.`}
               </p>
               <div className="flex gap-3 justify-end">
                 <button 
