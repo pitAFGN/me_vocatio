@@ -62,13 +62,36 @@ const register = async (name, email, password) => {
 
   try {
     const mxRecords = await dns.resolveMx(dominio);
-    if (!mxRecords || mxRecords.length === 0) {
+    // RFC 7505: un registro MX nulo ("0 .") o la ausencia de MX significan
+    // explícitamente que el dominio no recibe correo.
+    const noRecibeCorreo =
+      !mxRecords ||
+      mxRecords.length === 0 ||
+      mxRecords.every((r) => !r.exchange || r.exchange === ".");
+    if (noRecibeCorreo) {
       throw { status: 400, message: `El dominio "${dominio}" no parece recibir correos. Verifica que tu email esté bien escrito.` };
     }
   } catch (err) {
     if (err.status === 400) throw err;
-    // DNS error (ENOTFOUND, ENODATA, etc.) = dominio no existe
-    throw { status: 400, message: `El dominio "${dominio}" no existe. ¿Escribiste bien tu correo?` };
+    // Errores de resolución transitorios (resolver lento/caído, timeout, etc.):
+    // no se bloquea el registro, solo se avisa para que nadie quede fuera por
+    // un problema temporal de DNS.
+    const codigo = String(err?.code || "");
+    const ES_TRANSITORIO = [
+      "EAI_AGAIN",      // resolver temporalmente no disponible
+      "ETIMEOUT",       // la consulta DNS tardó demasiado
+      "ESERVFAIL",      // el servidor DNS falló al responder
+      "ECONNREFUSED",   // el servidor DNS rechazó la conexión
+      "ENETDOWN",       // red caída
+      "ENETUNREACH",    // red inalcanzable
+      "EHOSTUNREACH",   // el servidor DNS no responde
+    ].includes(codigo);
+    if (ES_TRANSITORIO) {
+      console.warn(`[MX] No se pudo verificar el dominio "${dominio}" (${codigo}); se continúa el registro.`);
+    } else {
+      // ENOTFOUND, ENODATA, EAI_NONAME, etc. = el dominio no existe/no resuelve
+      throw { status: 400, message: `El dominio "${dominio}" no existe. ¿Escribiste bien tu correo?` };
+    }
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
