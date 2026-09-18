@@ -85,6 +85,11 @@ const cancelar = async (req, res) => {
 const evento = async (req, res) => {
   const body = req.body;
 
+  // Body ausente, vacío o con Content-Type incorrecto => 400, nunca 500.
+  if (!body || typeof body !== "object" || Object.keys(body).length === 0) {
+    return res.status(400).json({ error: "Cuerpo JSON inválido" });
+  }
+
   const esValido = paymentService.validarChecksumEvento(body);
   if (!esValido) {
     console.warn("Evento de Wompi con firma inválida, se ignora.");
