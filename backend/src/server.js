@@ -99,6 +99,24 @@ app.use((err, req, res, next) => {
 });
 
 /* ─── Inicio del servidor ─── */
+/* 🧹 Tarea Programada (Garbage Collector) 🧹
+   Elimina cuentas no verificadas (fantasmas) después de 24 horas para
+   mantener la base de datos limpia. Se ejecuta cada 12 horas. */
+setInterval(async () => {
+  try {
+    const res = await pool.query(`
+      DELETE FROM users 
+      WHERE email_verified = false 
+      AND created_at < NOW() - INTERVAL '24 hours'
+    `);
+    if (res.rowCount > 0) {
+      console.log(`[Limpieza] ${res.rowCount} cuentas fantasma (no verificadas) eliminadas.`);
+    }
+  } catch (err) {
+    console.error("[Limpieza] Error al eliminar cuentas fantasma:", err.message);
+  }
+}, 12 * 60 * 60 * 1000);
+
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, async () => {
