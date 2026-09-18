@@ -9,10 +9,8 @@ export function useAuth() {
 
   const login = async (email, password) => {
     await authService.login(email, password);
-
     window.dispatchEvent(new Event("local-storage-update"));
-
-    router.push("/dashboard");
+    window.location.href = "/dashboard"; // ✅ Fuerza recarga completa
   };
 
   const register = async (name, email, password, captchaToken) => {
@@ -30,8 +28,7 @@ export function useAuth() {
     }
 
     window.dispatchEvent(new Event("local-storage-update"));
-
-    router.replace("/dashboard");
+    window.location.href = "/dashboard"; // ✅ En lugar de router.replace
   };
 
   const logout = async () => {

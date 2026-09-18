@@ -15,7 +15,10 @@ const pool = require("./config/db");
 const app = express();
 
 /* ─── Seguridad: Helmet ─── */
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
+}));
 
 /* ─── Trust proxy: imprescindible tras un proxy/load balancer para que
    express-rate-limit y req.ip calculen la IP real del cliente.
@@ -41,13 +44,19 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin))  {
       return callback(null, true);
     }
+    console.warn(`🚫 CORS bloqueado para origin: "${origin}". Permitidos:`, allowedOrigins);
     return callback(null, false);
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
+
+console.log('✅ Orígenes permitidos:', allowedOrigins);
+console.log('✅ NODE_ENV:', process.env.NODE_ENV);
 
 /* Defensa CSRF: rechaza peticiones de cambio de estado cuyo Origin no esté
    en la lista blanca (las cookies SameSite=None viajan cross-site). Exime
