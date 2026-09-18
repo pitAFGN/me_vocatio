@@ -4,25 +4,32 @@ const { ipKeyGenerator } = require("express-rate-limit");
 /**
  * Rate limiting por ruta.
  * Evita ataques de fuerza bruta limitando intentos por IP.
+ *
+ * ⚠️ IMPORTANTE: los preflight OPTIONS se excluyen con `skip`.
+ * Sin esto, cada intento de login cross-origin (Vercel → Railway)
+ * consume 2 requests (OPTIONS + POST), duplicando el consumo
+ * y bloqueando al usuario después de la mitad de intentos.
  */
 
-// Clave por usuario autenticado cuando existe; si no, por IP (IPv4/IPv6
-// normalizada). Impide evadir los límites cambiando de proxy detrás del
-// mismo usuario.
+// Excluye preflight OPTIONS de todos los contadores
+const skipOptions = (req) => req.method === "OPTIONS";
+
+// Clave por IP normalizada (maneja IPv4 e IPv6 correctamente)
+const ipKey = (req) => (req.ip ? ipKeyGenerator(req.ip) : "ip:none");
+
+// Clave por usuario autenticado cuando existe; si no, por IP.
 const userOrIpKeyGenerator = (req) => {
   if (req.user && req.user.id) return `u:${req.user.id}`;
-  return req.ip ? ipKeyGenerator(req.ip) : "ip:none";
+  return ipKey(req);
 };
 
-// Clave por email (normalizado) enviado en el body, para endpoints de
-// recuperación/registro. Complementa el límite por IP y reduce el mapeo
-// de cuentas (M3).
+// Clave por email (normalizado) enviado en el body.
 const emailKeyGenerator = (req) => {
   const email = req.body && typeof req.body.email === "string"
     ? req.body.email.trim().toLowerCase()
     : "";
   if (email) return `e:${email}`;
-  return req.ip ? ipKeyGenerator(req.ip) : "ip:none";
+  return ipKey(req);
 };
 
 // Login: máximo 5 intentos cada 15 minutos
@@ -31,6 +38,8 @@ const loginLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
+  keyGenerator: ipKey, // ← explícito para evitar problemas con trust proxy
   message: {
     error: "Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos.",
   },
@@ -42,6 +51,8 @@ const registerLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
+  keyGenerator: ipKey,
   message: {
     error: "Demasiados registros desde esta IP. Intenta de nuevo en 1 hora.",
   },
@@ -53,6 +64,7 @@ const registerEmailLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
   keyGenerator: emailKeyGenerator,
   message: {
     error: "Demasiados intentos para este correo. Intenta de nuevo en 1 hora.",
@@ -65,6 +77,8 @@ const forgotPasswordLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
+  keyGenerator: ipKey,
   message: {
     error: "Demasiadas solicitudes de recuperación. Intenta de nuevo en 15 minutos.",
   },
@@ -76,29 +90,34 @@ const forgotPasswordEmailLimiter = rateLimit({
   max: 2,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
   keyGenerator: emailKeyGenerator,
   message: {
     error: "Demasiadas solicitudes para este correo. Intenta de nuevo en 15 minutos.",
   },
 });
 
-// Verify email: máximo 10 intentos cada 15 minutos (clics legítimos + algún reintento)
+// Verify email: máximo 10 intentos cada 15 minutos
 const verifyEmailLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
+  keyGenerator: ipKey,
   message: {
     error: "Demasiados intentos de verificación. Intenta de nuevo en 15 minutos.",
   },
 });
 
-// Resend verification: máximo 3 reenvíos cada 15 minutos (mismo criterio que forgot-password)
+// Resend verification: máximo 3 reenvíos cada 15 minutos
 const resendVerificationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
+  keyGenerator: ipKey,
   message: {
     error: "Demasiadas solicitudes de reenvío. Intenta de nuevo en 15 minutos.",
   },
@@ -110,6 +129,7 @@ const resendVerificationEmailLimiter = rateLimit({
   max: 2,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
   keyGenerator: emailKeyGenerator,
   message: {
     error: "Demasiados reenvíos para este correo. Intenta de nuevo en 15 minutos.",
@@ -117,12 +137,12 @@ const resendVerificationEmailLimiter = rateLimit({
 });
 
 // AI Generation & Analysis: máximo 10 peticiones cada 5 minutos.
-// Clave por usuario autenticado para no evadir el límite con proxies.
 const aiLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
   keyGenerator: userOrIpKeyGenerator,
   message: {
     error: "Demasiadas consultas de Inteligencia Artificial. Por favor espera unos minutos.",
@@ -135,6 +155,7 @@ const recommendationLimiter = rateLimit({
   max: 15,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
   keyGenerator: userOrIpKeyGenerator,
   message: {
     error: "Has alcanzado el límite de recomendaciones por ahora. Intenta de nuevo en 5 minutos.",
@@ -147,6 +168,7 @@ const xpLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipOptions,
   keyGenerator: userOrIpKeyGenerator,
   message: {
     error: "Demasiadas solicitudes de experiencia. Por favor espera unos minutos.",
