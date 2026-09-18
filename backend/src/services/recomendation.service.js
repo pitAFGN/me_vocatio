@@ -10,7 +10,7 @@ const openai = new OpenAI({
   baseURL: "https://api.groq.com/openai/v1",
 });
 
-const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+const GROQ_MODEL = process.env.GROQ_MODEL || "llama3-70b-8192";
 
 /* ─────────────────────────────────────────
    HIGIENE DE ENTRADA PARA PROMPTS (M9)
@@ -64,6 +64,26 @@ const generarTestConGroq = async (professionTitle, professionArea, userId) => {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw { status: 500, message: "Falta configurar GROQ_API_KEY en el servidor" };
+  }
+
+  // Reutilizar un test pendiente y válido para esta profesión y usuario,
+  // en lugar de generar uno nuevo a cada visita.
+  const testPendiente = await pool.query(
+    `SELECT id as test_id, questions as preguntas
+     FROM diagnostic_tests
+     WHERE user_id = $1 AND profession_title = $2 AND completed_at IS NULL AND expires_at > NOW()`,
+    [userId, professionTitle]
+  );
+
+  if (testPendiente.rowCount > 0) {
+    return {
+      test_id: testPendiente.rows[0].test_id,
+      preguntas: testPendiente.rows[0].preguntas.map((q) => ({
+        pregunta_id: q.id,
+        pregunta: q.pregunta,
+        opciones: q.opciones,
+      })),
+    };
   }
 
   // Los datos del usuario van saneados y entre «»: son información,
