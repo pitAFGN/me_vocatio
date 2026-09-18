@@ -5,6 +5,7 @@ const { generarTokenSeguro, hashearToken, calcularExpiracion } = require("../uti
 const { generateAccessToken, generateRefreshToken } = require("../utils/jwt");
 
 require("dotenv").config();
+const dns = require("dns").promises;
 
 // Horas de validez del enlace de verificación de correo (magic link)
 const EMAIL_VERIFICATION_EXPIRES_HOURS =
@@ -46,6 +47,23 @@ const register = async (name, email, password) => {
         "Si el correo no estaba registrado, revisa tu bandeja para confirmar tu cuenta antes de iniciar sesión.",
       emailSent: null,
     };
+  }
+
+  // Verificar que el dominio del correo realmente exista (MX records)
+  const dominio = email.split("@")[1];
+  if (!dominio) {
+    throw { status: 400, message: "El correo electrónico no tiene un formato válido." };
+  }
+
+  try {
+    const mxRecords = await dns.resolveMx(dominio);
+    if (!mxRecords || mxRecords.length === 0) {
+      throw { status: 400, message: `El dominio "${dominio}" no parece recibir correos. Verifica que tu email esté bien escrito.` };
+    }
+  } catch (err) {
+    if (err.status === 400) throw err;
+    // DNS error (ENOTFOUND, ENODATA, etc.) = dominio no existe
+    throw { status: 400, message: `El dominio "${dominio}" no existe. ¿Escribiste bien tu correo?` };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

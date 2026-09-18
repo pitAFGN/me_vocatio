@@ -50,7 +50,7 @@ export default function AnalyticsPanel({
           </p>
           <h2 className="mt-3 text-2xl font-black text-slate-900 dark:text-white">Analíticas avanzadas</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Actualiza a Premium para ver el embudo de abandono en vivo, tiempo de estudio y retención por lección.
+            Actualiza a Premium para ver el tiempo de estudio, satisfacción y estudiantes recientes en vivo.
           </p>
           <button
             type="button"
@@ -97,37 +97,6 @@ export default function AnalyticsPanel({
   const studentsList = isRealData && liveData.recentStudents.length > 0 
     ? liveData.recentStudents 
     : [];
-
-  // Configurar el embudo (funnel) dinámicamente
-  const colors = ["bg-violet-500", "bg-purple-500", "bg-indigo-500", "bg-fuchsia-500", "bg-pink-500", "bg-cyan-500"];
-  let dynamicFunnel = [];
-  
-  if (isRealData && liveData.funnel && liveData.funnel.length > 0) {
-    dynamicFunnel = liveData.funnel.map((item, idx) => ({
-      ...item,
-      color: colors[idx % colors.length]
-    }));
-  } else if (resources.length > 0) {
-    dynamicFunnel = [
-      { step: "Inicio del curso", value: 100, color: colors[0] }
-    ];
-    let currentValue = 100;
-    resources.forEach((res, idx) => {
-      currentValue = Math.max(10, currentValue - Math.floor(Math.random() * 20 + 5));
-      dynamicFunnel.push({
-        step: res.title || `Lección ${idx + 1}`,
-        value: currentValue,
-        color: colors[(idx + 1) % colors.length]
-      });
-    });
-  } else {
-    dynamicFunnel = [
-      { step: "Inicio del curso", value: 100, color: "bg-violet-500" },
-      { step: "Lección 1", value: 85, color: "bg-purple-500" },
-      { step: "Lección 2", value: 70, color: "bg-indigo-500" },
-      { step: "Finalización", value: 55, color: "bg-emerald-500" },
-    ];
-  }
 
   const weeklyActivity = isRealData && liveData.weeklyActivity 
     ? liveData.weeklyActivity 
@@ -222,59 +191,6 @@ export default function AnalyticsPanel({
               <span className={`text-[8px] font-bold ${bar.peak ? 'text-violet-700 dark:text-violet-300' : 'text-slate-500'}`}>{bar.day}</span>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Embudo de Abandono (Drop-off Funnel) */}
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60 p-4 relative z-10">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-800 dark:text-slate-200">
-              Embudo de retención
-            </h3>
-            <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5">
-              {isRealData
-                ? (selectedCourseId ? "Deserción por lección de este curso" : "Tasa general de tus cursos")
-                : (resources.length > 0 
-                  ? `Adaptado a tus ${resources.length} lecciones configuradas`
-                  : "Estimación paso a paso de deserción de alumnos")
-              }
-            </p>
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">
-            Drop-off
-          </span>
-        </div>
-
-        <div className="space-y-3">
-          {dynamicFunnel.map((item) => (
-            <div key={item.step}>
-              <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                <span className="truncate max-w-[200px]">{item.step}</span>
-                <span className="font-bold text-violet-700 dark:text-violet-300">{item.value}%</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800/80">
-                <div 
-                  className={`h-full rounded-full transition-all duration-500 ${item.color}`} 
-                  style={{ width: `${item.value}%` }} 
-                />
-              </div>
-            </div>
-          ))}
-          {isRealData && (!liveData.totalStudents || liveData.totalStudents === 0) && (
-            <p className="text-[10px] text-slate-500 italic text-center mt-4">
-              Aún no hay inscripciones para medir retención.
-            </p>
-          )}
-        </div>
-
-        {/* Tip pedagógico de IA / Analítica */}
-        <div className="mt-4 rounded-xl border border-violet-500/20 bg-violet-500/5 p-3 flex items-start gap-2.5">
-          <Sparkles className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            <strong className="text-violet-700 dark:text-violet-200 font-semibold">Consejo pedagógico: </strong>
-            Los cursos que combinan lecciones cortas con enlaces prácticos aumentan la retención final en más de un <span className="text-emerald-700 dark:text-emerald-400 font-bold">25%</span>.
-          </p>
         </div>
       </div>
 
