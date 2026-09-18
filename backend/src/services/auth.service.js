@@ -21,6 +21,18 @@ const normalizarNombreRegistro = (name) => {
     .join(" ");
 };
 
+const normalizarEmail = (email) => {
+  if (!email) return email;
+  email = String(email).trim().toLowerCase();
+  const partes = email.split("@");
+  if (partes.length !== 2) return email;
+  let [local, dominio] = partes;
+  if (dominio === "gmail.com" || dominio === "googlemail.com") {
+    local = local.replace(/\./g, "");
+  }
+  return `${local}@${dominio}`;
+};
+
 const actualizarNombre = async (userId, name) => {
   const nombreNormalizado = normalizarNombreRegistro(name);
   const resultado = await pool.query(
@@ -32,11 +44,10 @@ const actualizarNombre = async (userId, name) => {
 
 /* ─────────────────────────────────────────
    REGISTER
-   Respuesta genérica (anti-enumeración): no revela si el correo ya
-   estaba registrado. Si el email existe, responde igual que un registro
-   nuevo para no permitir mapear cuentas (M3).
+   Si el email existe, lanza 409 (UX > Anti-enumeración).
 ───────────────────────────────────────── */
 const register = async (name, email, password) => {
+  email = normalizarEmail(email);
   const nombreNormalizado = normalizarNombreRegistro(name);
   const existe = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existe.rows.length > 0) {
@@ -138,6 +149,7 @@ const enviarCorreoVerificacion = async (userId, email, name) => {
    LOGIN (ACTUALIZADO PARA REFRESH TOKEN)
 ───────────────────────────────────────── */
 const login = async (email, password) => {
+  email = normalizarEmail(email);
   const resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
 
   if (resultado.rows.length === 0) {
@@ -189,6 +201,7 @@ const login = async (email, password) => {
    FORGOT PASSWORD
 ───────────────────────────────────────── */
 const forgotPassword = async (email) => {
+  email = normalizarEmail(email);
   const resultado = await pool.query("SELECT id, name FROM users WHERE email = $1", [email]);
 
   // Anti-enumeración (M3): si el correo no existe, se responde igual que
@@ -351,6 +364,7 @@ const verifyEmail = async (token) => {
    RESEND VERIFICATION
 ───────────────────────────────────────── */
 const resendVerification = async (email) => {
+  email = normalizarEmail(email);
   const resultado = await pool.query(
     "SELECT id, name, email, email_verified FROM users WHERE email = $1",
     [email]
@@ -377,6 +391,7 @@ const resendVerification = async (email) => {
    GOOGLE SYNC (LOGIN / REGISTER ALTERNATIVO)
 ───────────────────────────────────────── */
 const encontrarOCrearUsuarioGoogle = async (email, name) => {
+  email = normalizarEmail(email);
   let resultado = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   let user;
 
