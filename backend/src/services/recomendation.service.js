@@ -10,7 +10,7 @@ const openai = new OpenAI({
   baseURL: "https://api.groq.com/openai/v1",
 });
 
-const GROQ_MODEL = process.env.GROQ_MODEL || "llama3-70b-8192";
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
 /* ─────────────────────────────────────────
    HIGIENE DE ENTRADA PARA PROMPTS (M9)
