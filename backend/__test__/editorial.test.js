@@ -199,6 +199,20 @@ describe("Flujo editorial: visibilidad de obtenerCursoPorId", () => {
     expect(curso.lessons).toHaveLength(1);
   });
 
+  test("El detalle público NO expone el email del instructor (A2)", async () => {
+    pool.query
+      .mockResolvedValueOnce({ rows: [baseCurso("activo")] })
+      .mockResolvedValueOnce({ rows: [{ id: 1, title: "L1" }] });
+
+    const curso = await courseService.obtenerCursoPorId(9);
+    expect(curso.instructor_email).toBeUndefined();
+
+    const queryPublica = pool.query.mock.calls[0][0];
+    expect(queryPublica).toContain("instructor_name");
+    expect(queryPublica).not.toContain("u.email AS instructor_email");
+    expect(queryPublica).not.toMatch(/,\s*u\.email/);
+  });
+
   test("Un curso en revisión NO es visible para el público (404)", async () => {
     pool.query.mockResolvedValueOnce({ rows: [baseCurso("revision")] });
 
@@ -307,5 +321,45 @@ describe("POST /api/admin/courses/:id/rechazar", () => {
       res
     );
     expect(res.status).toHaveBeenCalledWith(400);
+  });
+});
+
+/* ─────────────────────────────────────────
+   CATÁLOGO PÚBLICO: filtros del listarCursos
+───────────────────────────────────────── */
+describe("Catálogo público: precedencia SQL en listarCursos", () => {
+  beforeEach(() => jest.clearAllMocks());
+  pool.query.mockResolvedValue({ rows: [] });
+
+  test("Con filtros, los estados quedan agrupados antes del AND", async () => {
+    await courseService.listarCursos({
+      search: "react",
+      category: "Tecnología",
+      level: "principiante",
+    });
+
+    const query = pool.query.mock.calls[0][0];
+    expect(query).toContain("(c.status = 'activo' OR c.status = 'published') AND");
+    expect(query).not.toMatch(/status = 'published'\s+AND[^(]/);
+  });
+
+  test("Sin filtros, solo se aplica la condición de estado", async () => {
+    await courseService.listarCursos();
+
+    const query = pool.query.mock.calls[0][0];
+    expect(query).toContain("(c.status = 'activo' OR c.status = 'published')");
+    expect(query).not.toMatch(/AND/);
+  });
+
+  test("Los filtros reciben sus valores en el orden esperado", async () => {
+    await courseService.listarCursos({
+      search: "react",
+      category: "Tecnología",
+      level: "avanzado",
+    });
+
+    const params = pool.query.mock.calls[0][1];
+    expect(params).toEqual(["%react%", "Tecnología", "avanzado"]);
+    expect(pool.query.mock.calls[0][0]).not.toMatch(/\$\d+\s+AND\s*\$\d+/);
   });
 });

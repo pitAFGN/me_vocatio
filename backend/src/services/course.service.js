@@ -77,7 +77,7 @@ const crearCurso = async (instructorId, datos) => {
    Filtros opcionales: búsqueda por texto, categoría, nivel
 ───────────────────────────────────────── */
 const listarCursos = async ({ search, category, level } = {}) => {
-  const condiciones = ["c.status = 'activo' OR c.status = 'published'"];
+  const condiciones = ["(c.status = 'activo' OR c.status = 'published')"];
   const valores = [];
 
   if (search) {
@@ -113,7 +113,7 @@ const listarCursos = async ({ search, category, level } = {}) => {
 ───────────────────────────────────────── */
 const obtenerCursoPorId = async (id, viewer = null) => {
   const resultado = await pool.query(
-    `SELECT c.*, u.name AS instructor_name, u.email AS instructor_email
+    `SELECT c.*, u.name AS instructor_name
      FROM courses c
      JOIN users u ON u.id = c.instructor_id
      WHERE c.id = $1`,
