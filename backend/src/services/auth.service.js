@@ -40,13 +40,7 @@ const register = async (name, email, password) => {
   const nombreNormalizado = normalizarNombreRegistro(name);
   const existe = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
   if (existe.rows.length > 0) {
-    return {
-      id: null,
-      email: null,
-      message:
-        "Si el correo no estaba registrado, revisa tu bandeja para confirmar tu cuenta antes de iniciar sesión.",
-      emailSent: null,
-    };
+    throw { status: 409, message: "El correo ya está registrado en el sistema." };
   }
 
   // Verificar que el dominio del correo realmente exista (MX records)
