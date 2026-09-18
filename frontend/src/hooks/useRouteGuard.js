@@ -89,14 +89,13 @@ export function useProtectedRoute() {
  * "Cargando/Verificando..." y se acelera el primer pintado sin tocar los 3D.
  */
 export function usePublicRoute() {
-  const router = useRouter();
   const { sesionValida } = useSesionValida();
 
   useEffect(() => {
     if (sesionValida === true) {
-      router.replace("/dashboard");
+      window.location.href = "/dashboard";
     }
-  }, [sesionValida, router]);
+  }, [sesionValida]);
 
   return { loading: false };
 }
