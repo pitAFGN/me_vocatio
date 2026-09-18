@@ -31,6 +31,21 @@ const nextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 
+  // Rewrite de /api/* al backend externo. Así la app habla same-origin
+  // (funciona también sin dominio propio) y el Set-Cookie del login aterriza
+  // en el origen del frontend, de modo que proxy.js ve el access_token.
+  // API_UPSTREAM_URL (p. ej. https://app.up.railway.app) se define en el
+  // deploy; en desarrollo el frontend llama directo a localhost:3001.
+  async rewrites() {
+    const upstream = process.env.API_UPSTREAM_URL || "http://localhost:3001";
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${upstream}/api/:path*`,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {
