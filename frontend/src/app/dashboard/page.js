@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { VOCATION_GROUPS, getVocationsForGroup } from "@/lib/vocationGroups";
 import { API_URL } from "@/lib/constants";
-import { authService } from "@/services/auth.service";
 
 import LoadingScreen from "@/components/LoadingScreen";
 import SidebarNav from "@/components/SidebarNav";
@@ -51,27 +50,18 @@ export default function ExecutiveDashboard() {
     role: null
   });
 
-  const fetchUser = async () => {
-    try {
-      const userData = await authService.me();
-      if (userData && userData.user) {
-        setProfileData(prev => ({
-          ...prev,
-          name: userData.user.name,
-          xp: userData.user.xp || 0,
-          level: userData.user.level || 1,
-          current_streak: userData.user.current_streak || 0,
-          role: userData.user.role || null
-        }));
-      }
-    } catch (err) {
-      console.error("Error fetching user data", err);
-    }
-  };
-
   useEffect(() => {
-    if (!loading) fetchUser();
-  }, [loading]);
+    if (user) {
+      setProfileData((prev) => ({
+        ...prev,
+        name: user.name,
+        xp: user.xp || 0,
+        level: user.level || 1,
+        current_streak: user.current_streak || 0,
+        role: user.role || null,
+      }));
+    }
+  }, [user]);
 
   const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState(1);

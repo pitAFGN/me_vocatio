@@ -18,7 +18,7 @@ const PlanSelectionModal = dynamic(
 export default function Configuracion() {
   const router = useRouter();
   const { logout, forgotPassword } = useAuth();
-  const { loading } = useProtectedRoute();
+  const { loading, user } = useProtectedRoute();
 
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
@@ -31,25 +31,14 @@ export default function Configuracion() {
   const [enviandoReset, setEnviandoReset] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await authService.me();
-        if (res?.user) {
-          setNombre(res.user.name || "");
-          setEmail(res.user.email || "");
-          setUserPlan(res.user.plan || "free");
-          setCreatedAt(res.user.created_at || null);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setUserLoaded(true);
-      }
-    };
-    if (!loading) {
-      fetchUser();
+    if (!loading && user) {
+      setNombre(user.name || "");
+      setEmail(user.email || "");
+      setUserPlan(user.plan || "free");
+      setCreatedAt(user.created_at || null);
+      setUserLoaded(true);
     }
-  }, [loading]);
+  }, [loading, user]);
 
   if (loading || !userLoaded) {
     return (

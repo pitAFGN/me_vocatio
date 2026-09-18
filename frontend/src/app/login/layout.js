@@ -7,3 +7,7 @@ export const metadata = {
     description: "Inicia sesión en tu cuenta de MeVocatio.",
   },
 };
+
+export default function LoginLayout({ children }) {
+  return children;
+}

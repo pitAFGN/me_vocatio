@@ -1,63 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useLocalFavorites } from "@/hooks/useLocalFavorites";
 
-const STORAGE_KEY = "me_vocatio_favorites";
+const FAVORITES_CONFIG = {
+  storageKey: "me_vocatio_favorites",
+  getId: (vocation) => vocation?.id,
+  eventName: "favoritesUpdated",
+};
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useState([]);
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      setFavorites(stored);
-    } catch {
-      setFavorites([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    const syncFavorites = () => {
-      try {
-        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-        setFavorites(stored);
-      } catch {
-        setFavorites([]);
-      }
-    };
-
-    window.addEventListener("favoritesUpdated", syncFavorites);
-    window.addEventListener("storage", syncFavorites);
-
-    return () => {
-      window.removeEventListener("favoritesUpdated", syncFavorites);
-      window.removeEventListener("storage", syncFavorites);
-    };
-  }, []);
-
-  const toggleSave = useCallback((vocation) => {
-    if (!vocation?.id) return;
-
-    let current = [];
-    try {
-      current = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      if (!Array.isArray(current)) current = [];
-    } catch {
-      current = [];
-    }
-
-    const exists = current.some((fav) => fav.id === vocation.id);
-
-    const updated = exists
-      ? current.filter((fav) => fav.id !== vocation.id)
-      : [...current, vocation];
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    setFavorites(updated);
-    window.dispatchEvent(new Event("favoritesUpdated"));
-  }, []);
-
-  const savedIds = favorites.map((fav) => fav.id);
-
-  return { favorites, savedIds, toggleSave };
+  const { items, savedIds, toggleSave } = useLocalFavorites(FAVORITES_CONFIG);
+  return { favorites: items, savedIds, toggleSave };
 }
+
+export default useFavorites;

@@ -9,8 +9,6 @@ import { abrirCheckoutWompi } from "@/lib/wompi";
  * ------------------------------------------------------------------
  * Integración real con la pasarela de pagos Wompi.
  *
- * - pagarCurso(datosCurso, callbacks): crea un curso de pago en el
- *   backend (POST /api/pagos/crear) y abre el widget de Wompi.
  * - pagarPremium(callbacks): activa el pago del Plan Premium
  *   (POST /api/pagos/premium) y abre el widget de Wompi.
  *
@@ -70,18 +68,12 @@ export function usePayment() {
     [abrirWidget]
   );
 
-  const pagarCurso = useCallback(
-    (datosCurso, callbacks = {}) =>
-      iniciarPago(paymentService.crearPago(datosCurso), callbacks),
-    [iniciarPago]
-  );
-
   const pagarPremium = useCallback(
     (callbacks = {}) => iniciarPago(paymentService.crearPagoPremium(), callbacks),
     [iniciarPago]
   );
 
-  return { pagarCurso, pagarPremium, cargando, error };
+  return { pagarPremium, cargando, error };
 }
 
 export default usePayment;

@@ -1,56 +1,26 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, FolderHeart, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { authService } from '@/services/auth.service';
+import { useSesionValida } from '@/hooks/useRouteGuard';
 
 export default function NavbarProfile() {
     const router = useRouter();
     const pathname = usePathname();
     const { logout } = useAuth();
-    const [user, setUser] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [checking, setChecking] = useState(true);
+    const { sesionValida, usuario } = useSesionValida();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
     const isCreatePage = pathname.startsWith('/creacion_recursos');
     const showCreateButton = pathname.startsWith('/dashboard') && !isCreatePage;
 
-    const checkAuth = useCallback(async () => {
-        try {
-            const response = await authService.me();
-            setUser(response.user);
-            setIsLoggedIn(true);
-        } catch {
-            // El access_token venció (15 min). Se intenta renovar la sesión una vez
-            // antes de mostrar "ACCESO", igual que hacen los route guards.
-            try {
-                await authService.refresh();
-                const response = await authService.me();
-                setUser(response.user);
-                setIsLoggedIn(true);
-            } catch {
-                setUser(null);
-                setIsLoggedIn(false);
-            }
-        } finally {
-            setChecking(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        checkAuth();
-        window.addEventListener('storage', checkAuth);
-        window.addEventListener('local-storage-update', checkAuth);
-        return () => {
-            window.removeEventListener('storage', checkAuth);
-            window.removeEventListener('local-storage-update', checkAuth);
-        };
-    }, [checkAuth, pathname]);
+    const isLoggedIn = sesionValida === true;
+    const checking = sesionValida === null;
+    const user = usuario;
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -64,7 +34,6 @@ export default function NavbarProfile() {
 
     const handleLogout = () => {
         logout();
-        setIsLoggedIn(false);
         setIsMenuOpen(false);
     };
 

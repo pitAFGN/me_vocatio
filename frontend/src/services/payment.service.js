@@ -22,18 +22,6 @@ async function requestJson(url, options = {}) {
 
 export const paymentService = {
   /**
-   * Crea el curso de pago + el intento de pago.
-   * El backend responde con { curso, widget } y con "widget"
-   * es con lo que se abre el checkout de Wompi.
-   */
-  async crearPago(datosCurso) {
-    return requestJson(`${API_URL}/api/pagos/crear`, {
-      method: "POST",
-      body: JSON.stringify(datosCurso),
-    });
-  },
-
-  /**
    * Inicia el pago del Plan Premium.
    * El backend responde con { pago, widget } y con "widget"
    * es con lo que se abre el checkout de Wompi.
@@ -48,22 +36,7 @@ export const paymentService = {
     return requestJson(`${API_URL}/api/pagos/mios`);
   },
 
-  async obtenerPorId(id) {
-    return requestJson(`${API_URL}/api/pagos/${id}`);
-  },
-
   async reconsultarEstado(id) {
     return requestJson(`${API_URL}/api/pagos/${id}/reconsultar`);
-  },
-
-  async reconsultarEstadoPorReferencia(reference, wompiTransactionId) {
-    const query = wompiTransactionId ? `?id=${encodeURIComponent(wompiTransactionId)}` : "";
-    return requestJson(
-      `${API_URL}/api/pagos/referencia/${encodeURIComponent(reference)}/reconsultar${query}`
-    );
-  },
-
-  async cancelar(id) {
-    return requestJson(`${API_URL}/api/pagos/${id}`, { method: "DELETE" });
   },
 };

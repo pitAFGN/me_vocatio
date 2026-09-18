@@ -13,8 +13,6 @@ import {
   ExternalLink,
   CheckCircle2,
   Star,
-  MessageSquare,
-  Send,
   Check
 } from "lucide-react";
 import { API_URL } from "@/lib/constants";

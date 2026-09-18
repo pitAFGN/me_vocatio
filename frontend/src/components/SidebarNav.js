@@ -4,31 +4,20 @@ import { LayoutDashboard, Compass, Bookmark, Award, Settings, Code2, LogOut } fr
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSesionValida } from "@/hooks/useRouteGuard";
 
 export default function SidebarNav({ logout }) {
     const pathname = usePathname();
+    const { usuario } = useSesionValida();
     const [hasNewAchievements, setHasNewAchievements] = useState(false);
-    const [userRole, setUserRole] = useState(null);
+    const userRole = usuario?.role ?? null;
 
     useEffect(() => {
         const updateIndicator = () => {
             setHasNewAchievements(Boolean(localStorage.getItem("mevocatio_new_achievements")));
         };
 
-        const checkRole = async () => {
-            try {
-                const { authService } = require("@/services/auth.service");
-                const data = await authService.me();
-                if (data?.user?.role) {
-                    setUserRole(data.user.role);
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        };
-
         updateIndicator();
-        checkRole();
         window.addEventListener("storage", updateIndicator);
         window.addEventListener("local-storage-update", updateIndicator);
         window.addEventListener("focus", updateIndicator);

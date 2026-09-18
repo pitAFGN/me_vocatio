@@ -30,7 +30,7 @@ useGLTF.preload("/diamante.glb");
 
 export default function DiamanteCanvas() {
     return (
-        <div className="w-[300px] h-[300px] sm:w-[360px] sm:h-[360px] md:w-[420px] md:h-[420px] relative pointer-events-none">
+        <div className="w-full h-full relative pointer-events-none">
             <Canvas
                 camera={{ position: [0, 0, 4.5], fov: 45 }}
                 dpr={[1, 1.5]} // ⚡ CRÍTICO: Evita renderizar a resoluciones gigantescas en celulares

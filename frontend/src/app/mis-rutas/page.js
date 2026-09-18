@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Compass, ExternalLink, Activity, BookOpen } from "lucide-react";
 import SidebarNav from "@/components/SidebarNav";

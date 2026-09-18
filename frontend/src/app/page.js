@@ -1,6 +1,6 @@
 import Link from "next/link";
 import PublicFooter from "@/components/PublicFooter";
-import LandingStars from "@/components/landing/LandingStars";
+import BackgroundStarsDiferidas from "@/components/BackgroundStarsDiferidas";
 import LandingDiamante from "@/components/landing/LandingDiamante";
 import { Search, BarChart3, Award, ArrowRight } from "lucide-react";
 
@@ -30,7 +30,7 @@ export default function LandingPage() {
     <main className="relative min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-slate-50 to-slate-100 dark:bg-none dark:bg-gradient-to-b dark:from-[#0b1329] dark:via-[#0f172a] dark:to-[#080d1a] text-slate-900 dark:text-slate-100 flex flex-col items-center justify-between px-4 sm:px-6 py-6 md:py-8 overflow-x-hidden transition-colors duration-500">
 
       {/* BRILLITOS / ESTRELLITAS EN TODO EL FONDO (Z-0) - Se montan de forma diferida */}
-      <LandingStars />
+      <BackgroundStarsDiferidas />
 
       {/* DETALLES DECORATIVOS FONDO LIGHT MODE (Z-0) */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-200/40 blur-[120px] dark:hidden pointer-events-none -z-10" />

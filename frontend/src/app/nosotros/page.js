@@ -44,6 +44,17 @@ const PASOS = [
     },
 ];
 
+export const metadata = {
+    title: "Sobre Nosotros",
+    description:
+        "Conoce la esencia de MeVocatio: beneficios, funcionamiento y casos de éxito de nuestra plataforma de desarrollo profesional.",
+    openGraph: {
+        title: "Sobre Nosotros | MeVocatio",
+        description:
+            "Conoce la esencia de MeVocatio y cómo transformamos el potencial profesional en legado.",
+    },
+};
+
 export default function NosotrosPage() {
     return (
         <main className="relative min-h-screen bg-slate-50 dark:bg-[#0b1329] text-slate-900 dark:text-slate-100 flex flex-col items-center py-6 sm:py-10 px-4 sm:px-6 overflow-x-hidden transition-colors duration-300">

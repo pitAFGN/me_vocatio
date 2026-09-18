@@ -24,6 +24,11 @@ const nextConfig = {
   reactCompiler: true,
   output: "standalone",
 
+  // Los paquetes de three.js/drei son ESM y algunos (p. ej. three-stdlib)
+  // pueden fallar durante el build en Vercel con "Unexpected token 'export'".
+  // Transpilarlos con el bundler evita esos errores sin afectar el rendimiento.
+  transpilePackages: ["three", "@react-three/fiber", "@react-three/drei", "three-stdlib"],
+
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200],

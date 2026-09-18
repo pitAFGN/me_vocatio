@@ -10,7 +10,7 @@ import Toast from "@/components/Toast";
 import { API_URL } from "@/lib/constants";
 import { resolveCourseBackground } from "@/lib/courseThemes";
 import CourseCard from "@/components/CourseCard";
-import { LayoutDashboard, Users, BookOpen, CreditCard, Search, Plus, Edit, Trash2, ArrowUpRight, CheckCircle2, TrendingUp, AlertTriangle, X, Eye, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, CreditCard, Search, Plus, Edit, Trash2, CheckCircle2, TrendingUp, AlertTriangle, X, Eye, ExternalLink } from "lucide-react";
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';

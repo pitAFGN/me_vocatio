@@ -14,7 +14,7 @@ import { authService } from "@/services/auth.service";
  * entre pestañas (`storage`) como ante eventos propios de la app
  * (`local-storage-update`, p. ej. tras login o logout).
  */
-function useSesionValida() {
+export function useSesionValida() {
   const [sesionValida, setSesionValida] = useState(null);
   const [usuario, setUsuario] = useState(null);
 
