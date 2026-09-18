@@ -32,6 +32,22 @@ async function esFirmaAutentica(token) {
   }
 }
 
+// Defensa en profundidad para /admin: exige rol admin y token vigente.
+// La autoridad real sigue siendo el backend.
+async function esAdminValido(token) {
+  if (!token || !process.env.JWT_ACCESS_SECRET) return false;
+  try {
+    const { payload } = await jwtVerify(token, secretKey(), { algorithms: ["HS256"] });
+    return (
+      payload?.role === "admin" &&
+      typeof payload.exp === "number" &&
+      payload.exp * 1000 > Date.now()
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("access_token")?.value;
@@ -41,6 +57,10 @@ export async function proxy(request) {
 
   if (isProtectedRoute && !autentico) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (pathname.startsWith("/admin") && !(await esAdminValido(token))) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // Si el usuario ya está logueado (token válido y vigente) y va a login,
