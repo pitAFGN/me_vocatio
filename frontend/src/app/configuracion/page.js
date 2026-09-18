@@ -8,6 +8,12 @@ import {
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
 import { authService } from "@/services/auth.service";
+import dynamic from "next/dynamic";
+
+const PlanSelectionModal = dynamic(
+  () => import("@/components/PlanSelectionModal"),
+  { ssr: false }
+);
 
 export default function Configuracion() {
   const router = useRouter();
@@ -18,6 +24,7 @@ export default function Configuracion() {
   const [email, setEmail] = useState("");
   const [userPlan, setUserPlan] = useState("free");
   const [createdAt, setCreatedAt] = useState(null);
+  const [showPlanModal, setShowPlanModal] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [guardandoNombre, setGuardandoNombre] = useState(false);
   const [userLoaded, setUserLoaded] = useState(false);
@@ -221,7 +228,7 @@ export default function Configuracion() {
                 ) : !isPremium ? (
                   <button
                     type="button"
-                    onClick={() => router.push("/dashboard")}
+                    onClick={() => setShowPlanModal(true)}
                     className="w-full mt-3 py-3 font-bold rounded-xl shadow-lg transition-all transform uppercase text-xs tracking-wider bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer shadow-indigo-600/30"
                   >
                     <Sparkles className="w-4 h-4" /> Explorar Plan Premium
@@ -268,6 +275,11 @@ export default function Configuracion() {
           </div>
         </div>
       </main>
+
+      {/* MODAL DE PLANES (WOMPI) */}
+      {showPlanModal && (
+        <PlanSelectionModal onSelect={() => setShowPlanModal(false)} />
+      )}
     </div>
   );
 }
