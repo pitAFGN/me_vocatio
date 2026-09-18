@@ -389,21 +389,16 @@ const encontrarOCrearUsuarioGoogle = async (email, name) => {
   if (resultado.rows.length > 0) {
     user = resultado.rows[0];
 
-    // Seguridad: NO se permite que un login OAuth se apodere de una cuenta
-    // existente con credenciales propias (correo+contraseña). Eso permitiría
-    // que cualquiera que registre un correo en Google secuestre la cuenta de
-    // una víctima. Las cuentas OAuth ya existentes se reconocen porque no
-    // tienen password_hash y ya están verificadas.
-    const tienePassword = Boolean(user.password_hash);
-    if (tienePassword || !user.email_verified) {
-      throw {
-        status: 409,
-        message:
-          "Ya existe una cuenta con este correo y credenciales propias. Inicia sesión con tu correo y contraseña desde el formulario de acceso.",
-      };
+    // Si el usuario ya existía (con contraseña) y no estaba verificado, 
+    // Google nos confirma que el correo es legítimo. Lo verificamos automáticamente.
+    if (!user.email_verified) {
+      const actualizado = await pool.query(
+        "UPDATE users SET email_verified = true, email_verified_at = NOW() WHERE id = $1 RETURNING *",
+        [user.id]
+      );
+      user = actualizado.rows[0];
     }
-
-    // Cuenta creada originalmente con Google: login normal.
+    // Account Linking: Permitimos el acceso (el usuario ahora puede entrar con clave o con Google).
   } else {
     const nuevoUsuario = await pool.query(
       "INSERT INTO users (name, email, password_hash, email_verified, email_verified_at) VALUES ($1, $2, $3, true, NOW()) RETURNING id, name, email, plan, xp, level, current_streak, role",
