@@ -8,6 +8,7 @@ import {
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
 import { authService } from "@/services/auth.service";
+import SidebarNav from "@/components/SidebarNav";
 import dynamic from "next/dynamic";
 
 const PlanSelectionModal = dynamic(
@@ -108,7 +109,9 @@ export default function Configuracion() {
       <div className="absolute top-0 left-1/4 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none bg-indigo-500/10 blur-[100px]" />
       <div className="absolute top-1/3 right-10 w-72 sm:w-96 h-72 sm:h-96 rounded-full pointer-events-none bg-purple-500/10 blur-[100px]" />
 
-      <main className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-10">
+      <SidebarNav logout={logout} />
+
+      <main className="relative z-10 md:pl-64 mx-auto w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-10 pb-24 md:pb-10">
         {/* Header compacto */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
           <div>

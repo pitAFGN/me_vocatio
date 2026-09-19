@@ -3,15 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "./ThemeProvider";
 import NavbarProfile from "./NavbarProfile";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Menu, X, ChevronRight } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { isDarkMode, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const rightRef = useRef(null);
 
   const isNosotrosActive = pathname === "/nosotros";
   const isAccessActive = pathname.startsWith("/login");
@@ -27,6 +29,22 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Cierra el menú móvil al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (rightRef.current && !rightRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Cierra el menú móvil al navegar
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   if (!mounted) {
     return (
@@ -53,16 +71,16 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 px-4 sm:px-6 md:px-10 py-2 sm:py-2.5 flex justify-between items-center border-b shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-2xl backdrop-blur-xl transition-colors duration-500 ${
+      className={`fixed top-0 w-full max-w-full z-50 px-3 sm:px-6 md:px-10 py-2 sm:py-2.5 flex justify-between items-center border-b shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-2xl backdrop-blur-xl transition-colors duration-500 ${
         isDarkMode
           ? "bg-gradient-to-r from-[#1e293b] via-[#0f172a] to-[#0b1329] border-slate-800/80"
           : "bg-white/80 border-slate-200/60"
       }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <div className="flex items-center gap-2 sm:gap-3 group">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 active:scale-95 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 group">
+          <div className="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 active:scale-95 shrink-0">
             <Image
               src="/Layout 4.png"
               alt="Me Vocatio Diamond"
@@ -72,7 +90,7 @@ export default function Navbar() {
             />
           </div>
           <span
-            className={`text-lg sm:text-xl font-bold tracking-tight transition-colors truncate ${
+            className={`hidden min-[380px]:inline text-base sm:text-xl font-bold tracking-tight truncate transition-colors ${
               isDarkMode ? "text-white" : "text-[#0f172a]"
             }`}
           >
@@ -82,11 +100,14 @@ export default function Navbar() {
       </div>
 
       {/* Botones derecha */}
-      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+      <div
+        ref={rightRef}
+        className="relative flex items-center gap-1.5 sm:gap-3 shrink-0"
+      >
         {/* Botón de tema */}
         <button
           onClick={toggleTheme}
-          className={`p-1.5 sm:p-2 rounded-full border transition-all duration-300 active:scale-95 shadow-sm cursor-pointer ${
+          className={`p-2 rounded-full border transition-all duration-300 active:scale-95 shadow-sm cursor-pointer shrink-0 ${
             isDarkMode
               ? "bg-slate-800/80 border-purple-500/30 text-slate-300 hover:text-white hover:border-purple-400"
               : "bg-white border-slate-200 text-slate-500 hover:text-purple-600 hover:border-purple-200 hover:bg-slate-50 hover:shadow-[0_4px_12px_rgba(109,40,217,0.08)]"
@@ -100,17 +121,63 @@ export default function Navbar() {
           )}
         </button>
 
-        {/* Botón Nosotros */}
+        {/* Botón Nosotros (solo escritorio: en móvil vive en la hamburguesa) */}
         <Link
           href="/nosotros"
           prefetch={false}
-          className={`${getButtonStyle("/nosotros")} px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider shrink-0`}
+          className={`${getButtonStyle("/nosotros")} hidden md:inline-flex px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider shrink-0`}
         >
           NOSOTROS
         </Link>
 
+        {/* Hamburger móvil */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          className={`md:hidden p-2 rounded-full border transition-all duration-300 active:scale-95 shadow-sm cursor-pointer shrink-0 ${
+            menuOpen
+              ? isDarkMode
+                ? "bg-slate-800/80 border-purple-400 text-white"
+                : "bg-slate-100 border-purple-300 text-purple-700"
+              : isDarkMode
+                ? "bg-slate-800/80 border-purple-500/30 text-slate-300 hover:text-white hover:border-purple-400"
+                : "bg-white border-slate-200 text-slate-600 hover:text-purple-600 hover:border-purple-200 hover:bg-slate-50"
+          }`}
+          title="Menú"
+          aria-label="Abrir menú de navegación"
+        >
+          {menuOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <Menu className="w-5 h-5" />
+          )}
+        </button>
+
         {/* NavbarProfile decide si mostrar ACCESO (no logueado) o perfil (logueado) */}
         <NavbarProfile />
+
+        {/* Dropdown móvil (solo < md) */}
+        {menuOpen && (
+          <div
+            className={`md:hidden absolute right-0 top-full mt-3 w-56 rounded-xl shadow-2xl border p-1.5 flex flex-col overflow-hidden z-50 ${
+              isDarkMode
+                ? "bg-slate-900 border-slate-700"
+                : "bg-white border-slate-200"
+            }`}
+          >
+            <Link
+              href="/nosotros"
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isNosotrosActive
+                  ? "bg-slate-100 dark:bg-white/10 text-purple-700 dark:text-white"
+                  : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5"
+              }`}
+            >
+              <span>Nosotros</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

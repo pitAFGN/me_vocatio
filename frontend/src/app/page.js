@@ -7,21 +7,21 @@ import { Search, BarChart3, Award, ArrowRight } from "lucide-react";
 const FEATURES = [
   {
     icon: Search,
-    title: "Descubre tu Vocación",
+    title: "Descubre tu vocación",
     description:
-      "Análisis profundo de tus capacidades intrínsecas mediante psicometría avanzada y mentoría estratégica personalizada.",
+      "Una prueba corta analiza tu personalidad, tus gustos y tus talentos para mostrarte las carreras donde mejor encajas.",
   },
   {
     icon: BarChart3,
-    title: "Evalúa tu Nivel",
+    title: "Mide tu nivel",
     description:
-      "Benchmark ejecutivo frente a los estándares de la industria global. Mapeo de brechas y oportunidades de alto impacto.",
+      "Compara tus habilidades con las que exige cada profesión y enfócate en lo que de verdad te falta para alcanzar tu meta.",
   },
   {
     icon: Award,
-    title: "Forja tu Legado",
+    title: "Construye tu futuro",
     description:
-      "Diseño de un plan de carrera vitalicio que garantiza relevancia, influencia y un impacto duradero en tu sector.",
+      "Sigue un plan claro y paso a paso para crecer en tu carrera y construir el futuro profesional que quieres.",
   },
 ];
 
