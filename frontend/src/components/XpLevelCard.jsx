@@ -39,7 +39,7 @@ export default function XpLevelCard({ xp = 0, level = 1 }) {
   return (
     <div className="mt-8">
       {/* Encabezado: etiqueta + progreso numérico */}
-      <div className="flex items-center justify-between gap-3 mb-7">
+      <div className="flex items-center justify-between gap-3 mb-7 flex-wrap">
         <span className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 tracking-wider font-semibold uppercase">
           <span className="w-7 h-7 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/15 border border-cyan-500/30 dark:border-cyan-500/40 flex items-center justify-center shadow-[0_0_12px_rgba(34,211,238,0.25)]">
             <Zap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
@@ -61,11 +61,11 @@ export default function XpLevelCard({ xp = 0, level = 1 }) {
           </div>
         </span>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap justify-end">
           <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 dark:bg-cyan-500/15 border border-cyan-500/30 dark:border-cyan-500/40 text-cyan-600 dark:text-cyan-300 text-[11px] font-black">
             {Math.round(fillPercent)}%
           </span>
-          <span className="text-lg text-cyan-600 dark:text-cyan-400 font-bold leading-none">
+          <span className="text-base sm:text-lg text-cyan-600 dark:text-cyan-400 font-bold leading-none">
             {animatedXp} <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">/ {xpNeededForLevel} XP</span>
           </span>
         </div>
@@ -99,13 +99,13 @@ export default function XpLevelCard({ xp = 0, level = 1 }) {
       </div>
 
       {/* Fila informativa */}
-      <div className="flex items-center justify-between mt-4 pl-12">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 mt-4 pl-9 sm:pl-12">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-          <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+          <Flame className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
           Te faltan <strong className="text-cyan-600 dark:text-cyan-300">{remainingXP} XP</strong> para subir de nivel
         </span>
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-          <Award className="w-3.5 h-3.5 text-violet-500 dark:text-violet-400" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/10 dark:bg-violet-500/15 border border-violet-500/25 dark:border-violet-500/30 text-violet-600 dark:text-violet-300 text-[10px] font-bold uppercase tracking-wider shrink-0">
+          <Award className="w-3.5 h-3.5" />
           Nivel {level + 1}
         </span>
       </div>
