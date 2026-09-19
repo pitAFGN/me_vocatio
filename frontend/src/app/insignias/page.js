@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Lock, Star, Flame, Target, Rocket, Trophy, BadgeCheck, Compass, ArrowLeft
+  Lock, Star, Flame, Target, Rocket, Trophy, BadgeCheck, Compass, ArrowLeft, Crown, Shield, Award, Medal
 } from "lucide-react";
 import { useProtectedRoute } from "@/hooks/useRouteGuard";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,19 @@ import { API_URL } from "@/lib/constants";
 import LoadingScreen from "@/components/LoadingScreen";
 import DashboardLayout from "@/components/DashboardLayout";
 
-const ICONS = { "badge-check": BadgeCheck, star: Star, flame: Flame, target: Target, rocket: Rocket, compass: Compass };
+const ICONS = {
+  "badge-check": BadgeCheck,
+  star: Star,
+  flame: Flame,
+  target: Target,
+  rocket: Rocket,
+  compass: Compass,
+  crown: Crown,
+  shield: Shield,
+  award: Award,
+  medal: Medal,
+  trophy: Trophy,
+};
 
 export default function Insignias() {
   const router = useRouter();
