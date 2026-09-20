@@ -4,7 +4,8 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[60] overflow-y-auto bg-black/60 backdrop-blur-sm">
+      <div className="min-h-full flex items-center justify-center p-4">
       <div 
         className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-900/20 dark:shadow-black animate-in fade-in zoom-in-95 duration-200"
         role="dialog"
@@ -49,6 +50,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
             Eliminar
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

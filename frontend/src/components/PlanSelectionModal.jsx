@@ -63,14 +63,14 @@ export default function PlanSelectionModal({ onSelect }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-slate-950/80 dark:bg-slate-950/80 backdrop-blur-sm" />
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 sm:p-6 overflow-y-auto">
+      <div className="absolute inset-0 bg-slate-950/80 dark:bg-slate-950/80 backdrop-blur-sm" onClick={handleCerrar} />
 
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="plan-selection-title"
-        className="relative w-full max-w-2xl rounded-3xl border border-slate-200 dark:border-violet-400/30 bg-white dark:bg-slate-900 p-6 shadow-2xl sm:p-8"
+        className="relative w-full max-w-2xl max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-slate-200 dark:border-violet-400/30 bg-white dark:bg-slate-900 p-6 shadow-2xl sm:p-8 pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
       >
         {/* Botón de Cerrar (X) */}
         <button

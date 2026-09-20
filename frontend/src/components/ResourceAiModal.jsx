@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   X,
@@ -114,6 +115,23 @@ export default function ResourceAiModal({
     }
   }, [chatMessages, chatLoading]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen, onClose]);
+
   const handleSendQuestion = async (preguntaTexto) => {
     const texto = (preguntaTexto || customQuestion).trim();
     if (!texto || chatLoading || !resource) return;
@@ -177,19 +195,36 @@ export default function ResourceAiModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!isOpen || !resource) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && resource ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-end md:items-center justify-center overflow-y-auto md:p-4 lg:p-6"
+        >
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity"
+            onClick={onClose}
+          />
 
-      {/* Modal Container */}
-      <div className="relative w-full max-w-3xl h-[88vh] max-h-[780px] rounded-3xl border border-violet-500/30 bg-[#0c1222]/95 shadow-2xl shadow-violet-500/10 backdrop-blur-2xl z-10 overflow-hidden flex flex-col">
-        
+          {/* Modal Container: bottom sheet en móvil / card centrada en desktop */}
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 32, stiffness: 320 }}
+            className="relative w-full md:max-w-3xl min-h-[62dvh] max-h-[92dvh] md:min-h-0 md:h-[88vh] md:max-h-[780px] rounded-t-3xl md:rounded-3xl border border-violet-500/30 bg-[#0c1222]/95 shadow-2xl shadow-violet-500/10 backdrop-blur-2xl z-10 overflow-hidden flex flex-col"
+          >
+        {/* Handle (affordance móvil para indicar que es arrastrable/cerrable) */}
+        <div className="md:hidden absolute top-2.5 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-white/25 shrink-0 z-20" />
+
         {/* Glow Orbs */}
         <div className="absolute -top-24 -right-24 w-60 h-60 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -227,9 +262,11 @@ export default function ResourceAiModal({
             </a>
             <button
               onClick={onClose}
-              className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+              aria-label="Cerrar conversación con la IA"
+              className="flex items-center gap-1.5 rounded-xl p-2.5 sm:p-2 text-slate-300 border border-white/15 bg-white/10 hover:bg-white/20 hover:text-white transition-colors cursor-pointer shrink-0"
             >
               <X className="w-5 h-5" />
+              <span className="hidden sm:inline text-xs font-bold">Cerrar</span>
             </button>
           </div>
         </div>
@@ -418,7 +455,7 @@ export default function ResourceAiModal({
             </div>
 
             {/* Footer con Preguntas Rápidas e Input */}
-            <div className="p-4 border-t border-white/10 bg-slate-900/90 space-y-3 shrink-0">
+            <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4 border-t border-white/10 bg-slate-900/90 space-y-3 shrink-0">
               {/* Pills de Preguntas Rápidas */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
                 <span className="text-[11px] font-bold text-slate-400 shrink-0">Preguntar:</span>
@@ -461,7 +498,7 @@ export default function ResourceAiModal({
                   value={customQuestion}
                   onChange={(e) => setCustomQuestion(e.target.value)}
                   placeholder="Pregúntale a Gemini lo que quieras sobre este recurso..."
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/15 bg-white/5 text-white placeholder-slate-400 text-xs focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-white/15 bg-white/5 text-white placeholder-slate-400 text-base sm:text-xs focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all"
                 />
                 <button
                   type="submit"
@@ -475,7 +512,9 @@ export default function ResourceAiModal({
             </div>
           </div>
         )}
-      </div>
-    </div>
+        </motion.div>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>
   );
 }

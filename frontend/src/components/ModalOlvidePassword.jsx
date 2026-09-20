@@ -33,12 +33,13 @@ export default function ModalOlvidePassword({ onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[60] overflow-y-auto">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
+      <div className="min-h-full flex items-center justify-center p-4">
       {/* Modal */}
-      <div className="relative z-10 bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm mx-4 border border-slate-200">
+      <div className="relative z-10 bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm border border-slate-200">
         {/* Close button */}
         <button
           type="button"
@@ -80,6 +81,7 @@ export default function ModalOlvidePassword({ onClose }) {
             {loading ? "Enviando..." : "Enviar Enlace"}
           </button>
         </form>
+      </div>
       </div>
     </div>
   );

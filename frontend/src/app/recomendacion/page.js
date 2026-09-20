@@ -247,7 +247,7 @@ function RecomendacionContent() {
       {isPlanModalOpen && <PlanSelectionModal onSelect={cambiarPlan} />}
 
       {/* Contenedor Principal con margen para la Sidebar */}
-      <main className="md:pl-64 pt-6 sm:pt-8 px-4 sm:px-6 md:px-10 pb-16 relative z-10">
+      <main className="md:pl-64 pt-6 sm:pt-8 px-4 sm:px-6 md:px-10 pb-24 md:pb-16 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           
           {/* Header Superior del Dashboard */}
@@ -271,7 +271,7 @@ function RecomendacionContent() {
             </div>
 
             {/* Acciones de Cabecera */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               {/* Botón de Prueba de Insignias (Temporal para testing) - solo admin */}
               {userRole === "admin" && (
                 <button
@@ -344,7 +344,7 @@ function RecomendacionContent() {
                       setIsPlanModalOpen(true);
                     }
                   }}
-                  className="shrink-0 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg shadow-violet-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto shrink-0 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg shadow-violet-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Sparkles className="w-4 h-4 text-violet-200 animate-pulse" />
                   <span>CONSULTAR COPILOTO IA</span>
