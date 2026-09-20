@@ -284,7 +284,8 @@ const construirUrlSegura = async (material, vocation, nivel) => {
 
   // 1. VIDEOS (YouTube)
   if (tipo.includes("video") || plataforma.includes("youtube")) {
-    if (!esUrlFalsa && esUrlPermitida(rawUrl, ["youtube.com", "youtu.be"])) {
+    const esVideoEspecifico = rawUrl.includes("watch?v=") || rawUrl.includes("youtu.be/") || rawUrl.includes("/playlist?");
+      if (!esUrlFalsa && esVideoEspecifico && esUrlPermitida(rawUrl, ["youtube.com", "youtu.be"])) {
       return rawUrl;
     }
     const cleanYtQuery = query.toLowerCase().includes("tutorial") || query.toLowerCase().includes("curso") || query.toLowerCase().includes("video")
@@ -304,29 +305,8 @@ const construirUrlSegura = async (material, vocation, nivel) => {
 
   // 2. DOCUMENTACIÓN / GUÍAS OFICIALES
   if (tipo.includes("doc") || tipo.includes("guía") || tipo.includes("guia")) {
-    const dominiosDocsConfiables = [
-      "developer.mozilla.org", "docs.python.org", "react.dev", "nodejs.org",
-      "w3schools.com", "roadmap.sh", "kubernetes.io", "docker.com",
-      "postgresql.org", "learn.microsoft.com", "devdocs.io", "rust-lang.org",
-      "go.dev", "flutter.dev", "angular.dev", "vuejs.org", "laravel.com",
-      "spring.io", "geeksforgeeks.org", "freecodecamp.org", "github.com"
-    ];
-
-    if (!esUrlFalsa && esUrlPermitida(rawUrl, dominiosDocsConfiables)) {
-      return rawUrl;
-    }
-
-    if (
-      vocation.toLowerCase().includes("web") ||
-      vocation.toLowerCase().includes("front") ||
-      vocation.toLowerCase().includes("javascript")
-    ) {
-      return `https://developer.mozilla.org/es/search?q=${encodeURIComponent(titulo)}`;
-    }
-
-    return `https://www.google.com/search?q=${encodeURIComponent(`${query} documentacion oficial`)}`;
+    return `https://scholar.google.es/scholar?q=${encodeURIComponent(titulo)}`;
   }
-
   // 3. CURSOS
   if (tipo.includes("curso") || tipo.includes("course")) {
     if (plataforma.includes("coursera") || esUrlPermitida(rawUrl, ["coursera.org"])) {
@@ -350,45 +330,23 @@ const construirUrlSegura = async (material, vocation, nivel) => {
     }
     return `https://www.google.com/search?q=${encodeURIComponent(cleanCourseQuery)}`;
   }
-
   // 4. HERRAMIENTAS / PRÁCTICA
   if (tipo.includes("herramienta") || tipo.includes("práctica") || tipo.includes("practica") || tipo.includes("ejercicio")) {
-    if (plataforma.includes("leetcode") || esUrlPermitida(rawUrl, ["leetcode.com"])) {
-      return "https://leetcode.com/problemset/all/";
-    }
-    if (plataforma.includes("hackerrank") || esUrlPermitida(rawUrl, ["hackerrank.com"])) {
-      return "https://www.hackerrank.com/domains";
-    }
-    if (plataforma.includes("exercism") || esUrlPermitida(rawUrl, ["exercism.org"])) {
-      return "https://exercism.org/tracks";
-    }
-    if (plataforma.includes("kaggle") || esUrlPermitida(rawUrl, ["kaggle.com"])) {
-      return "https://www.kaggle.com/learn";
-    }
-    if (plataforma.includes("github") || esUrlPermitida(rawUrl, ["github.com"])) {
-      return `https://github.com/topics/${encodeURIComponent(vocation.toLowerCase().replace(/\s+/g, "-"))}`;
-    }
-    if (plataforma.includes("roadmap") || esUrlPermitida(rawUrl, ["roadmap.sh"])) {
-      return "https://roadmap.sh";
-    }
-    if (!esUrlFalsa && esUrlPermitida(rawUrl, DOMINIOS_CONFIANZA)) {
+    if (!esUrlFalsa && rawUrl.startsWith("http")) {
       return rawUrl;
     }
     const cleanToolQuery = query.toLowerCase().includes("herramienta") || query.toLowerCase().includes("practica") || query.toLowerCase().includes("ejercicios")
       ? query
-      : `${query} ejercicios practicos`;
+      : `${query} herramienta oficial`;
     return `https://www.google.com/search?q=${encodeURIComponent(cleanToolQuery)}`;
   }
 
+
+
   // 5. LIBROS
   if (tipo.includes("libro") || tipo.includes("book")) {
-    if (!esUrlFalsa && esUrlPermitida(rawUrl, ["openlibra.com", "github.com", "oreilly.com"])) {
-      return rawUrl;
-    }
-    const cleanBookQuery = query.toLowerCase().includes("libro") || query.toLowerCase().includes("book")
-      ? (query.toLowerCase().includes("pdf") ? query : `${query} pdf online`)
-      : `${query} libro guia pdf online`;
-    return `https://www.google.com/search?q=${encodeURIComponent(cleanBookQuery)}`;
+    const cleanBookQuery = query.toLowerCase().includes("libro") || query.toLowerCase().includes("book") ? query : `${query} libro`;
+    return `https://www.google.es/search?tbm=bks&q=${encodeURIComponent(cleanBookQuery)}`;
   }
 
   if (!esUrlFalsa && esUrlPermitida(rawUrl, DOMINIOS_CONFIANZA)) {
@@ -495,7 +453,7 @@ const generarYGuardarBloque = async (evaluationId, vocation, nivel, evitarUrls =
           "tipo": "Libro",
           "plataforma": "Libro de referencia",
           "query_busqueda": "libro guia ${vocationLimpia} pdf online",
-          "url_canonica": "" 
+          "url_canonica": ""
         },
         { 
           "titulo": "Título descriptivo del recurso 5", 
