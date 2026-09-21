@@ -10,7 +10,8 @@ import {
   Wrench,
   Sparkles,
   Lock,
-  ExternalLink
+  ExternalLink,
+  Info
 } from "lucide-react";
 import "@/app/recomendacion/RecomendacionPage.css";
 
@@ -94,6 +95,15 @@ export default function ResourceCard({ material, isFavorite = false, onToggleSav
           <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
             {material.descripcion}
           </p>
+
+          {((material.tipo || "").toLowerCase().includes("libro") || (material.tipo || "").toLowerCase().includes("doc") || (material.tipo || "").toLowerCase().includes("guia")) && (
+            <div className="mt-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 text-amber-700 dark:text-amber-300 flex items-start gap-2">
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <p className="text-[10px] font-medium leading-snug">
+                <b>Modo Beta:</b> Para garantizar recursos gratuitos y reales, este enlace realizará una búsqueda estricta en {(material.tipo || "").toLowerCase().includes("libro") ? "Google Libros" : "Google Académico"}.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Acciones de la Tarjeta */}

@@ -41,7 +41,14 @@ function ResetPasswordContent() {
     setLoading(true);
     try {
       await resetPassword(token, password);
-      alert("¡Contraseña actualizada con éxito!");
+      const Swal = (await import("sweetalert2")).default;
+      await Swal.fire({
+        title: "¡Contraseña Actualizada!",
+        text: "Tu nueva contraseña se guardó con éxito. Ya puedes iniciar sesión.",
+        icon: "success",
+        confirmButtonColor: "#8b5cf6"
+      });
+      router.push("/login");
     } catch (err) {
       setError(err.message || "El enlace expiró o es inválido.");
     } finally {
