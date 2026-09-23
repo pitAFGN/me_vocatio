@@ -9,7 +9,7 @@ const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), {
   loading: () => <div className="h-[78px]" />,
 });
 import { RECAPTCHA_SITE_KEY } from "@/lib/constants";
-import { getSupabase, isGoogleLoginEnabled } from "@/lib/supabase";
+import { getSupabase, isGoogleLoginEnabled, clearSupabaseLocalStorage } from "@/lib/supabase";
 import { validarCamposLogin, validarCamposRegistro } from "@/lib/validations/auth";
 import ModalOlvidePassword from "@/components/ModalOlvidePassword";
 
@@ -150,6 +150,7 @@ export default function AuthForm({ esRegistro, setEsRegistro }) {
       await googleLogin(user.email, nombreGoogle, session.access_token);
       const sb = await getSupabase();
       if (sb) await sb.auth.signOut({ scope: "local" });
+        clearSupabaseLocalStorage();
       procesandoOAuth.current = false;
       setGoogleEnviando(false);
     } catch (err) {

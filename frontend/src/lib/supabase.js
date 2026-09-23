@@ -17,3 +17,18 @@ export async function getSupabase() {
   });
   return supabaseInstance;
 }
+
+// Escoba digital para limpiar cualquier residuo en el LocalStorage
+export function clearSupabaseLocalStorage() {
+  if (typeof window === "undefined") return;
+  
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("sb-")) {
+      keysToRemove.push(key);
+    }
+  }
+  
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+}

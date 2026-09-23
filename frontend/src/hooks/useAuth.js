@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { authService } from "../services/auth.service";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase, clearSupabaseLocalStorage } from "@/lib/supabase";
 
 export function useAuth() {
   const router = useRouter();
@@ -49,6 +49,7 @@ export function useAuth() {
     } catch {
       // Si falla la sesión de Supabase, el token local ya fue limpiado.
     }
+    clearSupabaseLocalStorage();
 
     // Notificar limpieza de sesión
     window.dispatchEvent(new Event("local-storage-update"));
